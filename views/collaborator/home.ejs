@@ -1,0 +1,32 @@
+<div class="grid grid-cols-2 gap-4 mb-8">
+    <div class="bg-white p-4 rounded-2xl shadow-md">
+        <h3 class="font-semibold text-gray-500">Horas Positivas</h3>
+        <p class="text-xs text-gray-400">Você já cumpriu:</p>
+        <p class="text-3xl font-bold text-blue-600 mt-2"><%= hourBalance.positive.replace('+', '') %></p>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-md">
+        <h3 class="font-semibold text-gray-500">Horas negativas</h3>
+        <p class="text-xs text-gray-400">Pendentes:</p>
+        <p class="text-3xl font-bold text-red-600 mt-2"><%= hourBalance.negative.replace('-', '') %></p>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-2xl shadow-md mb-8 text-center">
+    <h2 class="text-lg font-bold text-gray-800">Total</h2>
+    <p class="text-5xl font-bold <%= hourBalance.total_minutes >= 0 ? 'text-green-600' : 'text-red-600' %> my-2">
+        <%= hourBalance.formatted %>
+    </p>
+    <p class="text-sm text-gray-500">do seu banco de horas</p>
+</div>
+
+
+<div class="space-y-4">
+    <div class="bg-white p-4 rounded-2xl shadow-md flex items-center justify-between">
+        <p class="font-semibold text-gray-700">Ganhe 30 horas: finalize o curso de linux</p>
+        <a href="#" class="bg-green-500 text-white font-bold py-2 px-4 rounded-full text-sm">+</a>
+    </div>
+    <div class="bg-white p-4 rounded-2xl shadow-md flex items-center justify-between">
+        <p class="font-semibold text-gray-700">Resolva um problema e ganhe 8 horas</p>
+        <a href="#" class="bg-green-500 text-white font-bold py-2 px-4 rounded-full text-sm">+</a>
+    </div>
+</div>

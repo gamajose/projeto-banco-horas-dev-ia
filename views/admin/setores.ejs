@@ -1,0 +1,47 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="sm:flex sm:items-center sm:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Setores</h1>
+            <p class="mt-2 text-sm text-gray-600">Uma lista de todos os setores registados na sua empresa.</p>
+        </div>
+        <div>
+            <a href="/admin/setores/novo" class="btn-primary">Adicionar Setor</a>
+        </div>
+    </div>
+
+    <% if (success_msg && success_msg.length > 0) { %>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6" role="alert"><p><%= success_msg %></p></div>
+    <% } %>
+    <% if (error_msg && error_msg.length > 0) { %>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert"><p><%= error_msg %></p></div>
+    <% } %>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="table-header">Nome do Setor</th>
+                        <th scope="col" class="table-header">Colaboradores</th>
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6"><span class="sr-only">Ações</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    <% setores.forEach(setor => { %>
+                        <tr>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= setor.nome %></td>
+                            <td class="table-cell"><%= setor.colaborador_count %></td>
+                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-4">
+                                <a href="/admin/setores/<%= setor.id %>/editar" class="text-blue-600 hover:text-blue-900">Editar</a>
+                                
+                                <form action="/admin/setores/<%= setor.id %>/apagar" method="POST" class="inline" onsubmit="return confirm('Tem a certeza que deseja apagar este setor? Esta ação não pode ser desfeita.');">
+                                    <button type="submit" class="text-red-600 hover:text-red-900">Apagar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

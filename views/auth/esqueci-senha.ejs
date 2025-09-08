@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Banco de Horas</title>
+    <link rel="stylesheet" href="/css/output.css"> 
+</head>
+<body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-100">
+
+    <div class="w-full max-w-sm mx-auto">
+        <div class="relative">
+            <div class="absolute inset-x-0 -top-12 flex justify-center">
+                <div class="bg-red-600 h-24 w-24 rounded-full flex items-center justify-center shadow-lg">
+                    <img class="h-12 w-12 brightness-0 invert" src="/images/logo-white.png" alt="Logo da Empresa"> 
+                </div>
+            </div>
+            
+            <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl space-y-6 pt-16">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800">Recuperar Senha</h2>
+                    <p class="text-gray-500 mt-2">Digite o seu email e enviaremos um link para redefinir a sua senha.</p>
+                </div>
+
+                <form action="/auth/esqueci-senha" method="POST" class="space-y-6">
+                    <% if (success_msg && success_msg.length > 0) { %>
+                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-3 rounded-md" role="alert">
+                            <p class="text-sm"><%= success_msg %></p>
+                        </div>
+                    <% } %>
+                     <% if (error_msg && error_msg.length > 0) { %>
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md" role="alert">
+                            <p class="text-sm"><%= error_msg %></p>
+                        </div>
+                    <% } %>
+                    
+                    <div>
+                        <label for="email" class="text-sm font-bold text-red-600">Email</label>
+                        <input id="email" name="email" type="email" required class="form-input-new mt-1" placeholder="seu-email@exemplo.com">
+                    </div>
+
+                    <div>
+                        <button type="submit" class="btn-primary-new">
+                            ENVIAR LINK DE RECUPERAÇÃO
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <a href="/auth/login" class="text-sm font-medium text-red-600 hover:text-red-500">
+                        Voltar para o Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

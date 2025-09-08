@@ -1,0 +1,308 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">
+            <%= userProfile.nome %>
+        </h1>
+        <p class="text-lg text-gray-600">
+            <%= user.email %>
+        </p>
+        <div class="mt-4">
+            <span class="inline-block bg-blue-100 text-blue-800 text-sm font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                Setor: <%= userProfile.setor_nome %>
+            </span>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 text-center">
+            <h3 class="text-lg font-medium text-gray-500">Horas Totais</h3>
+            <p
+                class="text-4xl font-bold mt-2 <%= hourBalance.total_minutes >= 0 ? 'text-green-600' : 'text-red-600' %>">
+                <%= hourBalance.formatted %>
+            </p>
+            <p class="text-sm text-gray-400 mt-1">(horas aprovadas)</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 text-center">
+            <h3 class="text-lg font-medium text-gray-500">Horas Positivas</h3>
+            <p class="text-4xl font-bold mt-2 text-blue-600">
+                <%= hourBalance.positive %>
+            </p>
+            <p class="text-sm text-gray-400 mt-1">(créditos aprovados)</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 text-center">
+            <h3 class="text-lg font-medium text-gray-500">Horas Negativas</h3>
+            <p class="text-4xl font-bold mt-2 text-orange-600">
+                <%= hourBalance.negative %>
+            </p>
+            <p class="text-sm text-gray-400 mt-1">(débitos aprovados)</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1">
+            <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                        <button data-target="#lancar-horas-panel" class="tab-btn active-tab">
+                            Lançar Horas
+                        </button>
+                        <button data-target="#solicitar-ausencia-panel" class="tab-btn inactive-tab">
+                            Solicitar Ausência
+                        </button>
+                    </nav>
+                </div>
+
+                <div class="p-6">
+                    <div id="lancar-horas-panel" class="tab-panel">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Lançar Horas</h2>
+                        <form id="form-lancamento" class="space-y-4">
+                            <div>
+                                <label for="data_movimentacao" class="form-label">Data</label>
+                                <input type="date" name="data_movimentacao" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="entrada" class="form-label">Tipo de Lançamento</label>
+                                <select name="entrada" class="form-input">
+                                    <option value="true">Crédito (hora extra, etc.)</option>
+                                    <option value="false">Débito (saída antecipada)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="hora_total" class="form-label">Total de Horas (HH:MM)</label>
+                                <input type="text" name="hora_total" placeholder="Ex: 02:30 ou 230" required
+                                    class="form-input">
+                            </div>
+                            <div>
+                                <label for="motivo" class="form-label">Motivo</label>
+                                <textarea name="motivo" rows="3" required class="form-input"></textarea>
+                            </div>
+                            <div>
+                                <button type="submit" class="btn-primary w-full">Enviar para Aprovação</button>
+                            </div>
+                        </form>
+                        <div id="form-feedback" class="mt-4 text-sm font-medium"></div>
+                    </div>
+
+                    <div id="solicitar-ausencia-panel" class="tab-panel hidden">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4">Solicitar Ausência</h2>
+                        <% if (hourBalance.total_minutes> 0) { %>
+                            <form id="form-folga" class="space-y-4">
+                                <div>
+                                    <label class="form-label">Tipo de Solicitação</label>
+                                    <div class="flex items-center space-x-4 mt-2">
+                                        <label><input type="radio" name="tipo_folga" value="integral" checked> Folga
+                                            Integral</label>
+                                        <label><input type="radio" name="tipo_folga" value="parcial"> Horas
+                                            Parciais</label>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="data_folga" class="form-label">Data da Ausência</label>
+                                    <input type="date" name="data_folga" required class="form-input">
+                                </div>
+                                <div id="horas-parciais-container" style="display: none;">
+                                    <label for="horas_parciais" class="form-label">Total de Horas a Debitar
+                                        (HH:MM)</label>
+                                    <input type="text" name="horas_parciais" placeholder="Ex: 01:30" class="form-input">
+                                </div>
+                                <div>
+                                    <label for="motivo_folga" class="form-label">Motivo</label>
+                                    <textarea name="motivo" rows="3" required class="form-input"></textarea>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn-primary w-full">Solicitar Ausência</button>
+                                </div>
+                            </form>
+                            <div id="folga-feedback" class="mt-4 text-sm font-medium"></div>
+                            <% } else { %>
+                                <p class="text-center text-gray-500 bg-gray-50 p-4 rounded-md">
+                                    Você não possui saldo de horas positivo para solicitar folgas.
+                                </p>
+                                <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2">
+            <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Meu Histórico de Lançamentos</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- LÓGICA DE ENVIO DO FORMULÁRIO DE HORAS (AJAX) ---
+        const formLancamento = document.getElementById('form-lancamento');
+        const feedbackDiv = document.getElementById('form-feedback');
+
+        if (formLancamento) {
+            formLancamento.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                feedbackDiv.textContent = 'A enviar...';
+                feedbackDiv.className = 'mt-4 text-sm font-medium text-gray-500';
+
+                const formData = new FormData(formLancamento);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/api/v1/movements', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (!response.ok) { throw new Error(result.error || 'Ocorreu um erro.'); }
+
+                    feedbackDiv.textContent = 'Solicitação enviada com sucesso!';
+                    feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
+                    formLancamento.reset();
+                } catch (error) {
+                    feedbackDiv.textContent = `Erro: ${error.message}`;
+                    feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
+                }
+            });
+        }
+
+        // --- NOVA LÓGICA PARA O FORMULÁRIO "SOLICITAR AUSÊNCIA" ---
+        const formFolga = document.getElementById('form-folga');
+        if (formFolga) {
+            const folgaFeedback = document.getElementById('folga-feedback');
+            const tipoFolgaRadios = document.querySelectorAll('input[name="tipo_folga"]');
+            const horasParciaisContainer = document.getElementById('horas-parciais-container');
+            tipoFolgaRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    horasParciaisContainer.style.display = event.target.value === 'parcial' ? 'block' : 'none';
+                });
+            });
+            formFolga.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                folgaFeedback.textContent = 'A enviar...';
+                const formData = new FormData(formFolga);
+                const data = Object.fromEntries(formData.entries());
+                try {
+                    const response = await fetch('/api/v1/movements/solicitar-folga', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (!response.ok) { throw new Error(result.message); }
+                    folgaFeedback.textContent = result.message;
+                    folgaFeedback.className = 'mt-4 text-sm font-medium text-green-600';
+                    formFolga.reset();
+                    horasParciaisContainer.style.display = 'none';
+                } catch (error) {
+                    folgaFeedback.textContent = `Erro: ${error.message}`;
+                    folgaFeedback.className = 'mt-4 text-sm font-medium text-red-600';
+                }
+            });
+        }
+
+        // --- MELHORIAS DE DATA E HORA ---
+        const dataInput = document.getElementById('data_movimentacao');
+        if (dataInput) {
+            dataInput.addEventListener('blur', () => {
+                const dateValue = dataInput.value;
+                if (dateValue) {
+                    const year = new Date(dateValue).getFullYear();
+                    if (year > 9999) {
+                        alert('O ano não pode ter mais de 4 dígitos.');
+                        dataInput.value = '';
+                    }
+                }
+            });
+        }
+
+        const horasInput = document.getElementById('hora_total');
+        if (horasInput) {
+            horasInput.addEventListener('blur', () => {
+                let value = horasInput.value.replace(/\D/g, '');
+                let hours, minutes;
+                if (value.length === 0) return;
+                if (value.length <= 2) {
+                    hours = '00';
+                    minutes = value.padStart(2, '0');
+                } else if (value.length === 3) {
+                    hours = '0' + value.substring(0, 1);
+                    minutes = value.substring(1);
+                } else {
+                    hours = value.substring(0, 2);
+                    minutes = value.substring(2, 4);
+                }
+                if (parseInt(hours, 10) > 23 || parseInt(minutes, 10) > 59) return;
+                horasInput.value = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+            });
+        }
+
+                // --- NOVA LÓGICA PARA CONTROLAR AS ABAS ---
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (event) => {
+                // Remove o estilo ativo de todas as abas
+                tabs.forEach(t => t.classList.remove('active-tab'));
+                // Adiciona o estilo ativo à aba clicada
+                event.target.classList.add('active-tab');
+
+                // Esconde todos os painéis
+                panels.forEach(panel => panel.classList.add('hidden'));
+                
+                // Mostra o painel correspondente à aba clicada
+                const targetPanelId = event.target.dataset.target;
+                const targetPanel = document.querySelector(targetPanelId);
+                if (targetPanel) {
+                    targetPanel.classList.remove('hidden');
+                }
+            });
+        });
+
+        // --- NOVA LÓGICA PARA O FORMULÁRIO "SOLICITAR AUSÊNCIA" ---
+        const folgaFeedback = document.getElementById('folga-feedback');
+        const tipoFolgaRadios = document.querySelectorAll('input[name="tipo_folga"]');
+        const horasParciaisContainer = document.getElementById('horas-parciais-container');
+
+        // Controla a visibilidade do campo de horas parciais
+        tipoFolgaRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                if (event.target.value === 'parcial') {
+                    horasParciaisContainer.style.display = 'block';
+                } else {
+                    horasParciaisContainer.style.display = 'none';
+                }
+            });
+        });
+
+        if (formFolga) {
+            formFolga.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                folgaFeedback.textContent = 'A enviar...';
+                folgaFeedback.className = 'mt-4 text-sm font-medium text-gray-500';
+
+                const formData = new FormData(formFolga);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/api/v1/movements/solicitar-folga', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (!response.ok) { throw new Error(result.message); }
+
+                    folgaFeedback.textContent = result.message;
+                    folgaFeedback.className = 'mt-4 text-sm font-medium text-green-600';
+                    formFolga.reset();
+                    horasParciaisContainer.style.display = 'none'; // Esconde o campo de novo
+
+                } catch (error) {
+                    folgaFeedback.textContent = `Erro: ${error.message}`;
+                    folgaFeedback.className = 'mt-4 text-sm font-medium text-red-600';
+                }
+            });
+        }
+    });
+</script>

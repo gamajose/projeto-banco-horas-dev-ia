@@ -1,0 +1,39 @@
+<div id="modal-perfis" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl leading-6 font-bold text-gray-900">Gerir Perfis de Gerente</h3>
+        <button id="close-modal-perfis" type="button" class="text-gray-400 hover:text-gray-600">
+          <span class="text-2xl">&times;</span>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <p class="text-sm text-gray-600">
+          Clique no botão para promover um colaborador a gerente ou despromover um gerente.
+        </p>
+        <div id="modal-perfis-feedback" class="text-sm"></div>
+        <div class="border rounded-md max-h-80 overflow-y-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                  <tr>
+                      <th class="table-header">Nome do Colaborador</th>
+                      <th class="table-header">Setor</th>
+                      <th class="table-header text-center">Ação</th>
+                  </tr>
+              </thead>
+              <tbody id="lista-perfis" class="bg-white divide-y divide-gray-200">
+                  </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="items-center px-4 py-3 mt-6 border-t">
+        <div class="flex justify-end">
+          <button id="cancel-modal-perfis" type="button" class="btn-secondary">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

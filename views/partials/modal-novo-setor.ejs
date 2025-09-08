@@ -1,0 +1,30 @@
+<div id="modal-novo-setor" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-lg font-medium text-gray-900">Adicionar Novo Setor</h3>
+            <button id="close-modal-setor" class="text-gray-400 hover:text-gray-600">
+                <span class="text-2xl">&times;</span>
+            </button>
+        </div>
+
+        <div class="mt-4">
+            <form id="form-novo-setor">
+                <div>
+                    <label for="nome-novo-setor" class="form-label">Nome do Setor</label>
+                    <input type="text" id="nome-novo-setor" class="form-input mt-1" required>
+                </div>
+                <div id="modal-setor-feedback" class="text-sm mt-3"></div>
+            </form>
+        </div>
+
+        <div class="flex justify-end pt-4 space-x-3 border-t mt-4">
+            <button id="cancel-modal-setor" type="button" class="btn-secondary">
+                Cancelar
+            </button>
+            <button type="submit" form="form-novo-setor" class="btn-primary">
+                Salvar Setor
+            </button>
+        </div>
+    </div>
+</div>

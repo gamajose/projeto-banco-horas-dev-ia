@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-gray-50">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title || 'Banco de Horas' %>
+    </title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <style>
+    .tab-btn {
+        padding: 1rem;
+        border-bottom: 2px solid transparent;
+        font-weight: 500;
+        color: #6B7280; /* text-gray-500 */
+    }
+    .tab-btn:hover {
+        border-color: #D1D5DB; /* border-gray-300 */
+        color: #4B5563; /* text-gray-600 */
+    }
+    .tab-btn.active-tab {
+        border-color: #3B82F6; /* border-blue-600 */
+        color: #3B82F6; /* text-blue-600 */
+    }
+</style>
+</head>
+
+<body class="h-full">
+    <div class="min-h-full">
+        <% if (locals.user) { %>
+            <%- include('../partials/navbar') %>
+                <% } %>
+
+                    <main>
+                        <% if (locals.user) { %>
+                            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                                <%- body %>
+                            </div>
+                            <% } else { %>
+                                <%- body %>
+                                    <% } %>
+                    </main>
+
+                    <% if (locals.user) { %>
+                        <%- include('../partials/footer') %>
+                            <% } %>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/js/main.js"></script>
+    
+    <% if (locals.additionalScripts) { %>
+        <% additionalScripts.forEach(script=> { %>
+            <script src="<%= script %>"></script>
+            <% }); %>
+                <% } %>
+</body>
+
+</html>

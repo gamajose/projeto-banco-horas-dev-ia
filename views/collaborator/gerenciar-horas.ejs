@@ -1,0 +1,178 @@
+<h2 class="text-2xl font-bold text-gray-800 mb-4">Central de horas:</h2>
+
+<div class="flex space-x-4 mb-8">
+    <button id="btn-abrir-lancar-horas" class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-blue-700">+ Adicionar horas</button>
+    <a href="/profile/relatorio" class="flex-1 text-center bg-gray-200 text-gray-800 font-semibold py-3 rounded-xl hover:bg-gray-300">Gerar Relatório</a>
+</div>
+
+<div class="space-y-3">
+    <% movimentacoes.forEach(mov => { %>
+    <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
+        <div>
+            <p class="text-sm text-gray-500"><%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %></p>
+            <p class="font-bold text-gray-800"><%= mov.motivo %></p>
+        </div>
+        <div class="text-right">
+            <p class="font-bold text-lg <%= mov.entrada ? 'text-green-600' : 'text-red-600' %>"><%= mov.entrada ? '+' : '-' %><%= mov.hora_total.substring(0, 5) %></p>
+            <p class="text-xs font-semibold px-2 py-1 rounded-full 
+                <% if(mov.autorizado) { %> bg-green-100 text-green-800 <% 
+                } else if(mov.analise) { %> bg-yellow-100 text-yellow-800 <% 
+                } else { %> bg-red-100 text-red-800 <% } %>">
+                <%= mov.status_nome %>
+            </p>
+        </div>
+    </div>
+    <% }) %>
+</div>
+
+
+<%- include('../partials/modal-lancar-horas') %>
+<%- include('../partials/modal-solicitar-folga', { hourBalance: hourBalance }) %>
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- REFERÊNCIAS AOS ELEMENTOS ---
+    const lancarHorasModal = document.getElementById('lancar-horas-modal');
+    const solicitarFolgaModal = document.getElementById('solicitar-folga-modal');
+    const btnAbrirLancarHoras = document.getElementById('btn-abrir-lancar-horas');
+    const btnAbrirSolicitarFolga = document.getElementById('btn-abrir-solicitar-folga');
+    const closeButtons = document.querySelectorAll('.modal-close-btn');
+    const historicoContainer = document.getElementById('historico-container');
+    const formLancamento = document.getElementById('form-lancamento');
+    const feedbackDiv = document.getElementById('form-feedback');
+
+    // --- LÓGICA DE ATUALIZAÇÃO DO HISTÓRICO ---
+    const createMovementHTML = (mov) => {
+        const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        const statusClass = mov.autorizado ? 'bg-green-100 text-green-800' : (mov.analise ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
+        const horasClass = mov.entrada ? 'text-green-600' : 'text-red-600';
+        const horasSignal = mov.entrada ? '+' : '-';
+
+        return `
+            <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-gray-500">${dataFormatada}</p>
+                    <p class="font-bold text-gray-800">${mov.motivo}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-lg ${horasClass}">${horasSignal}${mov.hora_total.substring(0, 5)}</p>
+                    <p class="text-xs font-semibold px-2 py-1 rounded-full ${statusClass}">
+                        ${mov.status_nome}
+                    </p>
+                </div>
+            </div>
+        `;
+    };
+
+    const updateHistoryList = async () => {
+        try {
+            const response = await fetch('/profile/api/relatorio'); // Usa a API de relatórios para buscar os dados
+            const result = await response.json();
+            if (result.success) {
+                historicoContainer.innerHTML = ''; // Limpa a lista
+                if (result.movimentacoes.length > 0) {
+                    result.movimentacoes.forEach(mov => {
+                        historicoContainer.innerHTML += createMovementHTML(mov);
+                    });
+                } else {
+                    historicoContainer.innerHTML = '<p class="text-center text-gray-500">Nenhum lançamento encontrado.</p>';
+                }
+            }
+        } catch (error) {
+            console.error("Erro ao atualizar histórico:", error);
+        }
+    };
+    
+    // Carrega o histórico assim que a página abre
+    updateHistoryList();
+
+    // --- LÓGICA DOS MODAIS ---
+    const openModal = (modal) => modal.classList.remove('hidden');
+    const closeModal = () => {
+        lancarHorasModal.classList.add('hidden');
+        solicitarFolgaModal.classList.add('hidden');
+    };
+
+    btnAbrirLancarHoras.addEventListener('click', () => openModal(lancarHorasModal));
+    if (btnAbrirSolicitarFolga) {
+        btnAbrirSolicitarFolga.addEventListener('click', () => openModal(solicitarFolgaModal));
+    }
+    closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO (COM ATUALIZAÇÃO) ---
+    formLancamento.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedbackDiv.textContent = 'A enviar...';
+        const formData = new FormData(formLancamento);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/v1/movements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (!response.ok) { throw new Error(result.message); }
+            
+            feedbackDiv.textContent = result.message;
+            feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
+            formLancamento.reset();
+            
+            // ATUALIZA O HISTÓRICO E FECHA O MODAL
+            await updateHistoryList(); 
+            setTimeout(() => {
+                closeModal();
+                feedbackDiv.textContent = '';
+            }, 1500); // Fecha o modal após 1.5 segundos
+
+        } catch (error) {
+            feedbackDiv.textContent = `Erro: ${error.message}`;
+            feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
+        }
+    });
+// --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO "SOLICITAR AUSÊNCIA" ---
+    if (formFolga) {
+        tipoFolgaRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                horasParciaisContainer.style.display = event.target.value === 'parcial' ? 'block' : 'none';
+            });
+        });
+
+        formFolga.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            folgaFeedback.textContent = 'A enviar...';
+            const formData = new FormData(formFolga);
+            const data = Object.fromEntries(formData.entries());
+            try {
+                const response = await fetch('/api/v1/movements/solicitar-folga', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (!response.ok) { throw new Error(result.message); }
+
+                folgaFeedback.textContent = result.message;
+                folgaFeedback.className = 'mt-4 text-sm font-medium text-green-600';
+                formFolga.reset();
+                horasParciaisContainer.style.display = 'none';
+
+                await updateHistoryList();
+                setTimeout(() => { closeModal(); folgaFeedback.textContent = ''; }, 1500);
+
+            } catch (error) {
+                folgaFeedback.textContent = `Erro: ${error.message}`;
+                folgaFeedback.className = 'mt-4 text-sm font-medium text-red-600';
+            }
+        });
+    }
+});
+</script>
