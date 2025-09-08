@@ -42,3 +42,18 @@
 2025-09-08 11:15:09 +00:00: 🚀 Servidor rodando na porta 8001
 2025-09-08 11:15:09 +00:00: 🌐 Acesse: http://localhost:8001
 2025-09-08 11:15:09 +00:00: 🛠️  Ambiente: development
+2025-09-08 11:17:56 +00:00: Erro no processo de login: Error: SQLITE_ERROR: no such column: username
+--> in Database#get('SELECT * FROM usuarios WHERE email = $1 OR username = $1', [ undefined ], [Function (anonymous)])
+    at /home/user/webapp/src/config/database.js:229:17
+    at new Promise (<anonymous>)
+    at Database.get (/home/user/webapp/src/config/database.js:228:14)
+    at User.findByLogin (/home/user/webapp/src/models/User.js:14:31)
+    at /home/user/webapp/src/routes/auth.js:29:33
+    at Layer.handleRequest (/home/user/webapp/node_modules/router/lib/layer.js:152:17)
+    at next (/home/user/webapp/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/user/webapp/node_modules/router/lib/route.js:117:3)
+    at handle (/home/user/webapp/node_modules/router/index.js:435:11) {
+  errno: 1,
+  code: 'SQLITE_ERROR',
+  __augmented: true
+}
