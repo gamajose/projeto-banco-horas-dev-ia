@@ -3,3 +3,16 @@
 2025-09-08 11:11:39 +00:00: 🚀 Servidor rodando na porta 3000
 2025-09-08 11:11:39 +00:00: 🌐 Acesse: http://localhost:3000
 2025-09-08 11:11:39 +00:00: 🛠️  Ambiente: development
+2025-09-08 11:14:53 +00:00: [dotenv@17.2.2] injecting env (12) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+2025-09-08 11:14:54 +00:00: Conectado ao banco de dados SQLite
+2025-09-08 11:14:54 +00:00: 📊 Banco de dados inicializado com sucesso
+2025-09-08 11:14:54 +00:00: 🚀 Servidor rodando na porta 3000
+2025-09-08 11:14:54 +00:00: 🌐 Acesse: http://localhost:3000
+2025-09-08 11:14:54 +00:00: 🛠️  Ambiente: development
+2025-09-08 11:14:54 +00:00: Usuário administrador criado: admin@bancohoras.com / admin123
+2025-09-08 11:15:08 +00:00: [dotenv@17.2.2] injecting env (12) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+2025-09-08 11:15:09 +00:00: Conectado ao banco de dados SQLite
+2025-09-08 11:15:09 +00:00: 📊 Banco de dados inicializado com sucesso
+2025-09-08 11:15:09 +00:00: 🚀 Servidor rodando na porta 8001
+2025-09-08 11:15:09 +00:00: 🌐 Acesse: http://localhost:8001
+2025-09-08 11:15:09 +00:00: 🛠️  Ambiente: development
