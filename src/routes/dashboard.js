@@ -25,7 +25,6 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       return res.redirect('/meu-perfil');
     }
 
-    // Lógica Exclusiva para o Administrador
     const stats = await Movement.getMovementStats();
     const pendingMovements = await Movement.getPendingMovements();
     const recentMovements = await Movement.findAll({ limit: 5 });
@@ -36,7 +35,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     res.render('dashboard/index', {
       title: 'Dashboard do Administrador',
       user: req.user,
-      userProfile: req.userProfile || {},
+      userProfile: req.userProfile || {}, // CORRIGIDO: userProfile é passado aqui
       stats,
       pendingMovements,
       recentMovements,
@@ -47,6 +46,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Erro ao carregar dashboard:', error);
     res.status(500).render('error', {
+      layout: 'layouts/main',
       title: 'Erro no Servidor',
       message: 'Não foi possível carregar o dashboard.',
       error: process.env.NODE_ENV === 'development' ? error : {}
@@ -88,11 +88,10 @@ router.get('/meu-perfil', isAuthenticated, async (req, res) => {
       layout: 'layouts/main',
       title: 'Erro no Servidor',
       message: 'Não foi possível carregar a sua página de perfil.',
-      user: req.user,
-      userProfile: req.userProfile || null,
       error: process.env.NODE_ENV === 'development' ? error : {}
     });
   }
 });
+
 
 module.exports = router;
