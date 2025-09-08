@@ -1,116 +1,739 @@
-<div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="sm:flex sm:items-center sm:justify-between mb-8">
-        <div class="sm:flex-auto">
-            <h1 class="text-3xl font-bold text-gray-800">Colaboradores</h1>
-            <p class="mt-2 text-sm text-gray-600">Uma lista de todos os colaboradores no sistema.</p>
+<!-- Page Header -->
+<div class="page-header">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-users text-red-600 mr-3"></i>
+                Colaboradores
+            </h1>
+            <p class="page-description">Gerencie todos os colaboradores do sistema</p>
         </div>
-        <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        <div class="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
+            <button onclick="exportCollaborators()" class="btn-outline btn-sm">
+                <i class="fas fa-download mr-2"></i>
+                Exportar
+            </button>
             <a href="/admin/colaboradores/novo" class="btn-primary">
-                Adicionar Colaborador
+                <i class="fas fa-user-plus mr-2"></i>
+                Novo Colaborador
             </a>
         </div>
     </div>
+</div>
 
-    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-value"><%= colaboradores.length %></div>
+                <div class="stat-card-label">Total</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-card-value"><%= colaboradores.filter(c => c.is_active).length %></div>
+                <div class="stat-card-label">Ativos</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600">
+                    <i class="fas fa-user-times"></i>
+                </div>
+                <div class="stat-card-value"><%= colaboradores.filter(c => !c.is_active).length %></div>
+                <div class="stat-card-label">Inativos</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="stat-card-icon bg-gradient-to-r from-purple-500 to-purple-600">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="stat-card-value"><%= colaboradores.filter(c => c.is_manager).length %></div>
+                <div class="stat-card-label">Gerentes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Search -->
+<div class="card mb-6">
+    <div class="card-body">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text" 
+                       id="search-input"
+                       placeholder="Buscar colaboradores..." 
+                       class="search-input">
+            </div>
+            
+            <select id="department-filter" class="form-input">
+                <option value="">Todos os setores</option>
+                <% 
+                const uniqueDepartments = [...new Set(colaboradores.map(c => c.setor_nome).filter(Boolean))];
+                uniqueDepartments.forEach(dept => { %>
+                    <option value="<%= dept %>"><%= dept %></option>
+                <% }); %>
+            </select>
+            
+            <select id="status-filter" class="form-input">
+                <option value="">Todos os status</option>
+                <option value="active">Apenas ativos</option>
+                <option value="inactive">Apenas inativos</option>
+            </select>
+            
+            <button onclick="clearFilters()" class="btn-secondary">
+                <i class="fas fa-filter-circle-xmark mr-2"></i>
+                Limpar Filtros
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Collaborators Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900">
+                Lista de Colaboradores
+            </h2>
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <span>Mostrando</span>
+                <span id="showing-count"><%= colaboradores.length %></span>
+                <span>de</span>
+                <span id="total-count"><%= colaboradores.length %></span>
+                <span>colaboradores</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-container">
+            <table class="min-w-full">
+                <thead>
                     <tr>
-                        <th scope="col" class="table-header">Nome</th>
-                        <th scope="col" class="table-header">Setor</th>
-                        <th scope="col" class="table-header">Status</th>
-                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6"><span class="sr-only">Editar</span>
+                        <th class="table-header">
+                            <input type="checkbox" id="select-all" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
                         </th>
+                        <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('name')">
+                            Nome
+                            <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </th>
+                        <th class="table-header hidden md:table-cell cursor-pointer hover:bg-gray-100" onclick="sortTable('department')">
+                            Setor
+                            <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </th>
+                        <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('status')">
+                            Status
+                            <i class="fas fa-sort ml-2 text-gray-400"></i>
+                        </th>
+                        <th class="table-header hidden lg:table-cell">Último Acesso</th>
+                        <th class="table-header text-right">Ações</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
-                    <% colaboradores.forEach(colab=> { %>
-                        <tr>
-                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm sm:pl-6">
-                                <div class="flex items-center">
-
-                                    <div class="h-10 w-10 flex-shrink-0">
-                                        <img class="h-10 w-10 rounded-full object-cover"
-                                            src="<%= colab.foto_url || '/images/default-avatar.png' %>"
-                                            alt="Foto de <%= colab.first_name %>">
+                <tbody id="collaborators-tbody">
+                    <% colaboradores.forEach(colab => { %>
+                        <tr class="table-row collaborator-row" 
+                            data-name="<%= colab.first_name %> <%= colab.last_name %>"
+                            data-email="<%= colab.email %>"
+                            data-department="<%= colab.setor_nome || '' %>"
+                            data-status="<%= colab.is_active ? 'active' : 'inactive' %>">
+                            
+                            <td class="table-cell">
+                                <input type="checkbox" class="collaborator-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500" 
+                                       value="<%= colab.id %>">
+                            </td>
+                            
+                            <td class="table-cell">
+                                <div class="flex items-center space-x-4">
+                                    <div class="relative">
+                                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                                             src="<%= colab.foto_url || '/images/default-avatar.png' %>"
+                                             alt="<%= colab.first_name %>">
+                                        <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm
+                                                    <%= colab.is_active ? 'bg-emerald-400' : 'bg-gray-400' %>"></div>
                                     </div>
-
-                                    <div class="ml-4">
-                                        <div class="font-medium text-gray-900">
-                                            <%= colab.first_name %>
-                                                <%= colab.last_name %>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">
+                                            <%= colab.first_name %> <%= colab.last_name %>
+                                            <% if (colab.is_manager) { %>
+                                                <i class="fas fa-crown text-yellow-500 ml-1" title="Gerente"></i>
+                                            <% } %>
+                                            <% if (colab.is_staff) { %>
+                                                <i class="fas fa-shield-alt text-red-500 ml-1" title="Administrador"></i>
+                                            <% } %>
                                         </div>
-                                        <div class="text-gray-500">
+                                        <div class="text-sm text-gray-600">
+                                            <i class="fas fa-envelope mr-1"></i>
                                             <%= colab.email %>
                                         </div>
+                                        <div class="text-xs text-gray-500 md:hidden mt-1">
+                                            <%= colab.setor_nome || 'Sem setor' %>
+                                        </div>
                                     </div>
-
                                 </div>
                             </td>
-                            <td class="table-cell">
-                                <%= colab.setor_nome %>
+                            
+                            <td class="table-cell hidden md:table-cell">
+                                <% if (colab.setor_nome) { %>
+                                    <span class="badge badge-info">
+                                        <i class="fas fa-building mr-1"></i>
+                                        <%= colab.setor_nome %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="text-gray-400 text-sm">Sem setor</span>
+                                <% } %>
                             </td>
+                            
                             <td class="table-cell">
                                 <button type="button"
-                                    class="toggle-status-btn inline-flex rounded-full px-2 text-xs font-semibold leading-5 <%= colab.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>"
-                                    data-id="<%= colab.id %>" data-active="<%= colab.is_active %>">
+                                        class="toggle-status-btn badge <%= colab.is_active ? 'badge-success' : 'badge-danger' %> cursor-pointer transition-colors hover:opacity-80"
+                                        data-id="<%= colab.id %>" 
+                                        data-active="<%= colab.is_active %>">
+                                    <i class="fas fa-<%= colab.is_active ? 'check-circle' : 'times-circle' %> mr-1"></i>
                                     <%= colab.is_active ? 'Ativo' : 'Inativo' %>
                                 </button>
                             </td>
-                            <td
-                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <a href="/admin/colaboradores/editar/<%= colab.id %>"
-                                    class="text-blue-600 hover:text-blue-900">Editar</a>
+                            
+                            <td class="table-cell hidden lg:table-cell">
+                                <div class="text-sm">
+                                    <% if (colab.last_login) { %>
+                                        <div class="text-gray-900">
+                                            <%= new Date(colab.last_login).toLocaleDateString('pt-BR') %>
+                                        </div>
+                                        <div class="text-gray-500">
+                                            <%= new Date(colab.last_login).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+                                        </div>
+                                    <% } else { %>
+                                        <span class="text-gray-400">Nunca acessou</span>
+                                    <% } %>
+                                </div>
+                            </td>
+                            
+                            <td class="table-cell text-right">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <button onclick="viewCollaborator('<%= colab.id %>')" 
+                                            class="btn-secondary btn-xs" 
+                                            title="Visualizar">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <a href="/admin/colaboradores/editar/<%= colab.id %>" 
+                                       class="btn-primary btn-xs" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button onclick="deleteCollaborator('<%= colab.id %>', '<%= colab.first_name %> <%= colab.last_name %>')" 
+                                            class="btn-danger btn-xs" 
+                                            title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
-                        <% }) %>
+                    <% }); %>
                 </tbody>
             </table>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden p-12 text-center">
+                <div class="text-gray-400">
+                    <i class="fas fa-users text-6xl mb-4 opacity-50"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhum colaborador encontrado</h3>
+                    <p class="text-gray-500 mb-6">Não há colaboradores que correspondam aos filtros aplicados.</p>
+                    <button onclick="clearFilters()" class="btn-primary">
+                        Limpar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+<div id="bulk-actions-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <span id="selected-count" class="text-sm font-medium text-gray-700">0 selecionados</span>
+            <button onclick="clearSelection()" class="text-sm text-gray-500 hover:text-gray-700">
+                Limpar seleção
+            </button>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="bulkActivate()" class="btn-success btn-sm">
+                <i class="fas fa-check mr-2"></i>
+                Ativar
+            </button>
+            <button onclick="bulkDeactivate()" class="btn-secondary btn-sm">
+                <i class="fas fa-pause mr-2"></i>
+                Desativar
+            </button>
+            <button onclick="bulkDelete()" class="btn-danger btn-sm">
+                <i class="fas fa-trash mr-2"></i>
+                Excluir
+            </button>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const tabela = document.querySelector('tbody');
+    initializeCollaboratorsPage();
+});
 
-    tabela.addEventListener('click', async (event) => {
-        // Verifica se o clique foi num botão de status
-        if (event.target.classList.contains('toggle-status-btn')) {
-            const button = event.target;
-            const profileId = button.dataset.id;
-            const currentStatus = button.dataset.active === 'true';
-            const newStatus = !currentStatus;
+function initializeCollaboratorsPage() {
+    setupEventListeners();
+    setupSearch();
+    setupFilters();
+    setupBulkActions();
+}
 
-            try {
-                // Faz a chamada à nossa nova API
-                const response = await fetch(`/admin/colaboradores/${profileId}/status`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ isActive: newStatus })
-                });
+function setupEventListeners() {
+    // Toggle status buttons
+    document.addEventListener('click', handleStatusToggle);
+    
+    // Search input
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
+    }
+    
+    // Filter selects
+    const departmentFilter = document.getElementById('department-filter');
+    const statusFilter = document.getElementById('status-filter');
+    
+    if (departmentFilter) {
+        departmentFilter.addEventListener('change', applyFilters);
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyFilters);
+    }
+}
 
-                const result = await response.json();
-
-                if (!result.success) {
-                    throw new Error(result.message || 'Falha ao atualizar o status.');
-                }
-
-                // Se deu certo, atualiza o botão na tela
-                button.dataset.active = newStatus;
-                button.textContent = newStatus ? 'Ativo' : 'Inativo';
-                
-                // Remove as classes de cor antigas e adiciona as novas
-                button.classList.remove(currentStatus ? 'bg-green-100' : 'bg-red-100', currentStatus ? 'text-green-800' : 'text-red-800');
-                button.classList.add(newStatus ? 'bg-green-100' : 'bg-red-100', newStatus ? 'text-green-800' : 'text-red-800');
-
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Não foi possível alterar o status do colaborador.');
+function setupSearch() {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSearch();
             }
+        });
+    }
+}
+
+function setupFilters() {
+    // Initialize filters
+    applyFilters();
+}
+
+function setupBulkActions() {
+    // Select all checkbox
+    const selectAllCheckbox = document.getElementById('select-all');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.collaborator-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActionsBar();
+        });
+    }
+    
+    // Individual checkboxes
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('collaborator-checkbox')) {
+            updateBulkActionsBar();
+            updateSelectAllCheckbox();
         }
     });
-});
+}
+
+async function handleStatusToggle(event) {
+    if (!event.target.classList.contains('toggle-status-btn')) {
+        return;
+    }
+    
+    const button = event.target;
+    const profileId = button.dataset.id;
+    const currentStatus = button.dataset.active === 'true';
+    const newStatus = !currentStatus;
+    
+    // Add loading state
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    button.disabled = true;
+    
+    try {
+        const response = await fetch(`/admin/colaboradores/${profileId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ isActive: newStatus })
+        });
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Falha ao atualizar o status.');
+        }
+        
+        // Update button
+        button.dataset.active = newStatus;
+        button.className = `toggle-status-btn badge ${newStatus ? 'badge-success' : 'badge-danger'} cursor-pointer transition-colors hover:opacity-80`;
+        button.innerHTML = `
+            <i class="fas fa-${newStatus ? 'check-circle' : 'times-circle'} mr-1"></i>
+            ${newStatus ? 'Ativo' : 'Inativo'}
+        `;
+        
+        // Update status indicator
+        const row = button.closest('tr');
+        const statusIndicator = row.querySelector('.w-4.h-4.rounded-full');
+        if (statusIndicator) {
+            statusIndicator.className = `w-4 h-4 rounded-full border-2 border-white shadow-sm ${newStatus ? 'bg-emerald-400' : 'bg-gray-400'}`;
+        }
+        
+        showNotification(`Colaborador ${newStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+        
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('Não foi possível atualizar o status.', 'error');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+    }
+}
+
+function handleSearch() {
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('search-input')?.value.toLowerCase().trim() || '';
+    const departmentFilter = document.getElementById('department-filter')?.value || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
+    
+    const rows = document.querySelectorAll('.collaborator-row');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const name = row.dataset.name.toLowerCase();
+        const email = row.dataset.email.toLowerCase();
+        const department = row.dataset.department;
+        const status = row.dataset.status;
+        
+        let show = true;
+        
+        // Search filter
+        if (searchTerm) {
+            show = show && (name.includes(searchTerm) || email.includes(searchTerm));
+        }
+        
+        // Department filter
+        if (departmentFilter) {
+            show = show && (department === departmentFilter);
+        }
+        
+        // Status filter
+        if (statusFilter) {
+            show = show && (status === statusFilter);
+        }
+        
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    // Update counters
+    document.getElementById('showing-count').textContent = visibleCount;
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('empty-state');
+    const tbody = document.getElementById('collaborators-tbody');
+    
+    if (visibleCount === 0) {
+        tbody.style.display = 'none';
+        emptyState.classList.remove('hidden');
+    } else {
+        tbody.style.display = '';
+        emptyState.classList.add('hidden');
+    }
+}
+
+function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('department-filter').value = '';
+    document.getElementById('status-filter').value = '';
+    applyFilters();
+}
+
+function sortTable(column) {
+    const tbody = document.getElementById('collaborators-tbody');
+    const rows = Array.from(tbody.querySelectorAll('.collaborator-row'));
+    
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch(column) {
+            case 'name':
+                aValue = a.dataset.name.toLowerCase();
+                bValue = b.dataset.name.toLowerCase();
+                break;
+            case 'department':
+                aValue = a.dataset.department.toLowerCase();
+                bValue = b.dataset.department.toLowerCase();
+                break;
+            case 'status':
+                aValue = a.dataset.status;
+                bValue = b.dataset.status;
+                break;
+        }
+        
+        return aValue.localeCompare(bValue);
+    });
+    
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function updateBulkActionsBar() {
+    const selectedCheckboxes = document.querySelectorAll('.collaborator-checkbox:checked');
+    const bulkActionsBar = document.getElementById('bulk-actions-bar');
+    const selectedCount = document.getElementById('selected-count');
+    
+    if (selectedCheckboxes.length > 0) {
+        selectedCount.textContent = `${selectedCheckboxes.length} selecionado${selectedCheckboxes.length > 1 ? 's' : ''}`;
+        bulkActionsBar.classList.remove('translate-y-full');
+    } else {
+        bulkActionsBar.classList.add('translate-y-full');
+    }
+}
+
+function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.collaborator-checkbox');
+    const checkedBoxes = document.querySelectorAll('.collaborator-checkbox:checked');
+    
+    if (checkedBoxes.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+    } else if (checkedBoxes.length === checkboxes.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+    } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+    }
+}
+
+function clearSelection() {
+    document.querySelectorAll('.collaborator-checkbox:checked').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('select-all').checked = false;
+    updateBulkActionsBar();
+}
+
+async function bulkActivate() {
+    const selectedIds = Array.from(document.querySelectorAll('.collaborator-checkbox:checked')).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showNotification('Nenhum colaborador selecionado.', 'warning');
+        return;
+    }
+    
+    if (!confirm(`Ativar ${selectedIds.length} colaborador(es)?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/admin/colaboradores/bulk-activate', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: selectedIds })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(`${result.updated} colaborador(es) ativado(s) com sucesso!`, 'success');
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showNotification('Erro ao ativar colaboradores: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function bulkDeactivate() {
+    const selectedIds = Array.from(document.querySelectorAll('.collaborator-checkbox:checked')).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showNotification('Nenhum colaborador selecionado.', 'warning');
+        return;
+    }
+    
+    if (!confirm(`Desativar ${selectedIds.length} colaborador(es)?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/admin/colaboradores/bulk-deactivate', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: selectedIds })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(`${result.updated} colaborador(es) desativado(s) com sucesso!`, 'success');
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showNotification('Erro ao desativar colaboradores: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function bulkDelete() {
+    const selectedIds = Array.from(document.querySelectorAll('.collaborator-checkbox:checked')).map(cb => cb.value);
+    
+    if (selectedIds.length === 0) {
+        showNotification('Nenhum colaborador selecionado.', 'warning');
+        return;
+    }
+    
+    if (!confirm(`ATENÇÃO: Excluir ${selectedIds.length} colaborador(es)? Esta ação não pode ser desfeita.`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch('/admin/colaboradores/bulk-delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: selectedIds })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(`${result.deleted} colaborador(es) excluído(s) com sucesso!`, 'success');
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showNotification('Erro ao excluir colaboradores: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function viewCollaborator(id) {
+    // TODO: Implement view collaborator modal or redirect
+    showNotification('Funcionalidade em desenvolvimento', 'info');
+}
+
+async function deleteCollaborator(id, name) {
+    if (!confirm(`Excluir o colaborador "${name}"? Esta ação não pode ser desfeita.`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const response = await fetch(`/admin/colaboradores/${id}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Colaborador excluído com sucesso!', 'success');
+            location.reload();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showNotification('Erro ao excluir colaborador: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
+function exportCollaborators() {
+    showLoading();
+    
+    // Create export URL with current filters
+    const searchTerm = document.getElementById('search-input')?.value || '';
+    const departmentFilter = document.getElementById('department-filter')?.value || '';
+    const statusFilter = document.getElementById('status-filter')?.value || '';
+    
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (departmentFilter) params.set('department', departmentFilter);
+    if (statusFilter) params.set('status', statusFilter);
+    
+    const exportUrl = `/admin/colaboradores/export?${params.toString()}`;
+    
+    // Create temporary download link
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = `colaboradores_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    hideLoading();
+    showNotification('Exportação iniciada! O download deve começar em breve.', 'success');
+}
+
+// Utility function for debouncing
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
 </script>

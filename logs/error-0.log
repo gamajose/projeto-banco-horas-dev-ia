@@ -1,0 +1,26 @@
+2025-09-08 11:11:39 +00:00: Erro inicial ao conectar com o banco de dados: AggregateError [ECONNREFUSED]: 
+    at /home/user/webapp/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Database._testConnection (/home/user/webapp/src/config/database.js:18:22) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}

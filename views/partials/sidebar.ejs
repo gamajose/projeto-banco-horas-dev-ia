@@ -1,0 +1,197 @@
+<!-- Sidebar -->
+<div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 lg:translate-x-0 sidebar-mobile">
+    <!-- Brand -->
+    <div class="sidebar-brand">
+        <div class="bg-red-600 p-2 rounded-xl">
+            <i class="fas fa-clock text-white text-xl"></i>
+        </div>
+        <div>
+            <div class="text-xl font-bold text-white">Banco de Horas</div>
+            <div class="text-sm text-slate-400">Sistema Profissional</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav scrollbar-hide overflow-y-auto flex-1">
+        <!-- Main Navigation -->
+        <div class="space-y-1">
+            <a href="/dashboard" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'dashboard') ? 'active' : '' %>">
+                <i class="sidebar-nav-icon fas fa-tachometer-alt"></i>
+                <span class="font-medium">Dashboard</span>
+            </a>
+
+            <a href="/profile/editar" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'profile') ? 'active' : '' %>">
+                <i class="sidebar-nav-icon fas fa-user-circle"></i>
+                <span class="font-medium">Meu Perfil</span>
+            </a>
+
+            <a href="/profile/relatorio" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'meu-relatorio') ? 'active' : '' %>">
+                <i class="sidebar-nav-icon fas fa-chart-line"></i>
+                <span class="font-medium">Meus Relatórios</span>
+            </a>
+
+            <a href="/profile/banco-horas" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'banco-horas') ? 'active' : '' %>">
+                <i class="sidebar-nav-icon fas fa-clock"></i>
+                <span class="font-medium">Registrar Horas</span>
+            </a>
+        </div>
+
+        <!-- Admin Section -->
+        <% if (user && user.is_staff) { %>
+            <div class="sidebar-section-title">
+                <i class="fas fa-crown text-yellow-400 mr-2"></i>
+                Administração
+            </div>
+            
+            <div class="space-y-1">
+                <a href="/admin/colaboradores" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'colaboradores') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-users"></i>
+                    <span class="font-medium">Colaboradores</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                        <%= locals.totalColaboradores || 0 %>
+                    </span>
+                </a>
+
+                <a href="/admin/setores" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'setores') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-building"></i>
+                    <span class="font-medium">Setores</span>
+                </a>
+
+                <a href="/admin/aprovacoes" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'aprovacoes') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-check-circle"></i>
+                    <span class="font-medium">Aprovações</span>
+                    <% if (locals.pendingApprovals > 0) { %>
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                            <%= locals.pendingApprovals %>
+                        </span>
+                    <% } %>
+                </a>
+
+                <a href="/admin/relatorios" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'relatorios') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-file-chart-pie"></i>
+                    <span class="font-medium">Relatórios</span>
+                </a>
+
+                <a href="/admin/configuracoes" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'configuracoes') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-cogs"></i>
+                    <span class="font-medium">Configurações</span>
+                </a>
+            </div>
+        <% } %>
+
+        <!-- Manager Section -->
+        <% if (user && user.is_manager && !user.is_staff) { %>
+            <div class="sidebar-section-title">
+                <i class="fas fa-user-tie text-blue-400 mr-2"></i>
+                Gerência
+            </div>
+            
+            <div class="space-y-1">
+                <a href="/manager/equipe" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'equipe') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-users-cog"></i>
+                    <span class="font-medium">Minha Equipe</span>
+                </a>
+
+                <a href="/manager/aprovacoes" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'manager-aprovacoes') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-clipboard-check"></i>
+                    <span class="font-medium">Aprovações</span>
+                    <% if (locals.teamPendingApprovals > 0) { %>
+                        <span class="ml-auto bg-amber-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                            <%= locals.teamPendingApprovals %>
+                        </span>
+                    <% } %>
+                </a>
+
+                <a href="/manager/relatorios" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'manager-relatorios') ? 'active' : '' %>">
+                    <i class="sidebar-nav-icon fas fa-chart-bar"></i>
+                    <span class="font-medium">Relatórios da Equipe</span>
+                </a>
+            </div>
+        <% } %>
+
+        <!-- Quick Actions -->
+        <div class="sidebar-section-title">
+            <i class="fas fa-bolt text-yellow-400 mr-2"></i>
+            Ações Rápidas
+        </div>
+        
+        <div class="space-y-1">
+            <a href="/quick/registrar-entrada" class="sidebar-nav-item">
+                <i class="sidebar-nav-icon fas fa-sign-in-alt text-emerald-400"></i>
+                <span class="font-medium">Registrar Entrada</span>
+            </a>
+
+            <a href="/quick/registrar-saida" class="sidebar-nav-item">
+                <i class="sidebar-nav-icon fas fa-sign-out-alt text-red-400"></i>
+                <span class="font-medium">Registrar Saída</span>
+            </a>
+
+            <a href="/quick/solicitar-ajuste" class="sidebar-nav-item">
+                <i class="sidebar-nav-icon fas fa-edit text-blue-400"></i>
+                <span class="font-medium">Solicitar Ajuste</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- User Profile Footer -->
+    <div class="p-4 border-t border-slate-700/50">
+        <div class="flex items-center space-x-3">
+            <img src="<%= user.foto_url || '/images/default-avatar.png' %>" 
+                 alt="<%= user.first_name %>" 
+                 class="w-10 h-10 rounded-full object-cover border-2 border-red-500">
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold text-white truncate">
+                    <%= user.first_name %> <%= user.last_name %>
+                </div>
+                <div class="text-xs text-slate-400 truncate">
+                    <%= user.email %>
+                </div>
+            </div>
+            <div class="relative">
+                <button id="user-menu-btn" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                
+                <!-- User Menu Dropdown -->
+                <div id="user-menu" class="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden">
+                    <a href="/profile/editar" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-user-edit mr-3 text-gray-400"></i>
+                        Editar Perfil
+                    </a>
+                    <a href="/profile/configuracoes" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-cog mr-3 text-gray-400"></i>
+                        Configurações
+                    </a>
+                    <div class="border-t border-gray-100 my-1"></div>
+                    <a href="/auth/logout" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                        Sair
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // User menu dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userMenu = document.getElementById('user-menu');
+        
+        if (userMenuBtn && userMenu) {
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userMenu.classList.toggle('hidden');
+            });
+            
+            document.addEventListener('click', function() {
+                userMenu.classList.add('hidden');
+            });
+            
+            userMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    });
+</script>

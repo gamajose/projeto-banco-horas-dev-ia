@@ -1,61 +1,257 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-gray-50">
+<html lang="pt-BR" class="h-full">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%= title || 'Banco de Horas' %>
-    </title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= title || 'Banco de Horas - Sistema Profissional' %></title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/css/output.css">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-    .tab-btn {
-        padding: 1rem;
-        border-bottom: 2px solid transparent;
-        font-weight: 500;
-        color: #6B7280; /* text-gray-500 */
-    }
-    .tab-btn:hover {
-        border-color: #D1D5DB; /* border-gray-300 */
-        color: #4B5563; /* text-gray-600 */
-    }
-    .tab-btn.active-tab {
-        border-color: #3B82F6; /* border-blue-600 */
-        color: #3B82F6; /* text-blue-600 */
-    }
-</style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dc2626;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b91c1c;
+        }
+        
+        /* Mobile sidebar animation */
+        .sidebar-mobile {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar-mobile.open {
+            transform: translateX(0);
+        }
+        
+        /* Loading animation */
+        .loading {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 
-<body class="h-full">
+<body class="h-full bg-gray-50 font-sans">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex items-center justify-center" style="display: none;">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-gray-600">Carregando...</p>
+        </div>
+    </div>
+
     <div class="min-h-full">
         <% if (locals.user) { %>
-            <%- include('../partials/navbar') %>
-                <% } %>
+            <!-- Mobile Navigation Button -->
+            <button id="mobile-nav-btn" class="mobile-nav-button">
+                <i class="fas fa-bars text-gray-700"></i>
+            </button>
 
-                    <main>
-                        <% if (locals.user) { %>
-                            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                                <%- body %>
-                            </div>
-                            <% } else { %>
-                                <%- body %>
-                                    <% } %>
-                    </main>
+            <!-- Mobile Overlay -->
+            <div id="mobile-overlay" class="mobile-sidebar-overlay" style="display: none;"></div>
 
-                    <% if (locals.user) { %>
-                        <%- include('../partials/footer') %>
-                            <% } %>
+            <!-- Sidebar -->
+            <%- include('../partials/sidebar') %>
+
+            <!-- Main Content Area -->
+            <div class="lg:ml-80">
+                <!-- Top Navigation Bar -->
+                <%- include('../partials/topbar') %>
+                
+                <!-- Page Content -->
+                <main class="px-4 py-6 sm:px-6 lg:px-8">
+                    <!-- Flash Messages -->
+                    <% if (locals.success_msg && locals.success_msg.length > 0) { %>
+                        <div class="alert alert-success mb-6 animate-fade-in">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <%= locals.success_msg %>
+                        </div>
+                    <% } %>
+                    
+                    <% if (locals.error_msg && locals.error_msg.length > 0) { %>
+                        <div class="alert alert-danger mb-6 animate-fade-in">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <%= locals.error_msg %>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Page Body -->
+                    <div class="loading">
+                        <%- body %>
+                    </div>
+                </main>
+            </div>
+        <% } else { %>
+            <!-- Auth Pages Layout -->
+            <div class="min-h-screen bg-gradient-to-br from-red-600 via-red-700 to-red-800">
+                <%- body %>
+            </div>
+        <% } %>
     </div>
 
     <!-- Scripts -->
-    <script src="/js/main.js"></script>
+    <script>
+        // Mobile navigation functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileNavBtn = document.getElementById('mobile-nav-btn');
+            const mobileOverlay = document.getElementById('mobile-overlay');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (mobileNavBtn && mobileOverlay && sidebar) {
+                mobileNavBtn.addEventListener('click', function() {
+                    sidebar.classList.add('open');
+                    mobileOverlay.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                });
+                
+                mobileOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    mobileOverlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                });
+                
+                // Close sidebar on escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') {
+                        sidebar.classList.remove('open');
+                        mobileOverlay.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+            
+            // Auto-hide flash messages
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    alert.style.transition = 'opacity 0.5s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 500);
+                });
+            }, 5000);
+        });
+        
+        // Global AJAX error handler
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showNotification('Erro interno da aplicação', 'error');
+        });
+        
+        // Global notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 max-w-sm p-4 rounded-xl shadow-lg transform translate-x-full transition-transform duration-300`;
+            
+            switch(type) {
+                case 'success':
+                    notification.classList.add('bg-emerald-500', 'text-white');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    break;
+                case 'warning':
+                    notification.classList.add('bg-amber-500', 'text-white');
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500', 'text-white');
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <span class="flex-1">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-white/80 hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Show notification
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto-remove notification
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        // Global loading functions
+        function showLoading() {
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+        
+        // Form enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add loading states to forms
+            const forms = document.querySelectorAll('form');
+            forms.forEach(function(form) {
+                form.addEventListener('submit', function() {
+                    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+                        const originalText = submitBtn.textContent;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processando...';
+                        
+                        // Re-enable after 5 seconds as fallback
+                        setTimeout(function() {
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = originalText;
+                        }, 5000);
+                    }
+                });
+            });
+        });
+    </script>
     
+    <!-- Additional Scripts -->
     <% if (locals.additionalScripts) { %>
-        <% additionalScripts.forEach(script=> { %>
+        <% additionalScripts.forEach(script => { %>
             <script src="<%= script %>"></script>
-            <% }); %>
-                <% } %>
+        <% }); %>
+    <% } %>
 </body>
 
 </html>
