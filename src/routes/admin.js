@@ -11,7 +11,7 @@ const csv = require("fast-csv");
 const PDFDocument = require("pdfkit");
 const router = express.Router();
 
-const db = require('../config/database');
+const db = require("../config/database");
 
 router.use(isAuthenticated, requireStaff);
 
@@ -24,7 +24,7 @@ router.get("/colaboradores", async (req, res) => {
       layout: "layouts/main",
       activePage: "colaboradores",
       user: req.user,
-      userProfile: req.userProfile, 
+      userProfile: req.userProfile,
       colaboradores,
     });
   } catch (error) {
@@ -111,7 +111,7 @@ router.get("/colaboradores/editar/:id", async (req, res) => {
       layout: "layouts/main",
       activePage: "colaboradores",
       user: req.user,
-      userProfile: req.userProfile, 
+      userProfile: req.userProfile,
       colaborador,
       setores,
     });
@@ -126,20 +126,45 @@ router.get("/colaboradores/editar/:id", async (req, res) => {
 
 // ROTA PARA PROCESSAR A ATUALIZAÇÃO
 router.post("/colaboradores/editar/:id", async (req, res) => {
-    try {
-        const profileId = req.params.id;
-        const { username, email, password, first_name, last_name, setor_id, gerente, ch_primeira, ch_segunda, is_active } = req.body;
-        const profileData = { nome: `${first_name} ${last_name}`, gerente: gerente === 'true', ch_primeira, ch_segunda, setor_id: parseInt(setor_id) };
-        const perfilAtualizado = await Profile.update(profileId, profileData);
-        const userData = { username, email, first_name, last_name, is_active: is_active === "true" };
-        if (password) { userData.password = password; }
-        await User.update(perfilAtualizado.usuario_id, userData);
-        req.flash('success_msg', 'Colaborador atualizado com sucesso!');
-        res.redirect("/admin/colaboradores");
-    } catch (error) {
-        req.flash('error_msg', 'Não foi possível atualizar o colaborador.');
-        res.redirect(`/admin/colaboradores/editar/${req.params.id}`);
+  try {
+    const profileId = req.params.id;
+    const {
+      username,
+      email,
+      password,
+      first_name,
+      last_name,
+      setor_id,
+      gerente,
+      ch_primeira,
+      ch_segunda,
+      is_active,
+    } = req.body;
+    const profileData = {
+      nome: `${first_name} ${last_name}`,
+      gerente: gerente === "true",
+      ch_primeira,
+      ch_segunda,
+      setor_id: parseInt(setor_id),
+    };
+    const perfilAtualizado = await Profile.update(profileId, profileData);
+    const userData = {
+      username,
+      email,
+      first_name,
+      last_name,
+      is_active: is_active === "true",
+    };
+    if (password) {
+      userData.password = password;
     }
+    await User.update(perfilAtualizado.usuario_id, userData);
+    req.flash("success_msg", "Colaborador atualizado com sucesso!");
+    res.redirect("/admin/colaboradores");
+  } catch (error) {
+    req.flash("error_msg", "Não foi possível atualizar o colaborador.");
+    res.redirect(`/admin/colaboradores/editar/${req.params.id}`);
+  }
 });
 
 // ROTA PARA ALTERAR O STATUS (ATIVO/INATIVO) DE UM COLABORADOR
@@ -165,35 +190,39 @@ router.patch("/colaboradores/:id/status", async (req, res) => {
 });
 
 // Rota para a API de atividade recente
-router.get('/api/recent-activity', requireStaff, async (req, res) => {
+router.get("/api/recent-activity", requireStaff, async (req, res) => {
   try {
     const sql = `
-            SELECT
-                ml.id,
-                ml.detalhes AS description,
-                ml.created_at AS "createdAt",
-                p.foto_url,
-                p.nome AS user_name,
-                d.nome AS department_name
-            FROM
-                movimentacoes_logs ml
-            JOIN
-                perfis p ON ml.perfil_id = p.id
-            JOIN
-                setores d ON p.setor_id = d.id
-            ORDER BY
-                ml.created_at DESC
-            LIMIT 10;
-        `;
+        SELECT
+            ml.id,
+            ml.detalhes AS description,
+            ml.created_at AS "createdAt",
+            p.foto_url,
+            p.nome AS user_name,
+            d.nome AS department_name
+        FROM
+            movimentacoes_logs ml
+        JOIN
+            perfis p ON ml.perfil_id = p.id
+        JOIN
+            setores d ON p.setor_id = d.id
+        ORDER BY
+            ml.created_at DESC
+        LIMIT 10;
+    `;
     const result = await db.query(sql);
     const recentActivity = result.rows;
-    res.status(200).json(recentActivity);
+    res.status(200).json({ success: true, activities: recentActivity });
   } catch (error) {
-    console.error('Error fetching recent activity:', error);
-    res.status(500).json({ message: 'Erro ao carregar a atividade recente.' });
+    console.error("Error fetching recent activity:", error);
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Erro ao carregar a atividade recente.",
+      });
   }
 });
-
 
 router.get("/setores", async (req, res) => {
   try {
@@ -329,62 +358,61 @@ router.get("/aprovacoes", async (req, res) => {
 });
 
 router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
-  try {
-    const movementId = req.params.id;
-    const statusAprovado = await Status.findByName("Aprovado");
-    if (!statusAprovado) {
-      return res.status(500).json({
-        success: false,
-        message: 'Status "Aprovado" não encontrado no sistema.',
-      });
-    }
-    await Movement.update(movementId, { status_id: statusAprovado.id });
-    
-    if (req.userProfile) {
-      await MovementLog.create({
-        movimentacao_id: movementId,
-        perfil_id: req.userProfile.id,
-        acao: 'APROVADO',
-        detalhes: `Movimentação aprovada pelo administrador.`
-      });
-    }
+  try {
+    const movementId = req.params.id;
+    const statusAprovado = await Status.findByName("Aprovado");
+    if (!statusAprovado) {
+      return res.status(500).json({
+        success: false,
+        message: 'Status "Aprovado" não encontrado no sistema.',
+      });
+    }
+    await Movement.update(movementId, { status_id: statusAprovado.id });
+    if (req.userProfile) {
+      await MovementLog.create({
+        movimentacao_id: movementId,
+        perfil_id: req.userProfile.id,
+        acao: "APROVADO",
+        detalhes: `Movimentação aprovada pelo administrador.`,
+      });
+    }
 
-    res.json({ success: true, message: "Movimentação aprovada com sucesso." });
-  } catch (error) {
-    console.error("Erro ao aprovar movimentação:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Erro ao aprovar movimentação." });
-  }
+    res.json({ success: true, message: "Movimentação aprovada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao aprovar movimentação:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao aprovar movimentação." });
+  }
 });
 
 router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
-  try {
-    const movementId = req.params.id;
-    const statusRejeitado = await Status.findByName("Rejeitado");
-    if (!statusRejeitado) {
-      return res.status(500).json({
-        success: false,
-        message: 'Status "Rejeitado" não encontrado no sistema.',
-      });
-    }
-    await Movement.update(movementId, { status_id: statusRejeitado.id });
+  try {
+    const movementId = req.params.id;
+    const statusRejeitado = await Status.findByName("Rejeitado");
+    if (!statusRejeitado) {
+      return res.status(500).json({
+        success: false,
+        message: 'Status "Rejeitado" não encontrado no sistema.',
+      });
+    }
+    await Movement.update(movementId, { status_id: statusRejeitado.id });
 
-    if (req.userProfile) {
-      await MovementLog.create({
-        movimentacao_id: movementId,
-        perfil_id: req.userProfile.id,
-        acao: 'REJEITADO',
-        detalhes: `Movimentação rejeitada pelo administrador.`
-      });
-    }
-    res.json({ success: true, message: "Movimentação rejeitada com sucesso." });
-  } catch (error) {
-    console.error("Erro ao rejeitar movimentação:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Erro ao rejeitar movimentação." });
-  }
+    if (req.userProfile) {
+      await MovementLog.create({
+        movimentacao_id: movementId,
+        perfil_id: req.userProfile.id,
+        acao: "REJEITADO",
+        detalhes: `Movimentação rejeitada pelo administrador.`,
+      });
+    }
+    res.json({ success: true, message: "Movimentação rejeitada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao rejeitar movimentação:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao rejeitar movimentação." });
+  }
 });
 
 router.get("/movimentacoes/pendentes", async (req, res) => {
@@ -399,7 +427,10 @@ router.get("/movimentacoes/pendentes", async (req, res) => {
       activePage: "pendentes",
     });
   } catch (error) {
-    console.error("Erro ao carregar a página de solicitações pendentes:", error);
+    console.error(
+      "Erro ao carregar a página de solicitações pendentes:",
+      error
+    );
     res.status(500).render("error", {
       title: "Erro",
       message: "Não foi possível carregar a página.",
@@ -453,40 +484,56 @@ router.get("/relatorios", async (req, res) => {
 });
 
 router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
-    try {
-        const pendingStatus = await Status.findByName("Pendente");
-        const approvedStatus = await Status.findByName("Aprovado"); // Nome do status corrigido
-        
-        if (!pendingStatus || !approvedStatus) {
-            console.error("Erro: Status 'Pendente' ou 'Aprovado' não encontrado.");
-            return res.status(500).json({ success: false, message: 'Status "Pendente" ou "Aprovado" não encontrado.' });
-        }
+  try {
+    const pendingStatus = await Status.findByName("Pendente");
+    const approvedStatus = await Status.findByName("Aprovado"); // Nome do status corrigido
 
-        const pendingMovements = await Movement.findAll({ status_id: pendingStatus.id });
-
-        if (pendingMovements.length === 0) {
-             return res.json({ success: true, message: "Nenhuma solicitação pendente para aprovar.", approved: 0 });
-        }
-
-        for (const mov of pendingMovements) {
-            await Movement.update(mov.id, { status_id: approvedStatus.id });
-
-            if (req.userProfile) {
-                await MovementLog.create({
-                    movimentacao_id: mov.id,
-                    perfil_id: req.userProfile.id,
-                    acao: 'APROVADO',
-                    detalhes: `Movimentação aprovada em massa pelo administrador.`
-                });
-            }
-        }
-
-        res.json({ success: true, message: "Todas as solicitações pendentes foram aprovadas.", approved: pendingMovements.length });
-
-    } catch (error) {
-        console.error("Erro detalhado ao aprovar todas as movimentações:", error);
-        res.status(500).json({ success: false, message: "Erro ao processar as aprovações." });
+    if (!pendingStatus || !approvedStatus) {
+      console.error("Erro: Status 'Pendente' ou 'Aprovado' não encontrado.");
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'Status "Pendente" ou "Aprovado" não encontrado.',
+        });
     }
+
+    const pendingMovements = await Movement.findAll({
+      status_id: pendingStatus.id,
+    });
+
+    if (pendingMovements.length === 0) {
+      return res.json({
+        success: true,
+        message: "Nenhuma solicitação pendente para aprovar.",
+        approved: 0,
+      });
+    }
+
+    for (const mov of pendingMovements) {
+      await Movement.update(mov.id, { status_id: approvedStatus.id });
+
+      if (req.userProfile) {
+        await MovementLog.create({
+          movimentacao_id: mov.id,
+          perfil_id: req.userProfile.id,
+          acao: "APROVADO",
+          detalhes: `Movimentação aprovada em massa pelo administrador.`,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: "Todas as solicitações pendentes foram aprovadas.",
+      approved: pendingMovements.length,
+    });
+  } catch (error) {
+    console.error("Erro detalhado ao aprovar todas as movimentações:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao processar as aprovações." });
+  }
 });
 
 router.get("/api/relatorios", async (req, res) => {
