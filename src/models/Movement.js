@@ -86,7 +86,11 @@ class Movement {
   static async getPendingMovements() {
     return await db.all(`
       SELECT
-        m.*, p.nome as colaborador_nome, s.nome as setor_nome, st.nome as status_nome
+        m.*, 
+        p.nome as colaborador_nome, 
+        p.foto_url,  -- Adicionamos a URL da foto aqui
+        s.nome as setor_nome, 
+        st.nome as status_nome
       FROM movimentacoes m
       JOIN perfis p ON m.colaborador_id = p.id
       JOIN setores s ON p.setor_id = s.id

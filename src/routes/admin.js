@@ -315,7 +315,7 @@ router.get("/aprovacoes", async (req, res) => {
       title: "Aprovação de Solicitações",
       solicitacoes: solicitacoesPendentes,
       user: req.user,
-      userProfile: req.userProfile, // CORRIGIDO: userProfile é passado
+      userProfile: req.userProfile,
       layout: "layouts/main",
       activePage: "aprovacoes",
     });

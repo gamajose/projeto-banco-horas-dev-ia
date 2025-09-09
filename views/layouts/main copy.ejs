@@ -90,10 +90,10 @@
             <%- include('../partials/sidebar', { userProfile: locals.userProfile }) %>
 
                 <div class="lg:ml-80">
-                     <%- include('../partials/topbar') %>
+                    <%- include('../partials/topbar', { userProfile: locals.userProfile }) %>
 
                         <!-- Page Content -->
-                        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                        <main class="px-4 py-6 sm:px-6 lg:px-8">
                             <!-- Flash Messages -->
                             <% if (locals.success_msg && locals.success_msg.length> 0) { %>
                                 <div class="alert alert-success mb-6 animate-fade-in">

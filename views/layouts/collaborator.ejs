@@ -47,27 +47,28 @@
         </main>
     </div>
 
-    <div id="mobile-menu" class="fixed inset-0 flex z-40 hidden">
-        <div id="menu-backdrop" class="fixed inset-0 bg-black opacity-25"></div>
-
-        <div id="menu-content"
-            class="relative flex-1 flex flex-col max-w-xs w-full bg-white transform -translate-x-full transition-transform duration-300 ease-in-out">
-            <div class="absolute top-0 right-0 -mr-12 pt-2">
-                <button id="close-menu-btn"
-                    class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none">
-                    <i class="fas fa-times text-white text-xl"></i>
-                </button>
+    <div id="options-modal"
+        class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden z-50 transition-opacity ease-in-out duration-300">
+        <div id="modal-content-wrapper"
+            class="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white transition-transform ease-in-out duration-300 transform scale-95">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-800">Opções</h3>
+                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
             </div>
-
-            <div class="p-4">
-                <h2 class="text-xl font-bold">Opções</h2>
+            <div class="mt-4">
+                <nav class="space-y-2">
+                    <a href="/profile/editar"
+                        class="block p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                        <i class="fas fa-user-edit mr-3 text-gray-500"></i>
+                        Editar Perfil
+                    </a>
+                    <a href="/auth/logout"
+                        class="block p-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors duration-200">
+                        <i class="fas fa-sign-out-alt mr-3 text-red-500"></i>
+                        Sair (Logout)
+                    </a>
+                </nav>
             </div>
-            <nav class="mt-5 flex-1">
-                <a href="/profile/editar" class="block py-2 px-4 text-base text-gray-700 hover:bg-gray-100">Editar
-                    Perfil</a>
-                <a href="/auth/logout" class="block py-2 px-4 text-base text-gray-700 hover:bg-gray-100">Sair
-                    (Logout)</a>
-            </nav>
         </div>
     </div>
 
@@ -75,29 +76,37 @@
 
 </html>
 
-<script>
+<script>  
     document.addEventListener('DOMContentLoaded', () => {
-        const menu = document.getElementById('mobile-menu');
-        const menuContent = document.getElementById('menu-content');
-        const openBtn = document.getElementById('open-menu-btn');
-        const closeBtn = document.getElementById('close-menu-btn');
-        const backdrop = document.getElementById('menu-backdrop');
-        const openMenu = () => {
-            menu.classList.remove('hidden');
+        const openMenuBtn = document.getElementById('open-menu-btn');
+        const modal = document.getElementById('options-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalContent = document.getElementById('modal-content-wrapper');
+
+        function openModal() {
+            modal.classList.remove('hidden');
             setTimeout(() => {
-                menuContent.classList.remove('-translate-x-full');
+                modal.classList.add('opacity-100');
+                modalContent.classList.remove('scale-95');
             }, 10);
-        };
+        }
 
-        const closeMenu = () => {
-            menuContent.classList.add('-translate-x-full');
+        function closeModal() {
+            modal.classList.remove('opacity-100');
+            modalContent.classList.add('scale-95');
             setTimeout(() => {
-                menu.classList.add('hidden');
+                modal.classList.add('hidden');
             }, 300);
-        };
+        }
 
-        openBtn.addEventListener('click', openMenu);
-        closeBtn.addEventListener('click', closeMenu);
-        backdrop.addEventListener('click', closeMenu);
+        if (openMenuBtn && modal && closeModalBtn) {
+            openMenuBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === 'options-modal') {
+                    closeModal();
+                }
+            });
+        }
     });
 </script>
