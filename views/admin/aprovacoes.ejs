@@ -8,7 +8,7 @@
             <p class="page-description">Aprovações que necessitam de sua análise.</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <button onclick="approveAllPending()" class="btn-success btn-sm">
+            <button id="approve-all-pending-btn" class="btn-success btn-sm">
                 <i class="fas fa-check-double mr-2"></i>
                 Aprovar Todas
             </button>
@@ -117,10 +117,56 @@
             </p>
         </div>
         <div class="mt-6 flex justify-center space-x-4">
-            <button id="btn-cancelar-aprovacao" class="btn-secondary">
+            <button id="btn-cancelar-aprovacao-massa" class="btn-secondary">
                 Cancelar
             </button>
-            <button id="btn-confirmar-aprovacao" class="btn-success">
+            <button id="btn-confirmar-aprovacao-massa" class="btn-success">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-approve-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100">
+            <i class="fas fa-check-circle text-3xl text-emerald-500"></i>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-lg font-bold text-gray-900">Aprovar Solicitação?</h3>
+            <p class="mt-2 text-sm text-gray-500">
+                Tem certeza que deseja aprovar esta solicitação?
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center space-x-4">
+            <button id="btn-cancelar-aprovacao-individual" class="btn-secondary">
+                Cancelar
+            </button>
+            <button id="btn-confirmar-aprovacao-individual" class="btn-success">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="confirm-reject-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+            <i class="fas fa-times-circle text-3xl text-red-500"></i>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-lg font-bold text-gray-900">Rejeitar Solicitação?</h3>
+            <p class="mt-2 text-sm text-gray-500">
+                Tem certeza que deseja rejeitar esta solicitação? Esta ação é definitiva.
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center space-x-4">
+            <button id="btn-cancelar-rejeicao" class="btn-secondary">
+                Cancelar
+            </button>
+            <button id="btn-confirmar-rejeicao" class="btn-danger">
                 Confirmar
             </button>
         </div>
@@ -130,76 +176,119 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const tabelaSolicitacoes = document.getElementById('solicitacoes-tbody');
+        const pendingRequestsTbody = document.getElementById('pending-requests-tbody');
 
-        // Modal de confirmação
-        const modalConfirmacao = document.getElementById('confirm-approve-all-modal');
+        // Modal de aprovação em massa
+        const modalAprovarTodas = document.getElementById('confirm-approve-all-modal');
         const btnAprovarTodas = document.getElementById('approve-all-pending-btn');
-        const btnConfirmar = document.getElementById('btn-confirmar-aprovacao');
-        const btnCancelar = document.getElementById('btn-cancelar-aprovacao');
+        const btnConfirmarAprovarTodas = document.getElementById('btn-confirmar-aprovacao-massa');
+        const btnCancelarAprovarTodas = document.getElementById('btn-cancelar-aprovacao-massa');
 
-        if (btnAprovarTodas) {
-            btnAprovarTodas.addEventListener('click', () => {
-                modalConfirmacao.classList.remove('hidden');
+        // Modais individuais
+        const modalAprovar = document.getElementById('confirm-approve-modal');
+        const btnConfirmarAprovar = document.getElementById('btn-confirmar-aprovacao-individual');
+        const btnCancelarAprovar = document.getElementById('btn-cancelar-aprovacao-individual');
+
+        const modalRejeitar = document.getElementById('confirm-reject-modal');
+        const btnConfirmarRejeitar = document.getElementById('btn-confirmar-rejeicao');
+        const btnCancelarRejeitar = document.getElementById('btn-cancelar-rejeicao');
+
+        let currentMovementId = null;
+
+        // --- LÓGICA DE EVENTOS DA TABELA ---
+        if (tabelaSolicitacoes || pendingRequestsTbody) {
+            const container = tabelaSolicitacoes || pendingRequestsTbody;
+            container.addEventListener('click', (event) => {
+                const target = event.target.closest('button');
+                if (!target) return;
+
+                currentMovementId = target.dataset.id;
+
+                if (target.classList.contains('btn-approve')) {
+                    modalAprovar.classList.remove('hidden');
+                } else if (target.classList.contains('btn-reject')) {
+                    modalRejeitar.classList.remove('hidden');
+                }
             });
         }
-
-        if (btnConfirmar) {
-            btnConfirmar.addEventListener('click', () => {
-                modalConfirmacao.classList.add('hidden');
+        // Aprovar Todas
+        if (btnAprovarTodas) {
+            btnAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.remove('hidden');
+            });
+        }
+        if (btnConfirmarAprovarTodas) {
+            btnConfirmarAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.add('hidden');
                 handleApproveAll();
             });
         }
-
-        if (btnCancelar) {
-            btnCancelar.addEventListener('click', () => {
-                modalConfirmacao.classList.add('hidden');
+        if (btnCancelarAprovarTodas) {
+            btnCancelarAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.add('hidden');
             });
         }
 
-        if (tabelaSolicitacoes) {
-            tabelaSolicitacoes.addEventListener('click', async (event) => {
-                const target = event.target;
-                const movementId = target.dataset.id;
-                let url = '';
+        // Aprovação Individual
+        if (btnConfirmarAprovar) {
+            btnConfirmarAprovar.addEventListener('click', () => {
+                modalAprovar.classList.add('hidden');
+                handleMovementAction('aprovar', currentMovementId);
+            });
+        }
+        if (btnCancelarAprovar) {
+            btnCancelarAprovar.addEventListener('click', () => {
+                modalAprovar.classList.add('hidden');
+            });
+        }
 
-                if (target.classList.contains('btn-approve')) {
-                    url = `/admin/movimentacoes/${movementId}/aprovar`;
-                } else if (target.classList.contains('btn-reject')) {
-                    url = `/admin/movimentacoes/${movementId}/rejeitar`;
-                } else {
-                    return;
-                }
-
-                if (!movementId || !url) return;
-
-                target.disabled = true;
-
-                try {
-                    const response = await fetch(url, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
-
-                    const result = await response.json();
-
-                    if (!result.success) {
-                        throw new Error(result.message || 'Falha ao processar a solicitação.');
-                    }
-
-                    const rowToRemove = document.getElementById(`mov-row-${movementId}`);
-                    if (rowToRemove) {
-                        rowToRemove.style.opacity = '0';
-                        setTimeout(() => rowToRemove.remove(), 300);
-                    }
-
-                } catch (error) {
-                    console.error('Erro:', error);
-                    alert('Não foi possível processar a solicitação.');
-                    target.disabled = false;
-                }
+        // Rejeição Individual
+        if (btnConfirmarRejeitar) {
+            btnConfirmarRejeitar.addEventListener('click', () => {
+                modalRejeitar.classList.add('hidden');
+                handleMovementAction('rejeitar', currentMovementId);
+            });
+        }
+        if (btnCancelarRejeitar) {
+            btnCancelarRejeitar.addEventListener('click', () => {
+                modalRejeitar.classList.add('hidden');
             });
         }
     });
+
+
+    // --- FUNÇÕES GLOBAIS DE AÇÃO ---
+    async function handleMovementAction(action, movementId) {
+        showLoading();
+
+        try {
+            const url = `/admin/movimentacoes/${movementId}/${action}`;
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || 'Falha ao processar a solicitação.');
+            }
+
+            const rowToRemove = document.getElementById(`mov-row-${movementId}`);
+            if (rowToRemove) {
+                rowToRemove.style.opacity = '0';
+                setTimeout(() => rowToRemove.remove(), 300);
+            }
+
+            showNotification(`Movimentação ${action === 'aprovar' ? 'aprovada' : 'rejeitada'} com sucesso!`, 'success');
+
+        } catch (error) {
+            console.error('Erro:', error);
+            showNotification('Não foi possível processar a solicitação.', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
 
 
     async function handleApproveAll() {
@@ -248,5 +337,26 @@
             console.error('Erro ao aprovar todas as movimentações:', error);
             alert('Não foi possível processar a solicitação em massa.');
         }
+    }
+
+    // As funções `showNotification`, `showLoading`, `hideLoading` e `viewMovementDetails`
+    // são assumidas como globais ou definidas em outro lugar (ex: main.js)
+    function showNotification(message, type) {
+        // Implementação da sua função de notificação
+        console.log(`[Notificação ${type}] ${message}`);
+        // No seu código real, você pode usar a sua função `showNotification` do `main.js` aqui.
+    }
+
+    function showLoading() {
+        console.log('Mostrando loading...');
+    }
+
+    function hideLoading() {
+        console.log('Escondendo loading...');
+    }
+
+    function viewMovementDetails(movementId) {
+        console.log('Detalhes da movimentação:', movementId);
+        // Implementar a lógica para abrir o modal de detalhes, que já discutimos antes.
     }
 </script>

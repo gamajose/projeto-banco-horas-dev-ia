@@ -21,9 +21,7 @@
     </div>
 </div>
 
-<!-- Stats Cards -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <!-- Total Users Card -->
     <div class="stat-card card-hover">
         <div class="flex items-center justify-between">
             <div>
@@ -47,7 +45,6 @@
         </div>
     </div>
 
-    <!-- Total Movements Card -->
     <div class="stat-card card-hover">
         <div class="flex items-center justify-between">
             <div>
@@ -71,7 +68,6 @@
         </div>
     </div>
 
-    <!-- Approved Hours Card -->
     <div class="stat-card card-hover">
         <div class="flex items-center justify-between">
             <div>
@@ -95,7 +91,6 @@
         </div>
     </div>
 
-    <!-- Pending Requests Card -->
     <div class="stat-card card-hover">
         <div class="flex items-center justify-between">
             <div>
@@ -107,7 +102,7 @@
                 </div>
                 <div class="stat-card-label">Pendentes</div>
                 <div class="stat-card-change <%= stats.pendentes > 0 ? 'negative' : 'positive' %>">
-                    <%= stats.pendentes> 0 ? 'Requer atenção' : 'Tudo em dia' %>
+                    <%= stats.pendentes > 0 ? 'Requer atenção' : 'Tudo em dia' %>
                 </div>
             </div>
             <div class="text-amber-500 text-3xl opacity-20">
@@ -122,9 +117,7 @@
     </div>
 </div>
 
-<!-- Main Content Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Pending Approvals Section -->
     <div class="lg:col-span-2">
         <div class="card">
             <div class="card-header">
@@ -138,12 +131,12 @@
                             <p class="text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
                         </div>
                     </div>
-                    <% if (stats.pendentes> 0) { %>
-                        <button onclick="approveAllPending()" class="btn-success btn-sm">
+                    <% if (stats.pendentes > 0) { %>
+                        <button id="approve-all-pending-btn" class="btn-success btn-sm">
                             <i class="fas fa-check-double mr-2"></i>
                             Aprovar Todas
                         </button>
-                        <% } %>
+                    <% } %>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -159,8 +152,8 @@
                             </tr>
                         </thead>
                         <tbody id="pending-requests-tbody">
-                            <% if (pendingMovements && pendingMovements.length> 0) { %>
-                                <% pendingMovements.forEach(mov=> { %>
+                            <% if (pendingMovements && pendingMovements.length > 0) { %>
+                                <% pendingMovements.forEach(mov => { %>
                                     <tr id="mov-row-<%= mov.id %>" class="table-row">
                                         <td class="table-cell">
                                             <div class="flex items-center space-x-3">
@@ -195,8 +188,7 @@
                                         </td>
                                         <td class="table-cell">
                                             <span class="badge <%= mov.entrada ? 'badge-success' : 'badge-danger' %>">
-                                                <i
-                                                    class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
+                                                <i class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
                                                 <%= mov.entrada ? 'Entrada' : 'Saída' %>
                                             </span>
                                         </td>
@@ -217,18 +209,18 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    <% }) %>
-                                        <% } else { %>
-                                            <tr>
-                                                <td colspan="5" class="table-cell text-center py-12">
-                                                    <div class="text-gray-400">
-                                                        <i class="fas fa-check-circle text-4xl mb-4"></i>
-                                                        <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
-                                                        <p class="text-sm">Todas as aprovações estão em dia!</p>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <% } %>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="table-cell text-center py-12">
+                                        <div class="text-gray-400">
+                                            <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                            <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                                            <p class="text-sm">Todas as aprovações estão em dia!</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -236,9 +228,7 @@
         </div>
     </div>
 
-    <!-- Right Sidebar -->
     <div class="space-y-8">
-        <!-- Department Stats -->
         <div class="card">
             <div class="card-header">
                 <div class="flex items-center space-x-3">
@@ -253,8 +243,8 @@
             </div>
             <div class="card-body">
                 <div id="resumo-setor-list" class="space-y-3">
-                    <% if (departmentStats && departmentStats.length> 0) { %>
-                        <% departmentStats.forEach(dept=> { %>
+                    <% if (departmentStats && departmentStats.length > 0) { %>
+                        <% departmentStats.forEach(dept => { %>
                             <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
                                 data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
                                 <div class="flex items-center justify-between">
@@ -276,18 +266,17 @@
                                     <i class="fas fa-chevron-right text-gray-400"></i>
                                 </div>
                             </div>
-                            <% }) %>
-                                <% } else { %>
-                                    <div class="text-center py-8 text-gray-500">
-                                        <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
-                                        <p>Nenhum setor cadastrado</p>
-                                    </div>
-                                    <% } %>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center py-8 text-gray-500">
+                            <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
+                            <p>Nenhum setor cadastrado</p>
+                        </div>
+                    <% } %>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Stats Chart -->
         <div class="card">
             <div class="card-header">
                 <h3 class="text-lg font-bold text-gray-900 flex items-center">
@@ -300,7 +289,6 @@
             </div>
         </div>
 
-        <!-- Recent Activity -->
         <div class="card">
             <div class="card-header">
                 <h3 class="text-lg font-bold text-gray-900 flex items-center">
@@ -310,7 +298,6 @@
             </div>
             <div class="card-body">
                 <div id="recent-activity" class="space-y-3">
-                    <!-- Activity items will be loaded here -->
                     <div class="text-center text-gray-500 py-4">
                         <i class="fas fa-spinner fa-spin text-lg"></i>
                         <p class="mt-2 text-sm">Carregando atividades...</p>
@@ -321,7 +308,6 @@
     </div>
 </div>
 
-<!-- Modals -->
 <div id="sector-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-2xl shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
@@ -333,13 +319,11 @@
         </div>
         <div class="mt-6 max-h-96 overflow-y-auto">
             <div id="sector-modal-list" class="space-y-3">
-                <!-- Content will be loaded here -->
-            </div>
+                </div>
         </div>
     </div>
 </div>
 
-<!-- Movement Details Modal -->
 <div id="movement-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
@@ -350,7 +334,28 @@
             </button>
         </div>
         <div id="movement-modal-content" class="mt-6">
-            <!-- Content will be loaded here -->
+            </div>
+    </div>
+</div>
+
+<div id="confirm-approve-all-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100">
+            <i class="fas fa-exclamation-triangle text-3xl text-yellow-500"></i>
+        </div>
+        <div class="mt-4">
+            <h3 id="custom-confirm-title" class="text-lg font-bold text-gray-900">Aprovar Todas as Solicitações?</h3>
+            <p id="custom-confirm-message" class="mt-2 text-sm text-gray-500">
+                Tem certeza que deseja aprovar todas as solicitações pendentes de uma só vez?
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center space-x-4">
+            <button id="btn-cancelar-aprovacao" class="btn-secondary">
+                Cancelar
+            </button>
+            <button id="btn-confirmar-aprovacao" class="btn-success">
+                Confirmar
+            </button>
         </div>
     </div>
 </div>
@@ -369,29 +374,35 @@
         }, 30000);
     });
 
-    // Funções de inicialização e manipuladores de eventos
+// Funções de inicialização e manipuladores de eventos
     function initializeDashboard() {
         const pendingTableBody = document.getElementById('pending-requests-tbody');
         const resumoPorSetorList = document.getElementById('resumo-setor-list');
-        const approveAllBtn = document.getElementById('approve-all-pending-btn'); // Adicione um ID a este botão
+        
+        // Modal de confirmação
         const modalConfirmacao = document.getElementById('confirm-approve-all-modal');
+        const btnAprovarTodas = document.getElementById('approve-all-pending-btn');
         const btnConfirmar = document.getElementById('btn-confirmar-aprovacao');
         const btnCancelar = document.getElementById('btn-cancelar-aprovacao');
-
-        // Adiciona um listener para abrir o modal de confirmação
-        if (approveAllBtn && modalConfirmacao) {
-            approveAllBtn.addEventListener('click', () => {
+        const confirmTitle = document.getElementById('custom-confirm-title');
+        const confirmMessage = document.getElementById('custom-confirm-message');
+        
+   // Adiciona um listener para abrir o modal de confirmação
+        if (btnAprovarTodas && modalConfirmacao) {
+            btnAprovarTodas.addEventListener('click', () => {
+                confirmTitle.textContent = 'Aprovar Todas as Solicitações?';
+                confirmMessage.textContent = 'Tem certeza que deseja aprovar todas as solicitações pendentes de uma só vez?';
                 modalConfirmacao.classList.remove('hidden');
             });
         }
-
+        
         // Adiciona um listener para fechar o modal ao clicar em "Cancelar"
         if (btnCancelar && modalConfirmacao) {
             btnCancelar.addEventListener('click', () => {
                 modalConfirmacao.classList.add('hidden');
             });
         }
-
+        
         // Adiciona um listener para confirmar e aprovar
         if (btnConfirmar && modalConfirmacao) {
             btnConfirmar.addEventListener('click', () => {
@@ -407,54 +418,11 @@
         if (resumoPorSetorList) {
             resumoPorSetorList.addEventListener('click', handleSectorClick);
         }
-
+        
         setupModalHandlers();
     }
 
-    // Função que executa a aprovação em massa
-    async function handleApproveAll() {
-        showLoading();
-
-        try {
-            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
-                method: 'PATCH'
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
-                refreshDashboard();
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // Dashboard initialization
-    function initializeDashboard() {
-        const pendingTableBody = document.getElementById('pending-requests-tbody');
-        const resumoPorSetorList = document.getElementById('resumo-setor-list');
-
-        // Handle approval/rejection buttons
-        if (pendingTableBody) {
-            pendingTableBody.addEventListener('click', handleMovementAction);
-        }
-
-        // Handle sector details
-        if (resumoPorSetorList) {
-            resumoPorSetorList.addEventListener('click', handleSectorClick);
-        }
-
-        // Modal handlers
-        setupModalHandlers();
-    }
-
-    // Handle movement approval/rejection
+    // Funções de ação
     async function handleMovementAction(event) {
         const target = event.target.closest('button');
         if (!target) return;
@@ -530,6 +498,203 @@
             target.disabled = false;
         }
     }
+
+    // Função que executa a aprovação em massa
+    async function handleApproveAll() {
+        showLoading();
+
+        try {
+            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
+                method: 'PATCH'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    
+    // Dashboard initialization
+    function initializeDashboard() {
+        const pendingTableBody = document.getElementById('pending-requests-tbody');
+        const resumoPorSetorList = document.getElementById('resumo-setor-list');
+
+        // Handle approval/rejection buttons
+        if (pendingTableBody) {
+            pendingTableBody.addEventListener('click', handleMovementAction);
+        }
+
+        // Handle sector details
+        if (resumoPorSetorList) {
+            resumoPorSetorList.addEventListener('click', handleSectorClick);
+        }
+
+        // Modal handlers
+        setupModalHandlers();
+    }
+
+
+    // Refresh dashboard
+    async function refreshDashboard() {
+        try {
+            const response = await fetch('/admin/api/dashboard-stats');
+            const data = await response.json();
+
+            if (data.success) {
+                // Update counters
+                updateElement('total-users-count', data.totalUsers);
+                updateElement('total-movements-count', data.stats.total);
+                updateElement('approved-hours-count', data.stats.aprovadas);
+                updateElement('pending-requests-count', data.stats.pendentes);
+
+                // Update chart
+                updateChart(data.chartData);
+            }
+        } catch (error) {
+            console.error('Error refreshing dashboard:', error);
+        }
+    }
+
+    // Update pending count
+    function updatePendingCount() {
+        const tbody = document.getElementById('pending-requests-tbody');
+        const rows = tbody.querySelectorAll('tr:not(:has(.text-gray-400))'); // Exclude "no data" row
+        const count = rows.length;
+
+        updateElement('pending-requests-count', count);
+    }
+
+    // Update element with animation
+    function updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element && element.textContent != value) {
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = 'transform 0.2s ease';
+
+            setTimeout(() => {
+                element.textContent = value;
+                element.style.transform = 'scale(1)';
+            }, 100);
+        }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+        const container = document.getElementById('recent-activity');
+        if (!container) return;
+
+        try {
+            const response = await fetch('/admin/api/recent-activity');
+            const data = await response.json();
+
+            if (data.success && data.activities.length > 0) {
+                container.innerHTML = data.activities.map(activity => `
+                <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="w-8 h-8 bg-${activity.color || 'gray'}-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-${activity.icon || 'bell'} text-${activity.color || 'gray'}-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900">${activity.title}</p>
+                        <p class="text-xs text-gray-500 truncate">${activity.description}</p>
+                        <p class="text-xs text-gray-400 mt-1">${formatRelativeTime(activity.created_at)}</p>
+                    </div>
+                </div>
+            `).join('');
+            } else {
+                container.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-history text-3xl mb-3 opacity-50"></i>
+                    <p>Nenhuma atividade recente</p>
+                </div>
+            `;
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            container.innerHTML = `
+            <div class="text-center py-8 text-red-400">
+                <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                <p>Erro ao carregar atividades</p>
+            </div>
+        `;
+        }
+    }
+
+    // Initialize chart
+    function initializeChart() {
+        const ctx = document.getElementById('quickStatsChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
+                datasets: [{
+                    data: [<%= stats.aprovadas || 0 %>, <%= stats.pendentes || 0 %>, <%= stats.rejeitadas || 0 %>],
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Update chart
+    function updateChart(data) {
+        // Chart update logic would go here
+        // For now, we'll just log the data
+        console.log('Chart data update:', data);
+    }
+
+    // Format relative time (reused from topbar)
+    function formatRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+        if (diffInMinutes < 1) return 'Agora mesmo';
+        if (diffInMinutes < 60) return `${diffInMinutes}min atrás`;
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h atrás`;
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 30) return `${diffInDays}d atrás`;
+
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    
+    
 
     // Handle sector click
     async function handleSectorClick(event) {
@@ -800,152 +965,4 @@
         }
     }
 
-    // Refresh dashboard
-    async function refreshDashboard() {
-        try {
-            const response = await fetch('/admin/api/dashboard-stats');
-            const data = await response.json();
-
-            if (data.success) {
-                // Update counters
-                updateElement('total-users-count', data.totalUsers);
-                updateElement('total-movements-count', data.stats.total);
-                updateElement('approved-hours-count', data.stats.aprovadas);
-                updateElement('pending-requests-count', data.stats.pendentes);
-
-                // Update chart
-                updateChart(data.chartData);
-            }
-        } catch (error) {
-            console.error('Error refreshing dashboard:', error);
-        }
-    }
-
-    // Update pending count
-    function updatePendingCount() {
-        const tbody = document.getElementById('pending-requests-tbody');
-        const rows = tbody.querySelectorAll('tr:not(:has(.text-gray-400))'); // Exclude "no data" row
-        const count = rows.length;
-
-        updateElement('pending-requests-count', count);
-    }
-
-    // Update element with animation
-    function updateElement(id, value) {
-        const element = document.getElementById(id);
-        if (element && element.textContent != value) {
-            element.style.transform = 'scale(1.1)';
-            element.style.transition = 'transform 0.2s ease';
-
-            setTimeout(() => {
-                element.textContent = value;
-                element.style.transform = 'scale(1)';
-            }, 100);
-        }
-    }
-
-    // Load recent activity
-    async function loadRecentActivity() {
-        const container = document.getElementById('recent-activity');
-        if (!container) return;
-
-        try {
-            const response = await fetch('/admin/api/recent-activity');
-            const data = await response.json();
-
-            if (data.success && data.activities.length > 0) {
-                container.innerHTML = data.activities.map(activity => `
-                <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-${activity.color || 'gray'}-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <i class="fas fa-${activity.icon || 'bell'} text-${activity.color || 'gray'}-600 text-sm"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900">${activity.title}</p>
-                        <p class="text-xs text-gray-500 truncate">${activity.description}</p>
-                        <p class="text-xs text-gray-400 mt-1">${formatRelativeTime(activity.created_at)}</p>
-                    </div>
-                </div>
-            `).join('');
-            } else {
-                container.innerHTML = `
-                <div class="text-center py-8 text-gray-400">
-                    <i class="fas fa-history text-3xl mb-3 opacity-50"></i>
-                    <p>Nenhuma atividade recente</p>
-                </div>
-            `;
-            }
-        } catch (error) {
-            console.error('Error loading recent activity:', error);
-            container.innerHTML = `
-            <div class="text-center py-8 text-red-400">
-                <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
-                <p>Erro ao carregar atividades</p>
-            </div>
-        `;
-        }
-    }
-
-    // Initialize chart
-    function initializeChart() {
-        const ctx = document.getElementById('quickStatsChart');
-        if (!ctx) return;
-
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
-                datasets: [{
-                    data: [<%= stats.aprovadas || 0 %>, <%= stats.pendentes || 0 %>, <%= stats.rejeitadas || 0 %>],
-                    backgroundColor: [
-                        '#10b981',
-                        '#f59e0b',
-                        '#ef4444'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: {
-                                size: 12
-                            }
-                        }
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    }
-
-    // Update chart
-    function updateChart(data) {
-        // Chart update logic would go here
-        // For now, we'll just log the data
-        console.log('Chart data update:', data);
-    }
-
-    // Format relative time (reused from topbar)
-    function formatRelativeTime(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-
-        if (diffInMinutes < 1) return 'Agora mesmo';
-        if (diffInMinutes < 60) return `${diffInMinutes}min atrás`;
-
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return `${diffInHours}h atrás`;
-
-        const diffInDays = Math.floor(diffInHours / 24);
-        if (diffInDays < 30) return `${diffInDays}d atrás`;
-
-        return date.toLocaleDateString('pt-BR');
-    }
 </script>
