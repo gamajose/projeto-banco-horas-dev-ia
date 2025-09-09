@@ -1,3 +1,4 @@
+<!-- Page Header -->
 <div class="page-header">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -84,7 +85,7 @@
             </div>
         </div>
         <div class="mt-4">
-            <a href="/admin/aprovacoes" class="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+            <a href="/admin/relatorios" class="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
                 Histórico →
             </a>
         </div>
@@ -101,7 +102,7 @@
                 </div>
                 <div class="stat-card-label">Pendentes</div>
                 <div class="stat-card-change <%= stats.pendentes > 0 ? 'negative' : 'positive' %>">
-                    <%= stats.pendentes > 0 ? 'Requer atenção' : 'Tudo em dia' %>
+                    <%= stats.pendentes> 0 ? 'Requer atenção' : 'Tudo em dia' %>
                 </div>
             </div>
             <div class="text-amber-500 text-3xl opacity-20">
@@ -117,7 +118,7 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <div class="lg:col-span-1">
+    <div class="lg:col-span-2">
         <div class="card">
             <div class="card-header">
                 <div class="flex items-center justify-between">
@@ -130,12 +131,12 @@
                             <p class="text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
                         </div>
                     </div>
-                    <% if (stats.pendentes > 0) { %>
+                    <% if (stats.pendentes> 0) { %>
                         <button id="approve-all-pending-btn" class="btn-success btn-sm">
                             <i class="fas fa-check-double mr-2"></i>
                             Aprovar Todas
                         </button>
-                    <% } %>
+                        <% } %>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -151,8 +152,8 @@
                             </tr>
                         </thead>
                         <tbody id="pending-requests-tbody">
-                            <% if (pendingMovements && pendingMovements.length > 0) { %>
-                                <% pendingMovements.forEach(mov => { %>
+                            <% if (pendingMovements && pendingMovements.length> 0) { %>
+                                <% pendingMovements.forEach(mov=> { %>
                                     <tr id="mov-row-<%= mov.id %>" class="table-row">
                                         <td class="table-cell">
                                             <div class="flex items-center space-x-3">
@@ -187,7 +188,8 @@
                                         </td>
                                         <td class="table-cell">
                                             <span class="badge <%= mov.entrada ? 'badge-success' : 'badge-danger' %>">
-                                                <i class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
+                                                <i
+                                                    class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
                                                 <%= mov.entrada ? 'Entrada' : 'Saída' %>
                                             </span>
                                         </td>
@@ -208,57 +210,27 @@
                                             </div>
                                         </td>
                                     </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="5" class="table-cell text-center py-12">
-                                        <div class="text-gray-400">
-                                            <i class="fas fa-check-circle text-4xl mb-4"></i>
-                                            <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
-                                            <p class="text-sm">Todas as aprovações estão em dia!</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% } %>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="5" class="table-cell text-center py-12">
+                                                    <div class="text-gray-400">
+                                                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                                        <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                                                        <p class="text-sm">Todas as aprovações estão em dia!</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="lg:col-span-2">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
-                        <i class="fas fa-chart-pie text-red-600 mr-2"></i>
-                        Estatísticas Rápidas
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <canvas id="quickStatsChart" width="300" height="200"></canvas>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-lg font-bold text-gray-900 flex items-center">
-                        <i class="fas fa-history text-green-600 mr-2"></i>
-                        Atividade Recente
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div id="recent-activity" class="space-y-3">
-                        <div class="text-center text-gray-500 py-4">
-                            <i class="fas fa-spinner fa-spin text-lg"></i>
-                            <p class="mt-2 text-sm">Carregando atividades...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="card mt-8">
+    <div class="space-y-8">
+        <div class="card">
             <div class="card-header">
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-100 p-2 rounded-lg">
@@ -272,8 +244,8 @@
             </div>
             <div class="card-body">
                 <div id="resumo-setor-list" class="space-y-3">
-                    <% if (departmentStats && departmentStats.length > 0) { %>
-                        <% departmentStats.forEach(dept => { %>
+                    <% if (departmentStats && departmentStats.length> 0) { %>
+                        <% departmentStats.forEach(dept=> { %>
                             <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
                                 data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
                                 <div class="flex items-center justify-between">
@@ -287,28 +259,57 @@
                                                 <%= dept.nome %>
                                             </div>
                                             <div class="text-sm text-gray-500">
-                                                <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores !==1 ? 'es' : '' %>
+                                                <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores
+                                                        !==1 ? 'es' : '' %>
                                             </div>
                                         </div>
                                     </div>
                                     <i class="fas fa-chevron-right text-gray-400"></i>
                                 </div>
                             </div>
-                        <% }) %>
-                    <% } else { %>
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
-                            <p>Nenhum setor cadastrado</p>
-                        </div>
-                    <% } %>
+                            <% }) %>
+                                <% } else { %>
+                                    <div class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
+                                        <p>Nenhum setor cadastrado</p>
+                                    </div>
+                                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-chart-pie text-red-600 mr-2"></i>
+                    Estatísticas Rápidas
+                </h3>
+            </div>
+            <div class="card-body">
+                <canvas id="quickStatsChart" width="300" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-history text-green-600 mr-2"></i>
+                    Atividade Recente
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="recent-activity" class="space-y-3">
+                    <div class="text-center text-gray-500 py-4">
+                        <i class="fas fa-spinner fa-spin text-lg"></i>
+                        <p class="mt-2 text-sm">Carregando atividades...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="sector-modal"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
+<div id="sector-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-2xl shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
             <h3 id="sector-modal-title" class="text-2xl font-bold text-gray-900">Colaboradores</h3>
@@ -324,8 +325,7 @@
     </div>
 </div>
 
-<div id="movement-modal"
-    class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
+<div id="movement-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
             <h3 class="text-xl font-bold text-gray-900">Detalhes da Movimentação</h3>
@@ -340,10 +340,9 @@
 </div>
 
 <div id="confirm-approve-all-modal-dashboard"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
-        <div
-            class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+    class="fixed inset-0 z-50 flex items-start justify-center bg-black bg-opacity-50 hidden">
+    <div class="relative w-11/12 max-w-sm p-8 mt-20 bg-white rounded-2xl shadow-xl text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
             <i class="fas fa-exclamation-triangle text-3xl text-yellow-500"></i>
         </div>
         <div class="mt-4">
@@ -595,7 +594,7 @@
                 <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
                 <p>Erro ao carregar atividades</p>
             </div>
-            `;
+        `;
         }
     }
 
@@ -699,8 +698,8 @@
                 modalList.innerHTML = result.profiles.map(profile => `
                 <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                     <img class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
-                            src="${profile.foto_url || '/images/default-avatar.png'}" 
-                            alt="${profile.nome}">
+                         src="${profile.foto_url || '/images/default-avatar.png'}" 
+                         alt="${profile.nome}">
                     <div class="flex-1">
                         <div class="font-semibold text-gray-900">${profile.nome}</div>
                         <div class="text-sm text-gray-600">${profile.email}</div>
@@ -713,7 +712,7 @@
                         <div class="text-xs text-gray-500 mt-1">${profile.is_active ? 'Ativo' : 'Inativo'}</div>
                     </div>
                 </div>
-                `).join('');
+            `).join('');
             } else {
                 modalList.innerHTML = `
                 <div class="text-center py-12">
@@ -721,7 +720,7 @@
                     <p class="text-lg font-medium text-gray-500">Nenhum colaborador encontrado</p>
                     <p class="text-sm text-gray-400">Este setor ainda não possui colaboradores cadastrados.</p>
                 </div>
-                `;
+            `;
             }
         } catch (error) {
             console.error('Error loading sector details:', error);
@@ -731,7 +730,7 @@
                 <p class="text-lg font-medium text-red-500">Erro ao carregar</p>
                 <p class="text-sm text-red-400">Não foi possível carregar os colaboradores deste setor.</p>
             </div>
-            `;
+        `;
         }
     }
 
@@ -801,8 +800,8 @@
                     <div class="space-y-6">
                         <div class="flex items-center space-x-4">
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
-                                    src="${movement.foto_url || '/images/default-avatar.png'}" 
-                                    alt="${movement.colaborador_nome}">
+                                src="${movement.foto_url || '/images/default-avatar.png'}" 
+                                alt="${movement.colaborador_nome}">
                             <div>
                                 <h4 class="text-lg font-bold text-gray-900">${movement.colaborador_nome}</h4>
                                 <p class="text-sm text-gray-600">${movement.setor_nome}</p>
@@ -861,7 +860,7 @@
                 <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-4"></i>
                 <p class="text-red-600">Erro ao carregar detalhes da movimentação</p>
             </div>
-            `;
+        `;
         }
     }
 
@@ -871,6 +870,7 @@
             const response = await fetch(`/admin/movimentacoes/${movementId}/aprovar`, {
                 method: 'PATCH'
             });
+
             const result = await response.json();
 
             if (result.success) {
@@ -891,6 +891,7 @@
             const response = await fetch(`/admin/movimentacoes/${movementId}/rejeitar`, {
                 method: 'PATCH'
             });
+
             const result = await response.json();
 
             if (result.success) {
@@ -917,6 +918,7 @@
             const response = await fetch('/admin/movimentacoes/aprovar-todas', {
                 method: 'PATCH'
             });
+
             const result = await response.json();
 
             if (result.success) {
@@ -931,4 +933,5 @@
             hideLoading();
         }
     }
+
 </script>

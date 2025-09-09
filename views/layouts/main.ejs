@@ -8,20 +8,16 @@
         <%= title || 'Banco de Horas - Sistema Profissional' %>
     </title>
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Styles -->
     <link rel="stylesheet" href="/css/output.css">
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Chart.js for analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -70,7 +66,6 @@
 </head>
 
 <body class="h-full bg-gray-50 font-sans">
-    <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-white z-50 flex items-center justify-center"
         style="display: none;">
         <div class="text-center">
@@ -79,53 +74,47 @@
         </div>
     </div>
 
-    <div class="min-h-full">
-        <% if (locals.user && locals.userProfile) { %>
+    <% if (locals.user && locals.userProfile) { %>
+        <div class="min-h-full lg:flex lg:flex-row">
             <button id="mobile-nav-btn" class="mobile-nav-button">
                 <i class="fas fa-bars text-gray-700"></i>
             </button>
-
             <div id="mobile-overlay" class="mobile-sidebar-overlay" style="display: none;"></div>
 
             <%- include('../partials/sidebar', { userProfile: locals.userProfile }) %>
 
-                <div class="lg:ml-80">
-                     <%- include('../partials/topbar') %>
+            <div class="flex-1">
+                <%- include('../partials/topbar') %>
 
-                        <!-- Page Content -->
-                        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-                            <!-- Flash Messages -->
-                            <% if (locals.success_msg && locals.success_msg.length> 0) { %>
-                                <div class="alert alert-success mb-6 animate-fade-in">
-                                    <i class="fas fa-check-circle mr-2"></i>
-                                    <%= locals.success_msg %>
-                                </div>
-                                <% } %>
+                <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+                    <% if (locals.success_msg && locals.success_msg.length > 0) { %>
+                        <div class="alert alert-success mb-6 animate-fade-in">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <%= locals.success_msg %>
+                        </div>
+                    <% } %>
 
-                                    <% if (locals.error_msg && locals.error_msg.length> 0) { %>
-                                        <div class="alert alert-danger mb-6 animate-fade-in">
-                                            <i class="fas fa-exclamation-circle mr-2"></i>
-                                            <%= locals.error_msg %>
-                                        </div>
-                                        <% } %>
+                    <% if (locals.error_msg && locals.error_msg.length > 0) { %>
+                        <div class="alert alert-danger mb-6 animate-fade-in">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <%= locals.error_msg %>
+                        </div>
+                    <% } %>
 
-                                            <!-- Page Body -->
-                                            <div class="loading">
-                                                <%- body %>
-                                            </div>
-                        </main>
-                </div>
-                <% } else { %>
-                    <!-- Auth Pages Layout -->
-                    <div class="min-h-screen bg-gradient-to-br from-white-600 via-white-700 to-white-800">
+                    <div class="loading">
                         <%- body %>
                     </div>
-                    <% } %>
-    </div>
+                </main>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="min-h-screen bg-gradient-to-br from-white-600 via-white-700 to-white-800">
+            <%- body %>
+        </div>
+    <% } %>
 
     <script src="/js/main.js"></script>
 
-    <!-- Scripts -->
     <script>
         // Mobile navigation functionality
         document.addEventListener('DOMContentLoaded', function () {
@@ -139,13 +128,11 @@
                     mobileOverlay.style.display = 'block';
                     document.body.style.overflow = 'hidden';
                 });
-
                 mobileOverlay.addEventListener('click', function () {
                     sidebar.classList.remove('open');
                     mobileOverlay.style.display = 'none';
                     document.body.style.overflow = 'auto';
                 });
-
                 // Close sidebar on escape key
                 document.addEventListener('keydown', function (e) {
                     if (e.key === 'Escape') {
@@ -168,18 +155,15 @@
                 });
             }, 5000);
         });
-
         // Global AJAX error handler
         window.addEventListener('unhandledrejection', function (event) {
             console.error('Unhandled promise rejection:', event.reason);
             showNotification('Erro interno da aplicação', 'error');
         });
-
         // Global notification system
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = `fixed top-4 right-4 z-50 max-w-sm p-4 rounded-xl shadow-lg transform translate-x-full transition-transform duration-300`;
-
             switch (type) {
                 case 'success':
                     notification.classList.add('bg-emerald-500', 'text-white');
@@ -202,14 +186,12 @@
                     </button>
                 </div>
             `;
-
             document.body.appendChild(notification);
 
             // Show notification
             setTimeout(() => {
                 notification.classList.remove('translate-x-full');
             }, 100);
-
             // Auto-remove notification
             setTimeout(() => {
                 notification.classList.add('translate-x-full');
@@ -251,12 +233,11 @@
         });
     </script>
 
-    <!-- Additional Scripts -->
     <% if (locals.additionalScripts) { %>
-        <% additionalScripts.forEach(script=> { %>
+        <% additionalScripts.forEach(script => { %>
             <script src="<%= script %>"></script>
-            <% }); %>
-                <% } %>
+        <% }); %>
+    <% } %>
 </body>
 
 </html>
