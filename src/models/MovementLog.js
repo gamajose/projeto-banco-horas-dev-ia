@@ -35,7 +35,6 @@ class MovementLog {
   }
 
   // --- MÉTODOS AUXILIARES PARA LOGS ESPECÍFICOS ---
-
   static async logMovementCreation(movimentacao_id, perfil_id) {
     return this.create({
       movimentacao_id,
@@ -44,6 +43,27 @@ class MovementLog {
       detalhes: "Movimentação criada pelo colaborador.",
     });
   }
+
+   // NOVO MÉTODO para logar aprovação/rejeição
+  static async logMovementApproval(movimentacao_id, perfil_id, status_nome) {
+      return this.create({
+          movimentacao_id,
+          perfil_id,
+          acao: status_nome.toUpperCase(),
+          detalhes: `Movimentação ${status_nome} pelo administrador.`
+      });
+  }
+
+    static async logMovementUpdate(movimentacao_id, perfil_id, changes) {
+    const changesList = Object.keys(changes).join(", ");
+    return this.create({
+      movimentacao_id,
+      perfil_id,
+      acao: "ATUALIZAÇÃO",
+      detalhes: `Campos alterados: ${changesList}.`,
+    });
+  }
+
   static async findRecent(limit = 10, offset = 0) {
     const sql = `
             SELECT *
@@ -54,16 +74,6 @@ class MovementLog {
         `;
     const result = await db.query(sql, [limit, offset]);
     return result.rows;
-  }
-
-  static async logMovementUpdate(movimentacao_id, perfil_id, changes) {
-    const changesList = Object.keys(changes).join(", ");
-    return this.create({
-      movimentacao_id,
-      perfil_id,
-      acao: "ATUALIZAÇÃO",
-      detalhes: `Campos alterados: ${changesList}.`,
-    });
   }
 
   static associate(models) {

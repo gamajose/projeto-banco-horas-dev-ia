@@ -228,6 +228,14 @@
     @apply bg-blue-50 border-blue-400 text-blue-700;
   }
 
+  /* .nav-item.active {
+    @apply border-red-600 bg-red-50 text-red-600;
+  } */
+
+.nav-item.active {
+  @apply bg-red-600 text-white font-semibold shadow-md;
+}
+
   /* Loading States */
   .loading-spinner {
     @apply animate-spin rounded-full h-6 w-6 border-2 border-gray-300 border-t-red-600;

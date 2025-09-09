@@ -29,16 +29,19 @@
 
         <nav class="my-6">
             <ul class="flex justify-around bg-white rounded-full shadow-md p-2">
-                <li><a href="/meu-perfil" class="nav-item <%= activePage === 'home' ? 'active' : '' %>">Home</a></li>
+                <li><a href="/meu-perfil"
+                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'home' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Home</a>
+                </li>
+
+                <li><a href="/profile/gerenciar"
+                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'gerenciar' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Gerenciar
+                        Horas</a></li>
 
                 <li><a href="/profile/relatorio"
-                        class="nav-item <%= activePage === 'gerenciar' ? 'active' : '' %>">Gerenciar Horas</a></li>
-
-                <li><a href="/profile/folgas" class="nav-item <%= activePage === 'folga' ? 'active' : '' %>">Solicitar
-                        Folga</a></li>
+                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'relatorio' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Relatório</a>
+                </li>
             </ul>
         </nav>
-
         <main>
             <%- body %>
         </main>
@@ -79,7 +82,6 @@
         const openBtn = document.getElementById('open-menu-btn');
         const closeBtn = document.getElementById('close-menu-btn');
         const backdrop = document.getElementById('menu-backdrop');
-
         const openMenu = () => {
             menu.classList.remove('hidden');
             setTimeout(() => {

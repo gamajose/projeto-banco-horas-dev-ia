@@ -1,28 +1,65 @@
 <h2 class="text-2xl font-bold text-gray-800 mb-4">Central de horas:</h2>
 
 <div class="flex space-x-4 mb-8">
-    <button id="btn-abrir-lancar-horas" class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-blue-700">+ Adicionar horas</button>
-    <a href="/profile/relatorio" class="flex-1 text-center bg-gray-200 text-gray-800 font-semibold py-3 rounded-xl hover:bg-gray-300">Gerar Relatório</a>
+    <button id="btn-abrir-lancar-horas"
+        class="flex-1 bg-blue-600 text-white font-semibold py-3 rounded-xl shadow-md hover:bg-blue-700">+ Adicionar
+        horas</button>
+    <button id="btn-abrir-solicitar-folga"
+        class="flex-1 bg-gray-200 text-gray-800 font-semibold py-3 rounded-xl hover:bg-gray-300">Solicitar
+        Folga</button>
 </div>
 
-<div class="space-y-3">
-    <% movimentacoes.forEach(mov => { %>
-    <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
-        <div>
-            <p class="text-sm text-gray-500"><%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %></p>
-            <p class="font-bold text-gray-800"><%= mov.motivo %></p>
-        </div>
-        <div class="text-right">
-            <p class="font-bold text-lg <%= mov.entrada ? 'text-green-600' : 'text-red-600' %>"><%= mov.entrada ? '+' : '-' %><%= mov.hora_total.substring(0, 5) %></p>
-            <p class="text-xs font-semibold px-2 py-1 rounded-full 
+<!-- <div class="space-y-3"  id="historico-container">
+    <% movimentacoes.forEach(mov=> { %>
+        <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">
+                    <%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC' }) %>
+                </p>
+                <p class="font-bold text-gray-800">
+                    <%= mov.motivo %>
+                </p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-lg <%= mov.entrada ? 'text-green-600' : 'text-red-600' %>">
+                    <%= mov.entrada ? '+' : '-' %>
+                        <%= mov.hora_total.substring(0, 5) %>
+                </p>
+                <p class="text-xs font-semibold px-2 py-1 rounded-full 
                 <% if(mov.autorizado) { %> bg-green-100 text-green-800 <% 
                 } else if(mov.analise) { %> bg-yellow-100 text-yellow-800 <% 
                 } else { %> bg-red-100 text-red-800 <% } %>">
-                <%= mov.status_nome %>
-            </p>
+                    <%= mov.status_nome %>
+                </p>
+            </div>
         </div>
-    </div>
-    <% }) %>
+        <% }) %>
+</div> -->
+<div class="space-y-3" id="historico-container">
+    <% movimentacoes.forEach(mov=> { %>
+        <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500">
+                    <%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC' }) %>
+                </p>
+                <p class="font-bold text-gray-800">
+                    <%= mov.motivo %>
+                </p>
+            </div>
+            <div class="text-right">
+                <p class="font-bold text-lg <%= mov.entrada ? 'text-green-600' : 'text-red-600' %>">
+                    <%= mov.entrada ? '+' : '-' %>
+                        <%= mov.hora_total.substring(0, 5) %>
+                </p>
+                <p class="text-xs font-semibold px-2 py-1 rounded-full 
+                <% if(mov.autorizado) { %> bg-green-100 text-green-800 <% 
+                } else if(mov.analise) { %> bg-yellow-100 text-yellow-800 <% 
+                } else { %> bg-red-100 text-red-800 <% } %>">
+                    <%= mov.status_nome %>
+                </p>
+            </div>
+        </div>
+        <% }) %>
 </div>
 
 
@@ -49,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusClass = mov.autorizado ? 'bg-green-100 text-green-800' : (mov.analise ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
         const horasClass = mov.entrada ? 'text-green-600' : 'text-red-600';
         const horasSignal = mov.entrada ? '+' : '-';
-
         return `
             <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
                 <div>
@@ -68,10 +104,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const updateHistoryList = async () => {
         try {
-            const response = await fetch('/profile/api/relatorio'); // Usa a API de relatórios para buscar os dados
+            const response = await fetch('/profile/api/relatorio');
             const result = await response.json();
             if (result.success) {
-                historicoContainer.innerHTML = ''; // Limpa a lista
+                historicoContainer.innerHTML = '';
                 if (result.movimentacoes.length > 0) {
                     result.movimentacoes.forEach(mov => {
                         historicoContainer.innerHTML += createMovementHTML(mov);
@@ -84,15 +120,16 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Erro ao atualizar histórico:", error);
         }
     };
-    
-    // Carrega o histórico assim que a página abre
+// Carrega o histórico assim que a página abre
     updateHistoryList();
 
     // --- LÓGICA DOS MODAIS ---
     const openModal = (modal) => modal.classList.remove('hidden');
     const closeModal = () => {
         lancarHorasModal.classList.add('hidden');
-        solicitarFolgaModal.classList.add('hidden');
+        if (solicitarFolgaModal) {
+            solicitarFolgaModal.classList.add('hidden');
+        }
     };
 
     btnAbrirLancarHoras.addEventListener('click', () => openModal(lancarHorasModal));
@@ -121,13 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!response.ok) { throw new Error(result.message); }
-            
+
             feedbackDiv.textContent = result.message;
             feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
             formLancamento.reset();
             
             // ATUALIZA O HISTÓRICO E FECHA O MODAL
-            await updateHistoryList(); 
+            await updateHistoryList();
             setTimeout(() => {
                 closeModal();
                 feedbackDiv.textContent = '';
@@ -138,14 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
         }
     });
-// --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO "SOLICITAR AUSÊNCIA" ---
+
+    // --- LÓGICA DE SUBMISSÃO DO FORMULÁRIO "SOLICITAR AUSÊNCIA" ---
+    const formFolga = document.getElementById('form-folga');
     if (formFolga) {
+        const tipoFolgaRadios = document.querySelectorAll('input[name="tipo_folga"]');
+        const horasParciaisContainer = document.getElementById('horas-parciais-container');
         tipoFolgaRadios.forEach(radio => {
             radio.addEventListener('change', (event) => {
                 horasParciaisContainer.style.display = event.target.value === 'parcial' ? 'block' : 'none';
             });
         });
-
+        const folgaFeedback = document.getElementById('folga-feedback');
         formFolga.addEventListener('submit', async (event) => {
             event.preventDefault();
             folgaFeedback.textContent = 'A enviar...';

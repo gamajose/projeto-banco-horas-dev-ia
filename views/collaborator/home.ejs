@@ -19,14 +19,34 @@
     <p class="text-sm text-gray-500">do seu banco de horas</p>
 </div>
 
-
-<div class="space-y-4">
-    <div class="bg-white p-4 rounded-2xl shadow-md flex items-center justify-between">
-        <p class="font-semibold text-gray-700">Ganhe 30 horas: finalize o curso de linux</p>
-        <a href="#" class="bg-green-500 text-white font-bold py-2 px-4 rounded-full text-sm">+</a>
-    </div>
-    <div class="bg-white p-4 rounded-2xl shadow-md flex items-center justify-between">
-        <p class="font-semibold text-gray-700">Resolva um problema e ganhe 8 horas</p>
-        <a href="#" class="bg-green-500 text-white font-bold py-2 px-4 rounded-full text-sm">+</a>
+<div class="mt-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Histórico de Movimentações Recentes</h2>
+    <div class="space-y-3">
+        <% if (recentMovements && recentMovements.length > 0) { %>
+            <% recentMovements.forEach(mov => { %>
+                <div class="bg-white p-4 rounded-xl shadow-md flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500"><%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %></p>
+                        <p class="font-bold text-gray-800"><%= mov.motivo %></p>
+                        <% if (mov.aprovado_por && (mov.status_nome === 'Aprovado' || mov.status_nome === 'Rejeitado')) { %>
+                            <p class="text-xs text-gray-500 mt-1">
+                                <%= mov.status_nome %> por: <%= mov.aprovado_por %>
+                            </p>
+                        <% } %>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-bold text-lg <%= mov.entrada ? 'text-green-600' : 'text-red-600' %>"><%= mov.entrada ? '+' : '-' %><%= mov.hora_total.substring(0, 5) %></p>
+                        <p class="text-xs font-semibold px-2 py-1 rounded-full 
+                            <% if(mov.status_nome === 'Aprovado') { %> bg-green-100 text-green-800 <% 
+                            } else if(mov.status_nome === 'Pendente') { %> bg-yellow-100 text-yellow-800 <% 
+                            } else { %> bg-red-100 text-red-800 <% } %>">
+                            <%= mov.status_nome %>
+                        </p>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p class="text-center text-gray-500">Nenhuma movimentação recente encontrada.</p>
+        <% } %>
     </div>
 </div>

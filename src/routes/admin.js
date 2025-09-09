@@ -329,43 +329,62 @@ router.get("/aprovacoes", async (req, res) => {
 });
 
 router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
-  try {
-    const movementId = req.params.id;
-    const statusAprovado = await Status.findByName("Aprovado");
-    if (!statusAprovado) {
-      return res.status(500).json({
-        success: false,
-        message: 'Status "Aprovado" não encontrado no sistema.',
-      });
-    }
-    await Movement.update(movementId, { status_id: statusAprovado.id });
-    res.json({ success: true, message: "Movimentação aprovada com sucesso." });
-  } catch (error) {
-    console.error("Erro ao aprovar movimentação:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Erro ao aprovar movimentação." });
-  }
+  try {
+    const movementId = req.params.id;
+    const statusAprovado = await Status.findByName("Aprovado");
+    if (!statusAprovado) {
+      return res.status(500).json({
+        success: false,
+        message: 'Status "Aprovado" não encontrado no sistema.',
+      });
+    }
+    await Movement.update(movementId, { status_id: statusAprovado.id });
+    
+    if (req.userProfile) {
+      await MovementLog.create({
+        movimentacao_id: movementId,
+        perfil_id: req.userProfile.id,
+        acao: 'APROVADO',
+        detalhes: `Movimentação aprovada pelo administrador.`
+      });
+    }
+
+    res.json({ success: true, message: "Movimentação aprovada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao aprovar movimentação:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao aprovar movimentação." });
+  }
 });
 
 router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
-  try {
-    const movementId = req.params.id;
-    const statusRejeitado = await Status.findByName("Rejeitado");
-    if (!statusRejeitado) {
-      return res.status(500).json({
-        success: false,
-        message: 'Status "Rejeitado" não encontrado no sistema.',
-      });
-    }
-    await Movement.update(movementId, { status_id: statusRejeitado.id });
-    res.json({ success: true, message: "Movimentação rejeitada com sucesso." });
-  } catch (error) {
-    console.error("Erro ao rejeitar movimentação:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Erro ao rejeitar movimentação." });
-  }
+  try {
+    const movementId = req.params.id;
+    const statusRejeitado = await Status.findByName("Rejeitado");
+    if (!statusRejeitado) {
+      return res.status(500).json({
+        success: false,
+        message: 'Status "Rejeitado" não encontrado no sistema.',
+      });
+    }
+    await Movement.update(movementId, { status_id: statusRejeitado.id });
+
+    if (req.userProfile) {
+      await MovementLog.create({
+        movimentacao_id: movementId,
+        perfil_id: req.userProfile.id,
+        acao: 'REJEITADO',
+        detalhes: `Movimentação rejeitada pelo administrador.`
+      });
+    }
+    res.json({ success: true, message: "Movimentação rejeitada com sucesso." });
+  } catch (error) {
+    console.error("Erro ao rejeitar movimentação:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro ao rejeitar movimentação." });
+  }
 });
 
 router.get("/movimentacoes/pendentes", async (req, res) => {
