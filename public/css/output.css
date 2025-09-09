@@ -1721,10 +1721,6 @@ h1, h2, h3, h4, h5, h6 {
   top: -0.25rem;
 }
 
-.-top-12 {
-  top: -3rem;
-}
-
 .-top-14 {
   top: -3.5rem;
 }
@@ -3888,10 +3884,6 @@ h1, h2, h3, h4, h5, h6 {
 
   .lg\:col-start-3 {
     grid-column-start: 3;
-  }
-
-  .lg\:ml-80 {
-    margin-left: 20rem;
   }
 
   .lg\:block {
