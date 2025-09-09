@@ -50,6 +50,10 @@
     </div>
 </div>
 
+
+<!------------------------------------------------- Função ---------------------------------------------------------------------->
+
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const formFiltros = document.getElementById('form-filtros');
@@ -87,7 +91,7 @@
         };
 
         const loadInitialData = async () => {
-             try {
+            try {
                 const response = await fetch('/profile/api/relatorio');
                 const result = await response.json();
                 if (result.success) {
