@@ -11,13 +11,10 @@ router.get('/', (req, res) => {
     if (req.cookies.token) {
         res.redirect('/dashboard');
     } else {
-        res.render('home', {
-            title: 'Bem-vindo ao Banco de Horas',
-            layout: false
-        });
+        // Redireciona para a rota de login padrão.
+        res.redirect('/auth/login');
     }
 });
-
 // Dashboard principal
 router.get('/dashboard', isAuthenticated, async (req, res) => {
   try {

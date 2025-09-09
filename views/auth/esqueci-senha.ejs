@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Senha - Banco de Horas</title>
-    <link rel="stylesheet" href="/css/output.css"> 
+    <link rel="stylesheet" href="/css/output.css">
 </head>
 <body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-100">
 
     <div class="w-full max-w-sm mx-auto">
         <div class="relative">
-            <div class="absolute inset-x-0 -top-12 flex justify-center">
-                <div class="bg-red-600 h-24 w-24 rounded-full flex items-center justify-center shadow-lg">
-                    <img class="h-12 w-12 brightness-0 invert" src="/images/logo-white.png" alt="Logo da Empresa"> 
+            <div class="absolute inset-x-0 -top-14 flex justify-center">
+                <div class="bg-red-600 h-34 w-34 rounded-full flex items-center justify-center shadow-lg">
+                    <img class="h-32 w-32 brightness-0 invert" src="/images/logo.png" alt="Logo da Empresa">
                 </div>
             </div>
             
@@ -28,7 +28,7 @@
                             <p class="text-sm"><%= success_msg %></p>
                         </div>
                     <% } %>
-                     <% if (error_msg && error_msg.length > 0) { %>
+                    <% if (error_msg && error_msg.length > 0) { %>
                         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md" role="alert">
                             <p class="text-sm"><%= error_msg %></p>
                         </div>
@@ -39,8 +39,8 @@
                         <input id="email" name="email" type="email" required class="form-input-new mt-1" placeholder="seu-email@exemplo.com">
                     </div>
 
-                    <div>
-                        <button type="submit" class="btn-primary-new">
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary-new w-full uppercase py-3">
                             ENVIAR LINK DE RECUPERAÇÃO
                         </button>
                     </div>
@@ -54,6 +54,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>

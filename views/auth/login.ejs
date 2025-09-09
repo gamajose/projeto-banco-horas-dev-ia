@@ -1,52 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-gray-50">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Banco de Horas</title>
-    <link rel="stylesheet" href="/css/output.css">
-</head>
-
-<body class="h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-100">
-
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-100">
     <div class="w-full max-w-sm mx-auto">
         <div class="relative">
 
             <div class="absolute inset-x-0 -top-14 flex justify-center">
-                <div class="bg-red-600 h-24 w-24 rounded-full flex items-center justify-center shadow-lg">
-                    <img class="h-30 w-30 brightness-0 invert" src="/images/logo.png" alt="Logo da Empresa">
+                <div class="bg-red-600 h-34 w-34 rounded-full flex items-center justify-center shadow-lg">
+                    <img class="h-32 w-32 brightness-0 invert" src="/images/logo.png" alt="Logo da Empresa">
                 </div>
             </div>
 
             <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl space-y-6 pt-16">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800"></h2>
+                    <p class="text-gray-500 mt-2"></p>
+                </div>
+
                 <form action="/auth/login" method="POST" class="space-y-6">
-
-                    <% if (error_msg && error_msg.length> 0) { %>
+                    <% if (error_msg && error_msg.length > 0) { %>
                         <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md" role="alert">
-                            <p class="text-sm">
-                                <%= error_msg %>
-                            </p>
+                            <p class="text-sm"><%= error_msg %></p>
                         </div>
-                        <% } %>
+                    <% } %>
+                    
+                    <div>
+                        <label for="login" class="text-sm font-bold text-red-600">Login</label>
+                        <input id="login" name="login" type="text" required class="form-input mt-1" placeholder="Digite seu email ou usuario">
+                    </div>
 
-                            <div>
-                                <label for="login" class="text-sm font-bold text-red-600">Login</label>
-                                <input id="login" name="login" type="text" required class="form-input-new mt-1"
-                                    placeholder="Digite seu email ou usuario">
-                            </div>
+                    <div>
+                        <label for="password" class="text-sm font-bold text-red-600">Senha</label>
+                        <input id="password" name="password" type="password" required class="form-input mt-1" placeholder="Digite sua senha">
+                    </div>
 
-                            <div>
-                                <label for="password" class="text-sm font-bold text-red-600">Senha</label>
-                                <input id="password" name="password" type="password" required
-                                    class="form-input-new mt-1" placeholder="Digite sua senha">
-                            </div>
-
-                            <div>
-                                <button type="submit" class="btn-primary-new">
-                                    LOGAR
-                                </button>
-                            </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary w-full py-3">
+                            LOGAR
+                        </button>
+                    </div>
                 </form>
 
                 <div class="text-center">
@@ -57,7 +46,4 @@
             </div>
         </div>
     </div>
-
-</body>
-
-</html>
+</div>

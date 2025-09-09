@@ -7,6 +7,7 @@ const User = require("../models/User");
 const { generateToken } = require("../utils/jwt");
 
 const router = express.Router();
+
 // ROTA PARA MOSTRAR A PÁGINA DE LOGIN (GET)
 router.get('/login', (req, res) => {
     // Se o utilizador já estiver logado, redireciona para o dashboard
@@ -15,7 +16,6 @@ router.get('/login', (req, res) => {
     }
     res.render('auth/login', {
         title: 'Login',
-        layout: false, // Garante que a página de login não use o layout principal
         error_msg: req.flash('error_msg')
     });
 });
