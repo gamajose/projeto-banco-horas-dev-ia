@@ -1,24 +1,45 @@
-const db = require('../config/database');
-const { isAuthenticated, requireManager } = require('../middleware/auth');
-
+const db = require("../config/database");
+const { isAuthenticated, requireManager } = require("../middleware/auth");
 
 class Movement {
   static async create(movementData) {
-    const { data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id } = movementData;
+    const {
+      data_movimentacao,
+      hora_inicial,
+      hora_final,
+      hora_total,
+      motivo,
+      entrada,
+      forma_pagamento_id,
+      status_id,
+      colaborador_id,
+    } = movementData;
     const result = await db.query(
       `INSERT INTO movimentacoes 
       (data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-      [data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id]
+      [
+        data_movimentacao,
+        hora_inicial,
+        hora_final,
+        hora_total,
+        motivo,
+        entrada,
+        forma_pagamento_id,
+        status_id,
+        colaborador_id,
+      ]
     );
     return this.findById(result.rows[0].id);
   }
 
   static async findById(id) {
-    return await db.get(`
+    return await db.get(
+      `
       SELECT
         m.*,
         p.nome as colaborador_nome,
+        p.foto_url,  
         s.nome as setor_nome,
         st.nome as status_nome,
         st.analise,
@@ -30,7 +51,9 @@ class Movement {
       JOIN status st ON m.status_id = st.id
       LEFT JOIN formas_pagamento fp ON m.forma_pagamento_id = fp.id
       WHERE m.id = $1
-    `, [id]);
+    `,
+      [id]
+    );
   }
 
   static async findAll(filters = {}) {
@@ -54,26 +77,26 @@ class Movement {
       params.push(filters.colaborador_id);
     }
 
-        if (filters.status_id) {
-        conditions.push(`m.status_id = $${paramIndex++}`);
-        params.push(filters.status_id);
+    if (filters.status_id) {
+      conditions.push(`m.status_id = $${paramIndex++}`);
+      params.push(filters.status_id);
     }
 
     if (filters.data_inicio) {
-        conditions.push(`m.data_movimentacao >= $${paramIndex++}`);
-        params.push(filters.data_inicio);
+      conditions.push(`m.data_movimentacao >= $${paramIndex++}`);
+      params.push(filters.data_inicio);
     }
 
     if (filters.data_fim) {
-        conditions.push(`m.data_movimentacao <= $${paramIndex++}`);
-        params.push(filters.data_fim);
+      conditions.push(`m.data_movimentacao <= $${paramIndex++}`);
+      params.push(filters.data_fim);
     }
 
     if (conditions.length > 0) {
-      sql += ' WHERE ' + conditions.join(' AND ');
+      sql += " WHERE " + conditions.join(" AND ");
     }
 
-    sql += ' ORDER BY m.data_movimentacao DESC, m.created_at DESC';
+    sql += " ORDER BY m.data_movimentacao DESC, m.created_at DESC";
 
     if (filters.limit) {
       sql += ` LIMIT $${paramIndex++}`;
@@ -112,7 +135,16 @@ class Movement {
       FROM movimentacoes m
       JOIN status s ON m.status_id = s.id
     `);
-    return stats || { total: 0, entradas: 0, saidas: 0, aprovadas: 0, pendentes: 0, rejeitadas: 0 };
+    return (
+      stats || {
+        total: 0,
+        entradas: 0,
+        saidas: 0,
+        aprovadas: 0,
+        pendentes: 0,
+        rejeitadas: 0,
+      }
+    );
   }
 
   static async getMovementsByProfile(profileId, options = {}) {
@@ -137,22 +169,22 @@ class Movement {
 
     // Constrói a query dinamicamente para os campos que podem ser atualizados
     if (data.status_id !== undefined) {
-        fields.push(`status_id = $${paramIndex++}`);
-        values.push(data.status_id);
+      fields.push(`status_id = $${paramIndex++}`);
+      values.push(data.status_id);
     }
     // Adicione outros campos que possam ser atualizados no futuro aqui
     // Ex: if (data.motivo !== undefined) { ... }
 
     if (fields.length === 0) {
-        // Se nenhum campo válido foi passado, não faz nada
-        return null;
+      // Se nenhum campo válido foi passado, não faz nada
+      return null;
     }
 
     values.push(id); // Adiciona o ID para a cláusula WHERE
-    
+
     const sql = `
         UPDATE movimentacoes 
-        SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP
+        SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP
         WHERE id = $${paramIndex}
         RETURNING *
     `;
@@ -160,7 +192,6 @@ class Movement {
     const result = await db.query(sql, values);
     return result.rows[0];
   }
-
 }
 
 module.exports = Movement;

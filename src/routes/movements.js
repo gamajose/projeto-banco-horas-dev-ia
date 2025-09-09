@@ -1,6 +1,10 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { isAuthenticated, requireManager, isApiAuthenticated } = require('../middleware/auth');
+const {
+  isAuthenticated,
+  requireManager,
+  isApiAuthenticated,
+} = require("../middleware/auth");
 const Movement = require("../models/Movement");
 const Profile = require("../models/Profile");
 const Status = require("../models/Status");
@@ -11,49 +15,86 @@ const router = express.Router();
 // Rota para CRIAR uma nova movimentação (Lançar Horas via Modal)
 console.log("isApiAuthenticated:", typeof isApiAuthenticated);
 
+router.get("/:id", isApiAuthenticated, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const movement = await Movement.findById(id);
+
+    if (!movement) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Movimentação não encontrada." });
+    }
+
+    // Retorna todos os detalhes, incluindo o nome do colaborador e setor
+    res.json({ success: true, movement });
+  } catch (error) {
+    console.error("Erro ao buscar movimentação por ID:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Erro interno do servidor." });
+  }
+});
+
 router.post(
-  '/',
+  "/",
   isApiAuthenticated,
-  body('data_movimentacao').isISO8601().withMessage('Data da movimentação inválida'),
-  body('entrada').isBoolean().withMessage('Entrada deve ser um valor booleano'),
+  body("data_movimentacao")
+    .isISO8601()
+    .withMessage("Data da movimentação inválida"),
+  body("entrada").isBoolean().withMessage("Entrada deve ser um valor booleano"),
   async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        return res.status(400).json({ message: 'Dados inválidos.', details: errors.array() });
+        return res
+          .status(400)
+          .json({ message: "Dados inválidos.", details: errors.array() });
       }
 
-      const { data_movimentacao, hora_total, motivo, entrada, hora_inicial, hora_final, forma_pagamento_id } = req.body;
+      const {
+        data_movimentacao,
+        hora_total,
+        motivo,
+        entrada,
+        hora_inicial,
+        hora_final,
+        forma_pagamento_id,
+      } = req.body;
       const colaborador_id = req.userProfile.id;
 
-      const pendingStatus = await Status.findByName('Pendente');
+      const pendingStatus = await Status.findByName("Pendente");
       if (!pendingStatus) {
-        return res.status(500).json({ message: 'Status "Pendente" não configurado no sistema.' });
+        return res
+          .status(500)
+          .json({ message: 'Status "Pendente" não configurado no sistema.' });
       }
 
-      const movementData = { 
-        data_movimentacao, 
-        hora_inicial, 
-        hora_final, 
-        hora_total, 
-        motivo, 
-        entrada, 
+      const movementData = {
+        data_movimentacao,
+        hora_inicial,
+        hora_final,
+        hora_total,
+        motivo,
+        entrada,
         forma_pagamento_id,
-        status_id: pendingStatus.id, 
-        colaborador_id 
+        status_id: pendingStatus.id,
+        colaborador_id,
       };
 
       const newMovement = await Movement.create(movementData);
       await MovementLog.logMovementCreation(newMovement.id, colaborador_id);
 
-      res.status(201).json({ 
-        success: true, 
-        message: 'Movimentação enviada para aprovação!',
-        movement: newMovement
+      res.status(201).json({
+        success: true,
+        message: "Movimentação enviada para aprovação!",
+        movement: newMovement,
       });
     } catch (error) {
-      console.error('Erro ao criar movimentação:', error);
-      res.status(500).json({ message: 'Erro interno do servidor ao criar movimentação.' });
+      console.error("Erro ao criar movimentação:", error);
+      res
+        .status(500)
+        .json({ message: "Erro interno do servidor ao criar movimentação." });
     }
   }
 );

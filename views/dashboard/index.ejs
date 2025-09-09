@@ -30,7 +30,9 @@
                 <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600">
                     <i class="fas fa-users"></i>
                 </div>
-                <div class="stat-card-value" id="total-users-count"><%= totalUsers %></div>
+                <div class="stat-card-value" id="total-users-count">
+                    <%= totalUsers %>
+                </div>
                 <div class="stat-card-label">Total de Colaboradores</div>
                 <div class="stat-card-change positive">+2 este mês</div>
             </div>
@@ -52,7 +54,9 @@
                 <div class="stat-card-icon bg-gradient-to-r from-green-500 to-green-600">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="stat-card-value" id="total-movements-count"><%= stats.total %></div>
+                <div class="stat-card-value" id="total-movements-count">
+                    <%= stats.total %>
+                </div>
                 <div class="stat-card-label">Registros Totais</div>
                 <div class="stat-card-change positive">+<%= stats.hoje || 0 %> hoje</div>
             </div>
@@ -74,7 +78,9 @@
                 <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="stat-card-value" id="approved-hours-count"><%= stats.aprovadas %></div>
+                <div class="stat-card-value" id="approved-hours-count">
+                    <%= stats.aprovadas %>
+                </div>
                 <div class="stat-card-label">Horas Aprovadas</div>
                 <div class="stat-card-change positive">95% aprovação</div>
             </div>
@@ -96,10 +102,12 @@
                 <div class="stat-card-icon bg-gradient-to-r from-amber-500 to-amber-600">
                     <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <div class="stat-card-value" id="pending-requests-count"><%= stats.pendentes %></div>
+                <div class="stat-card-value" id="pending-requests-count">
+                    <%= stats.pendentes %>
+                </div>
                 <div class="stat-card-label">Pendentes</div>
                 <div class="stat-card-change <%= stats.pendentes > 0 ? 'negative' : 'positive' %>">
-                    <%= stats.pendentes > 0 ? 'Requer atenção' : 'Tudo em dia' %>
+                    <%= stats.pendentes> 0 ? 'Requer atenção' : 'Tudo em dia' %>
                 </div>
             </div>
             <div class="text-amber-500 text-3xl opacity-20">
@@ -130,12 +138,12 @@
                             <p class="text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
                         </div>
                     </div>
-                    <% if (stats.pendentes > 0) { %>
+                    <% if (stats.pendentes> 0) { %>
                         <button onclick="approveAllPending()" class="btn-success btn-sm">
                             <i class="fas fa-check-double mr-2"></i>
                             Aprovar Todas
                         </button>
-                    <% } %>
+                        <% } %>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -151,61 +159,76 @@
                             </tr>
                         </thead>
                         <tbody id="pending-requests-tbody">
-                            <% if (pendingMovements && pendingMovements.length > 0) { %>
-                                <% pendingMovements.forEach(mov => { %>
+                            <% if (pendingMovements && pendingMovements.length> 0) { %>
+                                <% pendingMovements.forEach(mov=> { %>
                                     <tr id="mov-row-<%= mov.id %>" class="table-row">
                                         <td class="table-cell">
                                             <div class="flex items-center space-x-3">
-                                                <img src="<%= mov.colaborador_foto || '/images/default-avatar.png' %>" 
-                                                     alt="<%= mov.colaborador_nome %>" 
-                                                     class="w-8 h-8 rounded-full object-cover">
+                                                <img src="<%= mov.foto_url || '/images/default-avatar.png' %>"
+                                                    alt="<%= mov.colaborador_nome %>"
+                                                    class="w-8 h-8 rounded-full object-cover">
                                                 <div>
-                                                    <div class="font-semibold text-gray-900"><%= mov.colaborador_nome %></div>
-                                                    <div class="text-sm text-gray-500 sm:hidden"><%= mov.setor_nome %></div>
+                                                    <div class="font-semibold text-gray-900">
+                                                        <%= mov.colaborador_nome %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500 sm:hidden">
+                                                        <%= mov.setor_nome %>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="table-cell hidden sm:table-cell">
-                                            <span class="badge badge-info"><%= mov.setor_nome %></span>
+                                            <span class="badge badge-info">
+                                                <%= mov.setor_nome %>
+                                            </span>
                                         </td>
                                         <td class="table-cell">
                                             <div class="text-sm">
-                                                <div class="font-medium"><%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'}) %></div>
-                                                <div class="text-gray-500"><%= mov.hora_total %></div>
+                                                <div class="font-medium">
+                                                    <%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR',
+                                                        {timeZone: 'UTC' }) %>
+                                                </div>
+                                                <div class="text-gray-500">
+                                                    <%= mov.hora_total %>
+                                                </div>
                                             </div>
                                         </td>
                                         <td class="table-cell">
                                             <span class="badge <%= mov.entrada ? 'badge-success' : 'badge-danger' %>">
-                                                <i class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
+                                                <i
+                                                    class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
                                                 <%= mov.entrada ? 'Entrada' : 'Saída' %>
                                             </span>
                                         </td>
                                         <td class="table-cell text-right">
                                             <div class="flex items-center justify-end space-x-2">
-                                                <button class="btn-success btn-xs btn-approve" data-id="<%= mov.id %>" title="Aprovar">
+                                                <button class="btn-success btn-xs btn-approve" data-id="<%= mov.id %>"
+                                                    title="Aprovar">
                                                     <i class="fas fa-check"></i>
                                                 </button>
-                                                <button class="btn-danger btn-xs btn-reject" data-id="<%= mov.id %>" title="Rejeitar">
+                                                <button class="btn-danger btn-xs btn-reject" data-id="<%= mov.id %>"
+                                                    title="Rejeitar">
                                                     <i class="fas fa-times"></i>
                                                 </button>
-                                                <button class="btn-secondary btn-xs" onclick="viewMovementDetails('<%= mov.id %>')" title="Detalhes">
+                                                <button class="btn-secondary btn-xs"
+                                                    onclick="viewMovementDetails('<%= mov.id %>')" title="Detalhes">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
                                             </div>
                                         </td>
                                     </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr>
-                                    <td colspan="5" class="table-cell text-center py-12">
-                                        <div class="text-gray-400">
-                                            <i class="fas fa-check-circle text-4xl mb-4"></i>
-                                            <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
-                                            <p class="text-sm">Todas as aprovações estão em dia!</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <% } %>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="5" class="table-cell text-center py-12">
+                                                    <div class="text-gray-400">
+                                                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                                        <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                                                        <p class="text-sm">Todas as aprovações estão em dia!</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -230,32 +253,36 @@
             </div>
             <div class="card-body">
                 <div id="resumo-setor-list" class="space-y-3">
-                    <% if (departmentStats && departmentStats.length > 0) { %>
-                        <% departmentStats.forEach(dept => { %>
-                            <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100" 
-                                 data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
+                    <% if (departmentStats && departmentStats.length> 0) { %>
+                        <% departmentStats.forEach(dept=> { %>
+                            <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                                data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center space-x-3">
-                                        <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                                        <div
+                                            class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
                                             <i class="fas fa-users text-white text-sm"></i>
                                         </div>
                                         <div>
-                                            <div class="font-semibold text-gray-900"><%= dept.nome %></div>
+                                            <div class="font-semibold text-gray-900">
+                                                <%= dept.nome %>
+                                            </div>
                                             <div class="text-sm text-gray-500">
-                                                <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores !== 1 ? 'es' : '' %>
+                                                <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores
+                                                        !==1 ? 'es' : '' %>
                                             </div>
                                         </div>
                                     </div>
                                     <i class="fas fa-chevron-right text-gray-400"></i>
                                 </div>
                             </div>
-                        <% }) %>
-                    <% } else { %>
-                        <div class="text-center py-8 text-gray-500">
-                            <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
-                            <p>Nenhum setor cadastrado</p>
-                        </div>
-                    <% } %>
+                            <% }) %>
+                                <% } else { %>
+                                    <div class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
+                                        <p>Nenhum setor cadastrado</p>
+                                    </div>
+                                    <% } %>
                 </div>
             </div>
         </div>
@@ -299,7 +326,8 @@
     <div class="relative top-20 mx-auto p-6 border w-full max-w-2xl shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
             <h3 id="sector-modal-title" class="text-2xl font-bold text-gray-900">Colaboradores</h3>
-            <button id="sector-modal-close" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button id="sector-modal-close"
+                class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
@@ -316,7 +344,8 @@
     <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white animate-slide-up">
         <div class="flex justify-between items-center pb-4 border-b border-gray-200">
             <h3 class="text-xl font-bold text-gray-900">Detalhes da Movimentação</h3>
-            <button id="movement-modal-close" class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button id="movement-modal-close"
+                class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
@@ -327,88 +356,154 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize dashboard
-    initializeDashboard();
-    loadRecentActivity();
-    initializeChart();
-    
-    // Auto refresh every 30 seconds
-    setInterval(() => {
-        refreshDashboard();
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize dashboard
+        initializeDashboard();
         loadRecentActivity();
-    }, 30000);
-});
+        initializeChart();
 
-// Dashboard initialization
-function initializeDashboard() {
-    const pendingTableBody = document.getElementById('pending-requests-tbody');
-    const resumoPorSetorList = document.getElementById('resumo-setor-list');
-    
-    // Handle approval/rejection buttons
-    if (pendingTableBody) {
-        pendingTableBody.addEventListener('click', handleMovementAction);
-    }
-    
-    // Handle sector details
-    if (resumoPorSetorList) {
-        resumoPorSetorList.addEventListener('click', handleSectorClick);
-    }
-    
-    // Modal handlers
-    setupModalHandlers();
-}
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            refreshDashboard();
+            loadRecentActivity();
+        }, 30000);
+    });
 
-// Handle movement approval/rejection
-async function handleMovementAction(event) {
-    const target = event.target.closest('button');
-    if (!target) return;
-    
-    const movementId = target.dataset.id;
-    let action = '';
-    
-    if (target.classList.contains('btn-approve')) {
-        action = 'aprovar';
-    } else if (target.classList.contains('btn-reject')) {
-        action = 'rejeitar';
-    } else {
-        return;
-    }
-    
-    // Add loading state
-    const originalHTML = target.innerHTML;
-    target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-    target.disabled = true;
-    
-    try {
-        const response = await fetch(`/admin/movimentacoes/${movementId}/${action}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        
-        const result = await response.json();
-        
-        if (!result.success) {
-            throw new Error(result.message || `Erro ao ${action} movimentação`);
+    // Funções de inicialização e manipuladores de eventos
+    function initializeDashboard() {
+        const pendingTableBody = document.getElementById('pending-requests-tbody');
+        const resumoPorSetorList = document.getElementById('resumo-setor-list');
+        const approveAllBtn = document.getElementById('approve-all-pending-btn'); // Adicione um ID a este botão
+        const modalConfirmacao = document.getElementById('confirm-approve-all-modal');
+        const btnConfirmar = document.getElementById('btn-confirmar-aprovacao');
+        const btnCancelar = document.getElementById('btn-cancelar-aprovacao');
+
+        // Adiciona um listener para abrir o modal de confirmação
+        if (approveAllBtn && modalConfirmacao) {
+            approveAllBtn.addEventListener('click', () => {
+                modalConfirmacao.classList.remove('hidden');
+            });
         }
-        
-        // Remove the row with animation
-        const row = document.getElementById(`mov-row-${movementId}`);
-        if (row) {
-            row.style.transition = 'all 0.3s ease';
-            row.style.backgroundColor = action === 'aprovar' ? '#dcfce7' : '#fef2f2';
-            row.style.transform = 'scale(0.98)';
-            row.style.opacity = '0.7';
-            
-            setTimeout(() => {
-                row.remove();
-                
-                // Check if table is empty
-                const tbody = document.getElementById('pending-requests-tbody');
-                if (tbody.children.length === 0) {
-                    tbody.innerHTML = `
+
+        // Adiciona um listener para fechar o modal ao clicar em "Cancelar"
+        if (btnCancelar && modalConfirmacao) {
+            btnCancelar.addEventListener('click', () => {
+                modalConfirmacao.classList.add('hidden');
+            });
+        }
+
+        // Adiciona um listener para confirmar e aprovar
+        if (btnConfirmar && modalConfirmacao) {
+            btnConfirmar.addEventListener('click', () => {
+                modalConfirmacao.classList.add('hidden');
+                handleApproveAll();
+            });
+        }
+
+        if (pendingTableBody) {
+            pendingTableBody.addEventListener('click', handleMovementAction);
+        }
+
+        if (resumoPorSetorList) {
+            resumoPorSetorList.addEventListener('click', handleSectorClick);
+        }
+
+        setupModalHandlers();
+    }
+
+    // Função que executa a aprovação em massa
+    async function handleApproveAll() {
+        showLoading();
+
+        try {
+            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
+                method: 'PATCH'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Dashboard initialization
+    function initializeDashboard() {
+        const pendingTableBody = document.getElementById('pending-requests-tbody');
+        const resumoPorSetorList = document.getElementById('resumo-setor-list');
+
+        // Handle approval/rejection buttons
+        if (pendingTableBody) {
+            pendingTableBody.addEventListener('click', handleMovementAction);
+        }
+
+        // Handle sector details
+        if (resumoPorSetorList) {
+            resumoPorSetorList.addEventListener('click', handleSectorClick);
+        }
+
+        // Modal handlers
+        setupModalHandlers();
+    }
+
+    // Handle movement approval/rejection
+    async function handleMovementAction(event) {
+        const target = event.target.closest('button');
+        if (!target) return;
+
+        const movementId = target.dataset.id;
+        let action = '';
+
+        if (target.classList.contains('btn-approve')) {
+            action = 'aprovar';
+        } else if (target.classList.contains('btn-reject')) {
+            action = 'rejeitar';
+        } else {
+            return;
+        }
+
+        // Add loading state
+        const originalHTML = target.innerHTML;
+        target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        target.disabled = true;
+
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/${action}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || `Erro ao ${action} movimentação`);
+            }
+
+            // Remove the row with animation
+            const row = document.getElementById(`mov-row-${movementId}`);
+            if (row) {
+                row.style.transition = 'all 0.3s ease';
+                row.style.backgroundColor = action === 'aprovar' ? '#dcfce7' : '#fef2f2';
+                row.style.transform = 'scale(0.98)';
+                row.style.opacity = '0.7';
+
+                setTimeout(() => {
+                    row.remove();
+
+                    // Check if table is empty
+                    const tbody = document.getElementById('pending-requests-tbody');
+                    if (tbody.children.length === 0) {
+                        tbody.innerHTML = `
                         <tr>
                             <td colspan="5" class="table-cell text-center py-12">
                                 <div class="text-gray-400">
@@ -419,54 +514,54 @@ async function handleMovementAction(event) {
                             </td>
                         </tr>
                     `;
-                }
-                
-                // Update counter
-                updatePendingCount();
-            }, 300);
-        }
-        
-        showNotification(`Movimentação ${action === 'aprovar' ? 'aprovada' : 'rejeitada'} com sucesso!`, 'success');
-        
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification(error.message, 'error');
-        target.innerHTML = originalHTML;
-        target.disabled = false;
-    }
-}
+                    }
 
-// Handle sector click
-async function handleSectorClick(event) {
-    const trigger = event.target.closest('.sector-details-trigger');
-    if (!trigger) return;
-    
-    event.preventDefault();
-    
-    const sectorId = trigger.dataset.sectorId;
-    const sectorName = trigger.dataset.sectorName;
-    
-    // Show modal
-    const modal = document.getElementById('sector-modal');
-    const modalTitle = document.getElementById('sector-modal-title');
-    const modalList = document.getElementById('sector-modal-list');
-    
-    modalTitle.textContent = `Colaboradores - ${sectorName}`;
-    modalList.innerHTML = `
+                    // Update counter
+                    updatePendingCount();
+                }, 300);
+            }
+
+            showNotification(`Movimentação ${action === 'aprovar' ? 'aprovada' : 'rejeitada'} com sucesso!`, 'success');
+
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification(error.message, 'error');
+            target.innerHTML = originalHTML;
+            target.disabled = false;
+        }
+    }
+
+    // Handle sector click
+    async function handleSectorClick(event) {
+        const trigger = event.target.closest('.sector-details-trigger');
+        if (!trigger) return;
+
+        event.preventDefault();
+
+        const sectorId = trigger.dataset.sectorId;
+        const sectorName = trigger.dataset.sectorName;
+
+        // Show modal
+        const modal = document.getElementById('sector-modal');
+        const modalTitle = document.getElementById('sector-modal-title');
+        const modalList = document.getElementById('sector-modal-list');
+
+        modalTitle.textContent = `Colaboradores - ${sectorName}`;
+        modalList.innerHTML = `
         <div class="text-center py-8">
             <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
             <p class="mt-2 text-gray-600">Carregando colaboradores...</p>
         </div>
     `;
-    
-    modal.classList.remove('hidden');
-    
-    try {
-        const response = await fetch(`/api/v1/profiles?setor_id=${sectorId}`);
-        const result = await response.json();
-        
-        if (result.success && result.profiles.length > 0) {
-            modalList.innerHTML = result.profiles.map(profile => `
+
+        modal.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/profiles?setor_id=${sectorId}`);
+            const result = await response.json();
+
+            if (result.success && result.profiles.length > 0) {
+                modalList.innerHTML = result.profiles.map(profile => `
                 <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                     <img class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
                          src="${profile.foto_url || '/images/default-avatar.png'}" 
@@ -484,282 +579,282 @@ async function handleSectorClick(event) {
                     </div>
                 </div>
             `).join('');
-        } else {
-            modalList.innerHTML = `
+            } else {
+                modalList.innerHTML = `
                 <div class="text-center py-12">
                     <i class="fas fa-users text-4xl text-gray-300 mb-4"></i>
                     <p class="text-lg font-medium text-gray-500">Nenhum colaborador encontrado</p>
                     <p class="text-sm text-gray-400">Este setor ainda não possui colaboradores cadastrados.</p>
                 </div>
             `;
-        }
-    } catch (error) {
-        console.error('Error loading sector details:', error);
-        modalList.innerHTML = `
+            }
+        } catch (error) {
+            console.error('Error loading sector details:', error);
+            modalList.innerHTML = `
             <div class="text-center py-12">
                 <i class="fas fa-exclamation-triangle text-4xl text-red-300 mb-4"></i>
                 <p class="text-lg font-medium text-red-500">Erro ao carregar</p>
                 <p class="text-sm text-red-400">Não foi possível carregar os colaboradores deste setor.</p>
             </div>
         `;
+        }
     }
-}
 
-// Setup modal handlers
-function setupModalHandlers() {
-    // Sector modal
-    const sectorModal = document.getElementById('sector-modal');
-    const sectorModalClose = document.getElementById('sector-modal-close');
-    
-    if (sectorModalClose) {
-        sectorModalClose.addEventListener('click', () => {
-            sectorModal.classList.add('hidden');
-        });
-    }
-    
-    // Movement modal
-    const movementModal = document.getElementById('movement-modal');
-    const movementModalClose = document.getElementById('movement-modal-close');
-    
-    if (movementModalClose) {
-        movementModalClose.addEventListener('click', () => {
-            movementModal.classList.add('hidden');
-        });
-    }
-    
-    // Close modals on backdrop click
-    [sectorModal, movementModal].forEach(modal => {
-        if (modal) {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                }
+    // Setup modal handlers
+    function setupModalHandlers() {
+        // Sector modal
+        const sectorModal = document.getElementById('sector-modal');
+        const sectorModalClose = document.getElementById('sector-modal-close');
+
+        if (sectorModalClose) {
+            sectorModalClose.addEventListener('click', () => {
+                sectorModal.classList.add('hidden');
             });
         }
-    });
-    
-    // Close modals on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            sectorModal?.classList.add('hidden');
-            movementModal?.classList.add('hidden');
-        }
-    });
-}
 
-// View movement details
-async function viewMovementDetails(movementId) {
-    const modal = document.getElementById('movement-modal');
-    const content = document.getElementById('movement-modal-content');
-    
-    content.innerHTML = `
+        // Movement modal
+        const movementModal = document.getElementById('movement-modal');
+        const movementModalClose = document.getElementById('movement-modal-close');
+
+        if (movementModalClose) {
+            movementModalClose.addEventListener('click', () => {
+                movementModal.classList.add('hidden');
+            });
+        }
+
+        // Close modals on backdrop click
+        [sectorModal, movementModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                sectorModal?.classList.add('hidden');
+                movementModal?.classList.add('hidden');
+            }
+        });
+    }
+
+    // View movement details
+    async function viewMovementDetails(movementId) {
+        const modal = document.getElementById('movement-modal');
+        const content = document.getElementById('movement-modal-content');
+
+        content.innerHTML = `
         <div class="text-center py-8">
             <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
             <p class="mt-2 text-gray-600">Carregando detalhes...</p>
         </div>
     `;
-    
-    modal.classList.remove('hidden');
-    
-    try {
-        const response = await fetch(`/api/v1/movements/${movementId}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            const movement = result.movement;
+
+        modal.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/movements/${movementId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const movement = result.movement;
+                content.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-4">
+                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
+                                src="${movement.foto_url || '/images/default-avatar.png'}" 
+                                alt="${movement.colaborador_nome}">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-900">${movement.colaborador_nome}</h4>
+                                <p class="text-sm text-gray-600">${movement.setor_nome}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label">Data</label>
+                                <p class="text-gray-900 font-medium">${new Date(movement.data_movimentacao).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                            <div>
+                                <label class="form-label">Horário</label>
+                                <p class="text-gray-900 font-mono">${movement.hora_total}</p>
+                            </div>
+                            <div>
+                                <label class="form-label">Tipo</label>
+                                <p class="text-gray-900">
+                                    <span class="badge ${movement.entrada ? 'badge-success' : 'badge-danger'}">
+                                        ${movement.entrada ? 'Entrada' : 'Saída'}
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                <label class="form-label">Status</label>
+                                <p class="text-gray-900">
+                                    <span class="badge badge-warning">Pendente</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Motivo</label>
+                            <p class="text-gray-900 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">${movement.motivo}</p>
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button onclick="approveMovementFromModal('${movement.id}')" class="btn-success flex-1">
+                                <i class="fas fa-check mr-2"></i>
+                                Aprovar
+                            </button>
+                            <button onclick="rejectMovementFromModal('${movement.id}')" class="btn-danger flex-1">
+                                <i class="fas fa-times mr-2"></i>
+                                Rejeitar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                throw new Error(result.message || 'Erro ao carregar detalhes');
+            }
+        } catch (error) {
+            console.error('Error loading movement details:', error);
             content.innerHTML = `
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Colaborador</label>
-                            <p class="text-gray-900 font-medium">${movement.colaborador_nome}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Setor</label>
-                            <p class="text-gray-900">${movement.setor_nome}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Data</label>
-                            <p class="text-gray-900">${new Date(movement.data_movimentacao).toLocaleDateString('pt-BR')}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Horário</label>
-                            <p class="text-gray-900 font-mono">${movement.hora_total}</p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Tipo</label>
-                            <p class="text-gray-900">
-                                <span class="badge ${movement.entrada ? 'badge-success' : 'badge-danger'}">
-                                    ${movement.entrada ? 'Entrada' : 'Saída'}
-                                </span>
-                            </p>
-                        </div>
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Status</label>
-                            <p class="text-gray-900">
-                                <span class="badge badge-warning">Pendente</span>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    ${movement.observacao ? `
-                        <div>
-                            <label class="text-sm font-medium text-gray-600">Observação</label>
-                            <p class="text-gray-900 bg-gray-50 p-3 rounded-lg">${movement.observacao}</p>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="flex space-x-3 pt-4">
-                        <button onclick="approveMovementFromModal('${movement.id}')" class="btn-success flex-1">
-                            <i class="fas fa-check mr-2"></i>
-                            Aprovar
-                        </button>
-                        <button onclick="rejectMovementFromModal('${movement.id}')" class="btn-danger flex-1">
-                            <i class="fas fa-times mr-2"></i>
-                            Rejeitar
-                        </button>
-                    </div>
-                </div>
-            `;
-        } else {
-            throw new Error(result.message || 'Erro ao carregar detalhes');
-        }
-    } catch (error) {
-        console.error('Error loading movement details:', error);
-        content.innerHTML = `
             <div class="text-center py-8">
                 <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-4"></i>
                 <p class="text-red-600">Erro ao carregar detalhes da movimentação</p>
             </div>
         `;
-    }
-}
-
-// Approve movement from modal
-async function approveMovementFromModal(movementId) {
-    try {
-        const response = await fetch(`/admin/movimentacoes/${movementId}/aprovar`, {
-            method: 'PATCH'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            document.getElementById('movement-modal').classList.add('hidden');
-            showNotification('Movimentação aprovada com sucesso!', 'success');
-            refreshDashboard();
-        } else {
-            throw new Error(result.message);
         }
-    } catch (error) {
-        showNotification('Erro ao aprovar movimentação: ' + error.message, 'error');
     }
-}
 
-// Reject movement from modal
-async function rejectMovementFromModal(movementId) {
-    try {
-        const response = await fetch(`/admin/movimentacoes/${movementId}/rejeitar`, {
-            method: 'PATCH'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            document.getElementById('movement-modal').classList.add('hidden');
-            showNotification('Movimentação rejeitada com sucesso!', 'success');
-            refreshDashboard();
-        } else {
-            throw new Error(result.message);
+    // Approve movement from modal
+    async function approveMovementFromModal(movementId) {
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/aprovar`, {
+                method: 'PATCH'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('movement-modal').classList.add('hidden');
+                showNotification('Movimentação aprovada com sucesso!', 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentação: ' + error.message, 'error');
         }
-    } catch (error) {
-        showNotification('Erro ao rejeitar movimentação: ' + error.message, 'error');
     }
-}
 
-// Approve all pending movements
-async function approveAllPending() {
-    if (!confirm('Tem certeza que deseja aprovar TODAS as solicitações pendentes?')) {
-        return;
-    }
-    
-    showLoading();
-    
-    try {
-        const response = await fetch('/admin/movimentacoes/aprovar-todas', {
-            method: 'PATCH'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
-            refreshDashboard();
-        } else {
-            throw new Error(result.message);
+    // Reject movement from modal
+    async function rejectMovementFromModal(movementId) {
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/rejeitar`, {
+                method: 'PATCH'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('movement-modal').classList.add('hidden');
+                showNotification('Movimentação rejeitada com sucesso!', 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao rejeitar movimentação: ' + error.message, 'error');
         }
-    } catch (error) {
-        showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
-    } finally {
-        hideLoading();
     }
-}
 
-// Refresh dashboard
-async function refreshDashboard() {
-    try {
-        const response = await fetch('/admin/api/dashboard-stats');
-        const data = await response.json();
-        
-        if (data.success) {
-            // Update counters
-            updateElement('total-users-count', data.totalUsers);
-            updateElement('total-movements-count', data.stats.total);
-            updateElement('approved-hours-count', data.stats.aprovadas);
-            updateElement('pending-requests-count', data.stats.pendentes);
-            
-            // Update chart
-            updateChart(data.chartData);
+    // Approve all pending movements
+    async function approveAllPending() {
+        if (!confirm('Tem certeza que deseja aprovar TODAS as solicitações pendentes?')) {
+            return;
         }
-    } catch (error) {
-        console.error('Error refreshing dashboard:', error);
+
+        showLoading();
+
+        try {
+            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
+                method: 'PATCH'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
     }
-}
 
-// Update pending count
-function updatePendingCount() {
-    const tbody = document.getElementById('pending-requests-tbody');
-    const rows = tbody.querySelectorAll('tr:not(:has(.text-gray-400))'); // Exclude "no data" row
-    const count = rows.length;
-    
-    updateElement('pending-requests-count', count);
-}
+    // Refresh dashboard
+    async function refreshDashboard() {
+        try {
+            const response = await fetch('/admin/api/dashboard-stats');
+            const data = await response.json();
 
-// Update element with animation
-function updateElement(id, value) {
-    const element = document.getElementById(id);
-    if (element && element.textContent != value) {
-        element.style.transform = 'scale(1.1)';
-        element.style.transition = 'transform 0.2s ease';
-        
-        setTimeout(() => {
-            element.textContent = value;
-            element.style.transform = 'scale(1)';
-        }, 100);
+            if (data.success) {
+                // Update counters
+                updateElement('total-users-count', data.totalUsers);
+                updateElement('total-movements-count', data.stats.total);
+                updateElement('approved-hours-count', data.stats.aprovadas);
+                updateElement('pending-requests-count', data.stats.pendentes);
+
+                // Update chart
+                updateChart(data.chartData);
+            }
+        } catch (error) {
+            console.error('Error refreshing dashboard:', error);
+        }
     }
-}
 
-// Load recent activity
-async function loadRecentActivity() {
-    const container = document.getElementById('recent-activity');
-    if (!container) return;
-    
-    try {
-        const response = await fetch('/admin/api/recent-activity');
-        const data = await response.json();
-        
-        if (data.success && data.activities.length > 0) {
-            container.innerHTML = data.activities.map(activity => `
+    // Update pending count
+    function updatePendingCount() {
+        const tbody = document.getElementById('pending-requests-tbody');
+        const rows = tbody.querySelectorAll('tr:not(:has(.text-gray-400))'); // Exclude "no data" row
+        const count = rows.length;
+
+        updateElement('pending-requests-count', count);
+    }
+
+    // Update element with animation
+    function updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element && element.textContent != value) {
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = 'transform 0.2s ease';
+
+            setTimeout(() => {
+                element.textContent = value;
+                element.style.transform = 'scale(1)';
+            }, 100);
+        }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+        const container = document.getElementById('recent-activity');
+        if (!container) return;
+
+        try {
+            const response = await fetch('/admin/api/recent-activity');
+            const data = await response.json();
+
+            if (data.success && data.activities.length > 0) {
+                container.innerHTML = data.activities.map(activity => `
                 <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
                     <div class="w-8 h-8 bg-${activity.color || 'gray'}-100 rounded-lg flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-${activity.icon || 'bell'} text-${activity.color || 'gray'}-600 text-sm"></i>
@@ -771,86 +866,86 @@ async function loadRecentActivity() {
                     </div>
                 </div>
             `).join('');
-        } else {
-            container.innerHTML = `
+            } else {
+                container.innerHTML = `
                 <div class="text-center py-8 text-gray-400">
                     <i class="fas fa-history text-3xl mb-3 opacity-50"></i>
                     <p>Nenhuma atividade recente</p>
                 </div>
             `;
-        }
-    } catch (error) {
-        console.error('Error loading recent activity:', error);
-        container.innerHTML = `
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            container.innerHTML = `
             <div class="text-center py-8 text-red-400">
                 <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
                 <p>Erro ao carregar atividades</p>
             </div>
         `;
+        }
     }
-}
 
-// Initialize chart
-function initializeChart() {
-    const ctx = document.getElementById('quickStatsChart');
-    if (!ctx) return;
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
-            datasets: [{
-                data: [<%= stats.aprovadas || 0 %>, <%= stats.pendentes || 0 %>, <%= stats.rejeitadas || 0 %>],
-                backgroundColor: [
-                    '#10b981',
-                    '#f59e0b', 
-                    '#ef4444'
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        padding: 15,
-                        font: {
-                            size: 12
+    // Initialize chart
+    function initializeChart() {
+        const ctx = document.getElementById('quickStatsChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
+                datasets: [{
+                    data: [<%= stats.aprovadas || 0 %>, <%= stats.pendentes || 0 %>, <%= stats.rejeitadas || 0 %>],
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
                         }
                     }
-                }
-            },
-            cutout: '70%'
-        }
-    });
-}
+                },
+                cutout: '70%'
+            }
+        });
+    }
 
-// Update chart
-function updateChart(data) {
-    // Chart update logic would go here
-    // For now, we'll just log the data
-    console.log('Chart data update:', data);
-}
+    // Update chart
+    function updateChart(data) {
+        // Chart update logic would go here
+        // For now, we'll just log the data
+        console.log('Chart data update:', data);
+    }
 
-// Format relative time (reused from topbar)
-function formatRelativeTime(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Agora mesmo';
-    if (diffInMinutes < 60) return `${diffInMinutes}min atrás`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h atrás`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) return `${diffInDays}d atrás`;
-    
-    return date.toLocaleDateString('pt-BR');
-}
+    // Format relative time (reused from topbar)
+    function formatRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+        if (diffInMinutes < 1) return 'Agora mesmo';
+        if (diffInMinutes < 60) return `${diffInMinutes}min atrás`;
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h atrás`;
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 30) return `${diffInDays}d atrás`;
+
+        return date.toLocaleDateString('pt-BR');
+    }
 </script>

@@ -452,6 +452,43 @@ router.get("/relatorios", async (req, res) => {
   }
 });
 
+router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
+    try {
+        const pendingStatus = await Status.findByName("Pendente");
+        const approvedStatus = await Status.findByName("Aprovado"); // Nome do status corrigido
+        
+        if (!pendingStatus || !approvedStatus) {
+            console.error("Erro: Status 'Pendente' ou 'Aprovado' não encontrado.");
+            return res.status(500).json({ success: false, message: 'Status "Pendente" ou "Aprovado" não encontrado.' });
+        }
+
+        const pendingMovements = await Movement.findAll({ status_id: pendingStatus.id });
+
+        if (pendingMovements.length === 0) {
+             return res.json({ success: true, message: "Nenhuma solicitação pendente para aprovar.", approved: 0 });
+        }
+
+        for (const mov of pendingMovements) {
+            await Movement.update(mov.id, { status_id: approvedStatus.id });
+
+            if (req.userProfile) {
+                await MovementLog.create({
+                    movimentacao_id: mov.id,
+                    perfil_id: req.userProfile.id,
+                    acao: 'APROVADO',
+                    detalhes: `Movimentação aprovada em massa pelo administrador.`
+                });
+            }
+        }
+
+        res.json({ success: true, message: "Todas as solicitações pendentes foram aprovadas.", approved: pendingMovements.length });
+
+    } catch (error) {
+        console.error("Erro detalhado ao aprovar todas as movimentações:", error);
+        res.status(500).json({ success: false, message: "Erro ao processar as aprovações." });
+    }
+});
+
 router.get("/api/relatorios", async (req, res) => {
   try {
     const movimentacoesFiltradas = await Movement.findAll(req.query);
