@@ -72,7 +72,7 @@ router.get('/meu-perfil', isAuthenticated, async (req, res) => {
     const recentMovements = await Movement.getMovementsByProfile(req.userProfile.id, { limit: 10 });
 
         // Lógica para adicionar o nome do aprovador/rejeitador
-     for (const mov of recentMovements) {
+    for (const mov of recentMovements) {
         if (mov.status_nome !== 'Pendente') { // Se o status não for 'Pendente'
             const logs = await MovementLog.findByMovementId(mov.id);
             if (logs.length > 0) {
