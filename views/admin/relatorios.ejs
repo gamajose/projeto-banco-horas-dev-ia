@@ -85,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
             status_color = 'text-green-600';
         }else if (mov.status_nome === 'Rejeitado'){
             status_color = 'text-red-600';
+        }else{
+            status_color = 'text-yellow-600';
         }
         const status_name = `<span class="${status_color} font-medium">${mov.status_nome}</span>`;
 
