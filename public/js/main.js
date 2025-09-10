@@ -10,6 +10,7 @@
     initializeTimeDisplay();
   });
 
+  // --- LÓGICA PARA MODAL DE AÇÕES RÁPIDAS (ADMIN) ---
   document.addEventListener('DOMContentLoaded', () => {
     console.log("Módulo de Ações Rápidas carregado!")
     const modal = document.getElementById('modal-acao-rapida');
