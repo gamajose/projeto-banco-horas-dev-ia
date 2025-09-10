@@ -10,6 +10,94 @@
     initializeTimeDisplay();
   });
 
+  document.addEventListener('DOMContentLoaded', () => {
+    console.log("Módulo de Ações Rápidas carregado!")
+    const modal = document.getElementById('modal-acao-rapida');
+    if (!modal) return;
+
+    // Elementos do Modal
+    const title = document.getElementById('modal-acao-rapida-title');
+    const form = document.getElementById('form-acao-rapida');
+    const feedbackDiv = document.getElementById('acao-rapida-feedback');
+    const dataInput = document.getElementById('acao-rapida-data');
+    const hiddenInputEntrada = document.getElementById('acao-rapida-entrada');
+    const containerTipoAjuste = document.getElementById('container-tipo-ajuste');
+    const selectTipoAjuste = document.getElementById('acao-rapida-tipo');
+
+    // Botões que abrem o modal
+    const btnEntrada = document.getElementById('acao-registrar-entrada');
+    const btnSaida = document.getElementById('acao-registrar-saida');
+    const btnAjuste = document.getElementById('acao-solicitar-ajuste');
+    const btnClose = document.getElementById('modal-acao-rapida-close');
+
+    const openModal = (config) => {
+        title.textContent = config.title;
+        hiddenInputEntrada.value = config.entrada;
+        feedbackDiv.innerHTML = '';
+        form.reset();
+        
+        // Preenche a data atual
+        const today = new Date();
+        dataInput.value = today.toISOString().split('T')[0];
+
+        // Lógica para "Solicitar Ajuste"
+        if (config.showTypeSelector) {
+            containerTipoAjuste.classList.remove('hidden');
+            selectTipoAjuste.setAttribute('name', 'entrada');
+            hiddenInputEntrada.removeAttribute('name');
+        } else {
+            containerTipoAjuste.classList.add('hidden');
+            hiddenInputEntrada.setAttribute('name', 'entrada');
+            selectTipoAjuste.removeAttribute('name');
+        }
+        modal.classList.remove('hidden');
+    };
+
+    const closeModal = () => {
+        modal.classList.add('hidden');
+    };
+
+    // Listeners dos botões
+    if (btnEntrada) btnEntrada.addEventListener('click', () => openModal({ title: 'Registrar Entrada de Horas', entrada: 'true', showTypeSelector: false }));
+    if (btnSaida) btnSaida.addEventListener('click', () => openModal({ title: 'Registrar Saída de Horas', entrada: 'false', showTypeSelector: false }));
+    if (btnAjuste) btnAjuste.addEventListener('click', () => openModal({ title: 'Solicitar Ajuste de Ponto', entrada: 'true', showTypeSelector: true }));
+
+    if (btnClose) btnClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', e => (e.target === modal) && closeModal());
+
+    // Listener do formulário
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            feedbackDiv.textContent = 'A enviar...';
+            feedbackDiv.className = 'mt-4 text-sm font-medium text-gray-500';
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/v1/movements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Ocorreu um erro.');
+
+                feedbackDiv.textContent = 'Solicitação enviada com sucesso!';
+                feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1500);
+            } catch (error) {
+                feedbackDiv.textContent = `Erro: ${error.message}`;
+                feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
+            }
+        });
+    }
+});
+
   // --- Funcionalidade de navegação e menus ---
   function initializeNavigation() {
     const dropdowns = {

@@ -30,6 +30,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     const departmentStats = await Department.getDepartmentStats();
     const allUsers = await User.findAll();
     const totalUsers = allUsers.length;
+    const todosColaboradores = await Profile.findAll();
 
     res.render('dashboard/index', {
       title: 'Dashboard do Administrador',
@@ -40,6 +41,7 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
       recentMovements,
       departmentStats,
       totalUsers,
+      todosColaboradores,
       activePage: 'dashboard'
     });
   } catch (error) {
