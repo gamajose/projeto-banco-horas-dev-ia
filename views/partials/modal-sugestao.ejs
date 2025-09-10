@@ -1,0 +1,42 @@
+<div id="modal-sugestao" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-lg">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 class="text-2xl font-bold text-gray-800">Enviar Sugestão/Feedback</h3>
+            <button id="modal-sugestao-close" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+        </div>
+        <div class="mt-4">
+            <form id="form-sugestao" class="space-y-4">
+                <div>
+                    <label for="sugestao-nome" class="form-label">Seu Nome</label>
+                    <input type="text" id="sugestao-nome" name="nome" value="<%= userProfile.nome %>" required class="form-input bg-gray-100" readonly>
+                </div>
+                <div>
+                    <label for="sugestao-categoria" class="form-label">Categoria</label>
+                    <select id="sugestao-categoria" name="categoria" required class="form-input">
+                        <option value="Ajuste">Ajuste de Funcionalidade</option>
+                        <option value="Criar">Nova Funcionalidade</option>
+                        <option value="Deletar">Remoção de Funcionalidade</option>
+                        <option value="Bug">Relatar um Erro (Bug)</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div id="sugestao-categoria-outro-container" class="hidden">
+                    <label for="sugestao-categoria-outro" class="form-label">Especifique a Categoria</label>
+                    <input type="text" id="sugestao-categoria-outro" name="categoria_outro" class="form-input">
+                </div>
+                <div>
+                    <label for="sugestao-detalhes" class="form-label">Detalhes da Sugestão</label>
+                    <textarea name="detalhes" id="sugestao-detalhes" rows="4" required class="form-input" placeholder="Descreva detalhadamente a sua sugestão ou o problema encontrado..."></textarea>
+                </div>
+                <div>
+                    <label for="sugestao-anexo" class="form-label">Anexo (Opcional)</label>
+                    <input type="file" name="anexo" id="sugestao-anexo" class="form-input">
+                </div>
+                <div class="pt-4">
+                    <button type="submit" class="btn-primary w-full">Enviar para o GitHub</button>
+                </div>
+            </form>
+            <div id="sugestao-feedback" class="mt-4 text-sm font-medium"></div>
+        </div>
+    </div>
+</div>

@@ -17,6 +17,7 @@ const movementRoutes = require("./routes/movements");
 const reportRoutes = require("./routes/reports");
 const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
+const sugestaoRoutes = require("./routes/sugestao");
 const cookieParser = require("cookie-parser");
 
 const app = express();
@@ -61,6 +62,7 @@ app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/movements", movementRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/profiles", profilesApiRoutes);
+app.use("/api/v1/sugestao", sugestaoRoutes);
 app.use("/admin", adminRoutes);
 app.use("/profile", profileRoutes);
 app.use("/", dashboardRoutes);
