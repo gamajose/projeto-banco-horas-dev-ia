@@ -113,6 +113,8 @@
         </div>
     <% } %>
 
+    <%- include('../partials/modal-acao-rapida', { user: locals.user, todosColaboradores: locals.todosColaboradores || [] }) %>
+
     <script src="/js/main.js"></script>
 
     <script>
@@ -238,6 +240,8 @@
             <script src="<%= script %>"></script>
         <% }); %>
     <% } %>
+
+
 </body>
 
 </html>

@@ -60,8 +60,10 @@ router.post(
         hora_inicial,
         hora_final,
         forma_pagamento_id,
+        colaborador_id
       } = req.body;
-      const colaborador_id = req.userProfile.id;
+
+      const targetProfileId = (req.user.is_staff && colaborador_id) ? colaborador_id : req.userProfile.id;
 
       const pendingStatus = await Status.findByName("Pendente");
       if (!pendingStatus) {
@@ -79,11 +81,11 @@ router.post(
         entrada,
         forma_pagamento_id,
         status_id: pendingStatus.id,
-        colaborador_id,
+        colaborador_id: targetProfileId,
       };
 
       const newMovement = await Movement.create(movementData);
-      await MovementLog.logMovementCreation(newMovement.id, colaborador_id);
+      await MovementLog.logMovementCreation(newMovement.id, req.userProfile.id);
 
       res.status(201).json({
         success: true,
