@@ -2,11 +2,30 @@
     <div class="px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
             <div class="flex items-center space-x-4">
-
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center">
-                    <img src="/images/RedLogo.png" class="h-8">
-                    </a>
+                <div class="hidden lg:block">
+                    
+                    <nav class="breadcrumb">
+                        <% if (typeof breadcrumbs !=='undefined' && breadcrumbs.length> 0) { %>
+                            <% breadcrumbs.forEach((crumb, index)=> { %>
+                                <% if (index> 0) { %>
+                                    <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                    <% } %>
+                                        <% if (crumb.url && index < breadcrumbs.length - 1) { %>
+                                            <a href="<%= crumb.url %>" class="breadcrumb-item">
+                                                <%= crumb.title %>
+                                            </a>
+                                            <% } else { %>
+                                                <span class="breadcrumb-item active">
+                                                    <%= crumb.title %>
+                                                </span>
+                                                <% } %>
+                                                    <% }); %>
+                                                        <% } else { %>
+                                                            <span class="breadcrumb-item active">
+                                                                <%= title || 'Dashboard' %>
+                                                            </span>
+                                                            <% } %>
+                    </nav>
                 </div>
 
                 <div class="lg:hidden">

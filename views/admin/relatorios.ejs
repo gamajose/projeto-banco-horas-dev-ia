@@ -79,13 +79,22 @@ document.addEventListener('DOMContentLoaded', () => {
             : `<span class="text-red-600 font-medium">Débito</span>`;
         const motivo = mov.motivo || '';
 
+
+        let status_color = '';
+        if (mov.status_nome === 'Aprovado'){
+            status_color = 'text-green-600';
+        }else if (mov.status_nome === 'Rejeitado'){
+            status_color = 'text-red-600';
+        }
+        const status_name = `<span class="${status_color} font-medium">${mov.status_nome}</span>`;
+
         return `
             <tr>
                 <td class="table-cell font-medium">${mov.colaborador_nome}</td>
                 <td class="table-cell">${dataFormatada}</td>
                 <td class="table-cell">${tipoHTML}</td>
                 <td class="table-cell font-mono">${mov.hora_total}</td>
-                <td class="table-cell">${mov.status_nome}</td>
+                <td class="table-cell">${status_name}</td>
                 <td class="table-cell text-sm text-gray-500">${motivo}</td>
             </tr>
         `;
