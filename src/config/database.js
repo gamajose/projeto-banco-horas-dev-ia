@@ -307,6 +307,7 @@ class Database {
       try {
         const result = await client.query(sql, params);
         return result.rows[0];
+        
       } finally {
         client.release();
       }
