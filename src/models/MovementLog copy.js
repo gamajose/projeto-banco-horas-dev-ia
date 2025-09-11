@@ -27,7 +27,7 @@ class MovementLog {
     const sql = `
             SELECT ml.*, p.nome as perfil_nome
             FROM movimentacoes_logs ml
-            JOIN perfis p ON ml.usuario_id = p.usuario_id
+            JOIN perfis p ON ml.usuario_id = p.id
             WHERE ml.movimentacao_id = $1
             ORDER BY ml.created_at ASC
         `;

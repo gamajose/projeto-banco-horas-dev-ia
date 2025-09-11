@@ -30,7 +30,7 @@
                         class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative">
                         <i class="fas fa-bell text-lg"></i>
                         <% if (locals.unreadNotifications> 0) { %>
-                            <span
+                            <span id="notification-badge"
                                 class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                                 <%= locals.unreadNotifications %>
                             </span>
@@ -47,7 +47,7 @@
                             </div>
                         </div>
                         <div class="border-t border-gray-100 px-4 py-2">
-                            <a href="/notifications" class="text-sm text-red-600 hover:text-red-700 font-medium">
+                            <a href="/admin/aprovacoes" class="text-sm text-red-600 hover:text-red-700 font-medium">
                                 Ver todas as notificações
                             </a>
                         </div>

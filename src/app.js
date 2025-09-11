@@ -19,6 +19,7 @@ const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
 const sugestaoRoutes = require("./routes/sugestao");
 const cookieParser = require("cookie-parser");
+const Movement = require('./models/Movement'); 
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -45,6 +46,28 @@ app.use(
   })
 );
 app.use(flash());
+
+app.use(async (req, res, next) => {
+  res.locals.success_msg = req.flash("success_msg");
+  res.locals.error_msg = req.flash("error_msg");
+  res.locals.user = req.user || null;
+  res.locals.userProfile = req.userProfile || null;
+
+  // Lógica para buscar notificações de pendências para o admin
+  if (req.user && req.user.is_staff) {
+    try {
+      const pendingMovements = await Movement.getPendingMovements();
+      res.locals.pendingApprovals = pendingMovements.length;
+    } catch (error) {
+      console.error("Erro ao buscar pendências para o topbar:", error);
+      res.locals.pendingApprovals = 0;
+    }
+  } else {
+    res.locals.pendingApprovals = 0;
+  }
+
+  next();
+});
 
 // Middleware para passar flash messages e user para todas as views
 app.use((req, res, next) => {

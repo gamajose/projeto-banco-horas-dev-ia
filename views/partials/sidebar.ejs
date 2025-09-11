@@ -64,8 +64,7 @@
                     <span class="font-medium">Setores</span>
                 </a>
 
-                <a href="/admin/aprovacoes"
-                    class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'aprovacoes') ? 'active' : '' %>">
+                <a href="/admin/aprovacoes" class="sidebar-nav-item <%= (typeof activePage !== 'undefined' && activePage === 'aprovacoes') ? 'active' : '' %>">
                     <i class="sidebar-nav-icon fas fa-check-circle"></i>
                     <span class="font-medium">Aprovações</span>
                     <% if (locals.pendingApprovals> 0) { %>

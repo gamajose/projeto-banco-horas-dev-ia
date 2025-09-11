@@ -15,37 +15,61 @@
     initializeSuggestionModal();
   });
 
-
-   // --- Funcionalidade de navegação e menus (Dropdowns, Sidebar) ---
+  // --- Funcionalidade de navegação e menus (Dropdowns, Sidebar) ---
   function initializeNavigation() {
     const dropdowns = {
       "notifications-btn": "notifications-dropdown",
       "quick-actions-btn": "quick-actions-dropdown",
       "user-menu-btn": "user-menu-dropdown",
     };
-    
+
     Object.keys(dropdowns).forEach((btnId) => {
       const btn = document.getElementById(btnId);
       const dropdown = document.getElementById(dropdowns[btnId]);
+
       if (btn && dropdown) {
         btn.addEventListener("click", function (e) {
           e.stopPropagation();
-          Object.values(dropdowns).forEach((id) => {
-            if (id !== dropdowns[btnId]) document.getElementById(id)?.classList.add("hidden");
+
+          const isCurrentlyOpen = !dropdown.classList.contains("hidden");
+
+          Object.values(dropdowns).forEach((dId) => {
+            document.getElementById(dId)?.classList.add("hidden");
           });
-          dropdown.classList.toggle("hidden");
+
+          // Se o dropdown clicado NÃO estava aberto, então nós o abrimos
+          if (!isCurrentlyOpen) {
+            dropdown.classList.remove("hidden");
+
+          // Se for o dropdown de notificações, carrega o seu conteúdo
+          if (btnId === "notifications-btn") {
+              loadNotifications();
+            }
+          }
         });
       }
     });
 
-    document.addEventListener("click", () => {
-      Object.values(dropdowns).forEach((id) => document.getElementById(id)?.classList.add("hidden"));
+    document.addEventListener("click", function () {
+      Object.values(dropdowns).forEach((dropdownId) => {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+          dropdown.classList.add("hidden");
+        }
+      });
     });
 
-    Object.values(dropdowns).forEach((id) => {
-        document.getElementById(id)?.addEventListener("click", (e) => e.stopPropagation());
+    // Impede que o clique dentro de um menu o feche
+    Object.values(dropdowns).forEach((dropdownId) => {
+      const dropdown = document.getElementById(dropdownId);
+      if (dropdown) {
+        dropdown.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      }
     });
 
+    // Lógica da barra lateral móvel
     const mobileNavBtn = document.getElementById("mobile-nav-btn");
     const mobileOverlay = document.getElementById("mobile-overlay");
     const sidebar = document.getElementById("sidebar");
@@ -61,23 +85,27 @@
         document.body.style.overflow = "hidden";
       });
       mobileOverlay.addEventListener("click", closeSidebar);
-      document.addEventListener("keydown", (e) => (e.key === "Escape") && closeSidebar());
+      document.addEventListener(
+        "keydown",
+        (e) => e.key === "Escape" && closeSidebar()
+      );
     }
   }
-
 
   // --- Funcionalidade genérica para fechar modais ---
   function initializeGeneralModals() {
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") {
-        document.querySelectorAll('.fixed.z-50:not(.hidden)').forEach(modal => {
-            modal.classList.add('hidden');
-        });
+        document
+          .querySelectorAll(".fixed.z-50:not(.hidden)")
+          .forEach((modal) => {
+            modal.classList.add("hidden");
+          });
       }
     });
   }
 
-// --- Funcionalidade de formulários ---
+  // --- Funcionalidade de formulários ---
   function initializeForms() {
     // Auto-calculate total time
     const horaInicialInputs = document.querySelectorAll(
@@ -116,14 +144,13 @@
     });
   }
 
-
   // --- Funcionalidade de notificações ---
   function initializeNotifications() {
     setTimeout(function () {
-      const alerts = document.querySelectorAll('.alert');
+      const alerts = document.querySelectorAll(".alert");
       alerts.forEach(function (alert) {
-        alert.style.transition = 'opacity 0.5s ease';
-        alert.style.opacity = '0';
+        alert.style.transition = "opacity 0.5s ease";
+        alert.style.opacity = "0";
         setTimeout(function () {
           alert.remove();
         }, 500);
@@ -135,12 +162,12 @@
   function initializeTimeDisplay() {
     function updateTime() {
       const now = new Date();
-      const timeString = now.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
+      const timeString = now.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
       });
-      const timeElement = document.getElementById('current-time');
+      const timeElement = document.getElementById("current-time");
       if (timeElement) {
         timeElement.textContent = timeString;
       }
@@ -149,226 +176,264 @@
     setInterval(updateTime, 1000);
   }
 
- // --- Funcionalidade do modal de Ações Rápidas ---
+  // --- Funcionalidade do modal de Ações Rápidas ---
   function initializeQuickActionsModal() {
-    const modal = document.getElementById('modal-acao-rapida');
+    const modal = document.getElementById("modal-acao-rapida");
     if (!modal) return;
 
-    const btnEntrada = document.getElementById('acao-registrar-entrada');
-    const btnSaida = document.getElementById('acao-registrar-saida');
-    const btnClose = document.getElementById('modal-acao-rapida-close');
-    const form = document.getElementById('form-acao-rapida');
+    const btnEntrada = document.getElementById("acao-registrar-entrada");
+    const btnSaida = document.getElementById("acao-registrar-saida");
+    const btnClose = document.getElementById("modal-acao-rapida-close");
+    const form = document.getElementById("form-acao-rapida");
 
     const openModal = (config) => {
-        modal.querySelector('#modal-acao-rapida-title').textContent = config.title;
-        modal.querySelector('#acao-rapida-entrada').value = config.entrada;
-        modal.querySelector('#acao-rapida-feedback').innerHTML = '';
-        form.reset();
-        modal.querySelector('#acao-rapida-data').value = new Date().toISOString().split('T')[0];
-        modal.classList.remove('hidden');
+      modal.querySelector("#modal-acao-rapida-title").textContent =
+        config.title;
+      modal.querySelector("#acao-rapida-entrada").value = config.entrada;
+      modal.querySelector("#acao-rapida-feedback").innerHTML = "";
+      form.reset();
+      modal.querySelector("#acao-rapida-data").value = new Date()
+        .toISOString()
+        .split("T")[0];
+      modal.classList.remove("hidden");
     };
 
-    const closeModal = () => modal.classList.add('hidden');
+    const closeModal = () => modal.classList.add("hidden");
 
-    if (btnEntrada) btnEntrada.addEventListener('click', () => openModal({ title: 'Registrar Entrada de Horas', entrada: 'true' }));
-    if (btnSaida) btnSaida.addEventListener('click', () => openModal({ title: 'Registrar Saída de Horas', entrada: 'false' }));
-    if (btnClose) btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => (e.target === modal) && closeModal());
+    if (btnEntrada)
+      btnEntrada.addEventListener("click", () =>
+        openModal({ title: "Registrar Entrada de Horas", entrada: "true" })
+      );
+    if (btnSaida)
+      btnSaida.addEventListener("click", () =>
+        openModal({ title: "Registrar Saída de Horas", entrada: "false" })
+      );
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => e.target === modal && closeModal());
 
     if (form) {
-        form.addEventListener('submit', handleFormSubmit);
+      form.addEventListener("submit", handleFormSubmit);
     }
   }
 
-
   // --- Funcionalidade do modal de Sugestão ---
   function initializeSuggestionModal() {
-    const modal = document.getElementById('modal-sugestao');
+    const modal = document.getElementById("modal-sugestao");
     if (!modal) return;
 
-    const btnOpen = document.getElementById('acao-enviar-sugestao');
-    const btnClose = document.getElementById('modal-sugestao-close');
-    const form = document.getElementById('form-sugestao');
-    const categoriaSelect = document.getElementById('sugestao-categoria');
-    const categoriaOutroContainer = document.getElementById('sugestao-categoria-outro-container');
+    const btnOpen = document.getElementById("acao-enviar-sugestao");
+    const btnClose = document.getElementById("modal-sugestao-close");
+    const form = document.getElementById("form-sugestao");
+    const categoriaSelect = document.getElementById("sugestao-categoria");
+    const categoriaOutroContainer = document.getElementById(
+      "sugestao-categoria-outro-container"
+    );
 
     const openModal = () => {
-        form.reset();
-        modal.querySelector('#sugestao-feedback').innerHTML = '';
-        categoriaOutroContainer.classList.add('hidden');
-        modal.classList.remove('hidden');
+      form.reset();
+      modal.querySelector("#sugestao-feedback").innerHTML = "";
+      categoriaOutroContainer.classList.add("hidden");
+      modal.classList.remove("hidden");
     };
 
-    const closeModal = () => modal.classList.add('hidden');
+    const closeModal = () => modal.classList.add("hidden");
 
-    if (btnOpen) btnOpen.addEventListener('click', openModal);
-    if (btnClose) btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => (e.target === modal) && closeModal());
-    
-    categoriaSelect.addEventListener('change', () => {
-        categoriaOutroContainer.classList.toggle('hidden', categoriaSelect.value !== 'Outro');
+    if (btnOpen) btnOpen.addEventListener("click", openModal);
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => e.target === modal && closeModal());
+
+    categoriaSelect.addEventListener("change", () => {
+      categoriaOutroContainer.classList.toggle(
+        "hidden",
+        categoriaSelect.value !== "Outro"
+      );
     });
 
-    form.addEventListener('submit', handleSuggestionSubmit);
+    form.addEventListener("submit", handleSuggestionSubmit);
   }
 
   // --- Funções de Submissão de Formulários (AJAX) ---
   async function handleFormSubmit(e) {
-      e.preventDefault();
-      const form = e.target;
-      const feedbackDiv = form.nextElementSibling;
-      const submitBtn = form.querySelector('button[type="submit"]');
-      
-      feedbackDiv.textContent = 'A enviar...';
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
+    e.preventDefault();
+    const form = e.target;
+    const feedbackDiv = form.nextElementSibling;
+    const submitBtn = form.querySelector('button[type="submit"]');
 
-      try {
-          const response = await fetch('/api/v1/movements', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(Object.fromEntries(new FormData(form))),
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.message);
+    feedbackDiv.textContent = "A enviar...";
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
 
-          feedbackDiv.textContent = 'Solicitação enviada!';
-          if (window.showNotification) window.showNotification(result.message, 'success');
-          setTimeout(() => form.closest('.fixed').classList.add('hidden'), 1500);
+    try {
+      const response = await fetch("/api/v1/movements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
 
-      } catch (error) {
-          feedbackDiv.textContent = `Erro: ${error.message}`;
-          if (window.showNotification) window.showNotification(`Erro: ${error.message}`, 'error');
-      } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
-      }
+      feedbackDiv.textContent = "Solicitação enviada!";
+      if (window.showNotification)
+        window.showNotification(result.message, "success");
+      setTimeout(() => form.closest(".fixed").classList.add("hidden"), 1500);
+    } catch (error) {
+      feedbackDiv.textContent = `Erro: ${error.message}`;
+      if (window.showNotification)
+        window.showNotification(`Erro: ${error.message}`, "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
   }
 
-async function handleSuggestionSubmit(e) {
-      e.preventDefault();
-      const form = e.target;
-      const feedbackDiv = form.nextElementSibling;
-      const submitBtn = form.querySelector('button[type="submit"]');
+  async function handleSuggestionSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const feedbackDiv = form.nextElementSibling;
+    const submitBtn = form.querySelector('button[type="submit"]');
 
-      feedbackDiv.textContent = 'A enviar para o GitHub...';
-      const originalText = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
+    feedbackDiv.textContent = "A enviar para o GitHub...";
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML =
+      '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
 
-      try {
-          const response = await fetch('/api/v1/sugestao', {
-              method: 'POST',
-              body: new FormData(form)
-          });
-          const result = await response.json();
-          if (!response.ok) throw new Error(result.message);
+    try {
+      const response = await fetch("/api/v1/sugestao", {
+        method: "POST",
+        body: new FormData(form),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
 
-          feedbackDiv.textContent = result.message;
-          if (window.showNotification) window.showNotification(result.message, 'success');
-          setTimeout(() => form.closest('.fixed').classList.add('hidden'), 3000);
-
-      } catch (error) {
-          feedbackDiv.textContent = `Erro: ${error.message}`;
-          if (window.showNotification) window.showNotification(`Erro: ${error.message}`, 'error');
-      } finally {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = originalText;
-      }
+      feedbackDiv.textContent = result.message;
+      if (window.showNotification)
+        window.showNotification(result.message, "success");
+      setTimeout(() => form.closest(".fixed").classList.add("hidden"), 3000);
+    } catch (error) {
+      feedbackDiv.textContent = `Erro: ${error.message}`;
+      if (window.showNotification)
+        window.showNotification(`Erro: ${error.message}`, "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
   }
 
   // --- LÓGICA PARA MODAL DE AÇÕES RÁPIDAS (ADMIN) ---
-  document.addEventListener('DOMContentLoaded', () => {
-    console.log("Módulo de Ações Rápidas carregado!")
-    const modal = document.getElementById('modal-acao-rapida');
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("Módulo de Ações Rápidas carregado!");
+    const modal = document.getElementById("modal-acao-rapida");
     if (!modal) return;
 
     // Elementos do Modal
-    const title = document.getElementById('modal-acao-rapida-title');
-    const form = document.getElementById('form-acao-rapida');
-    const feedbackDiv = document.getElementById('acao-rapida-feedback');
-    const dataInput = document.getElementById('acao-rapida-data');
-    const hiddenInputEntrada = document.getElementById('acao-rapida-entrada');
-    const containerTipoAjuste = document.getElementById('container-tipo-ajuste');
-    const selectTipoAjuste = document.getElementById('acao-rapida-tipo');
+    const title = document.getElementById("modal-acao-rapida-title");
+    const form = document.getElementById("form-acao-rapida");
+    const feedbackDiv = document.getElementById("acao-rapida-feedback");
+    const dataInput = document.getElementById("acao-rapida-data");
+    const hiddenInputEntrada = document.getElementById("acao-rapida-entrada");
+    const containerTipoAjuste = document.getElementById(
+      "container-tipo-ajuste"
+    );
+    const selectTipoAjuste = document.getElementById("acao-rapida-tipo");
 
     // Botões que abrem o modal
-    const btnEntrada = document.getElementById('acao-registrar-entrada');
-    const btnSaida = document.getElementById('acao-registrar-saida');
-    const btnAjuste = document.getElementById('acao-solicitar-ajuste');
-    const btnClose = document.getElementById('modal-acao-rapida-close');
+    const btnEntrada = document.getElementById("acao-registrar-entrada");
+    const btnSaida = document.getElementById("acao-registrar-saida");
+    const btnAjuste = document.getElementById("acao-solicitar-ajuste");
+    const btnClose = document.getElementById("modal-acao-rapida-close");
 
     const openModal = (config) => {
-        title.textContent = config.title;
-        hiddenInputEntrada.value = config.entrada;
-        feedbackDiv.innerHTML = '';
-        form.reset();
-        
-        // Preenche a data atual
-        const today = new Date();
-        dataInput.value = today.toISOString().split('T')[0];
+      title.textContent = config.title;
+      hiddenInputEntrada.value = config.entrada;
+      feedbackDiv.innerHTML = "";
+      form.reset();
 
-        // Lógica para "Solicitar Ajuste"
-        if (config.showTypeSelector) {
-            containerTipoAjuste.classList.remove('hidden');
-            selectTipoAjuste.setAttribute('name', 'entrada');
-            hiddenInputEntrada.removeAttribute('name');
-        } else {
-            containerTipoAjuste.classList.add('hidden');
-            hiddenInputEntrada.setAttribute('name', 'entrada');
-            selectTipoAjuste.removeAttribute('name');
-        }
-        modal.classList.remove('hidden');
+      // Preenche a data atual
+      const today = new Date();
+      dataInput.value = today.toISOString().split("T")[0];
+
+      // Lógica para "Solicitar Ajuste"
+      if (config.showTypeSelector) {
+        containerTipoAjuste.classList.remove("hidden");
+        selectTipoAjuste.setAttribute("name", "entrada");
+        hiddenInputEntrada.removeAttribute("name");
+      } else {
+        containerTipoAjuste.classList.add("hidden");
+        hiddenInputEntrada.setAttribute("name", "entrada");
+        selectTipoAjuste.removeAttribute("name");
+      }
+      modal.classList.remove("hidden");
     };
 
     const closeModal = () => {
-        modal.classList.add('hidden');
+      modal.classList.add("hidden");
     };
 
     // Listeners dos botões
-    if (btnEntrada) btnEntrada.addEventListener('click', () => openModal({ title: 'Registrar Entrada de Horas', entrada: 'true', showTypeSelector: false }));
-    if (btnSaida) btnSaida.addEventListener('click', () => openModal({ title: 'Registrar Saída de Horas', entrada: 'false', showTypeSelector: false }));
-    if (btnAjuste) btnAjuste.addEventListener('click', () => openModal({ title: 'Solicitar Ajuste de Ponto', entrada: 'true', showTypeSelector: true }));
+    if (btnEntrada)
+      btnEntrada.addEventListener("click", () =>
+        openModal({
+          title: "Registrar Entrada de Horas",
+          entrada: "true",
+          showTypeSelector: false,
+        })
+      );
+    if (btnSaida)
+      btnSaida.addEventListener("click", () =>
+        openModal({
+          title: "Registrar Saída de Horas",
+          entrada: "false",
+          showTypeSelector: false,
+        })
+      );
+    if (btnAjuste)
+      btnAjuste.addEventListener("click", () =>
+        openModal({
+          title: "Solicitar Ajuste de Ponto",
+          entrada: "true",
+          showTypeSelector: true,
+        })
+      );
 
-    if (btnClose) btnClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', e => (e.target === modal) && closeModal());
+    if (btnClose) btnClose.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => e.target === modal && closeModal());
 
     // Listener do formulário
     if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            feedbackDiv.textContent = 'A enviar...';
-            feedbackDiv.className = 'mt-4 text-sm font-medium text-gray-500';
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        feedbackDiv.textContent = "A enviar...";
+        feedbackDiv.className = "mt-4 text-sm font-medium text-gray-500";
 
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
 
-            try {
-                const response = await fetch('/api/v1/movements', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
-                const result = await response.json();
-                if (!response.ok) throw new Error(result.message || 'Ocorreu um erro.');
+        try {
+          const response = await fetch("/api/v1/movements", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          if (!response.ok)
+            throw new Error(result.message || "Ocorreu um erro.");
 
-                feedbackDiv.textContent = 'Solicitação enviada com sucesso!';
-                feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
+          feedbackDiv.textContent = "Solicitação enviada com sucesso!";
+          feedbackDiv.className = "mt-4 text-sm font-medium text-green-600";
 
-                setTimeout(() => {
-                    closeModal();
-                }, 1500);
-            } catch (error) {
-                feedbackDiv.textContent = `Erro: ${error.message}`;
-                feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
-            }
-        });
+          setTimeout(() => {
+            closeModal();
+          }, 1500);
+        } catch (error) {
+          feedbackDiv.textContent = `Erro: ${error.message}`;
+          feedbackDiv.className = "mt-4 text-sm font-medium text-red-600";
+        }
+      });
     }
-});
-
- 
-
+  });
 
   // --- Funcionalidade de modais ---
   function initializeModals() {
@@ -389,8 +454,6 @@ async function handleSuggestionSubmit(e) {
       }
     });
   }
-
-  
 
   // --- Funções de utilidade globais ---
   window.showNotification = function (message, type = "info") {
@@ -443,7 +506,13 @@ async function handleSuggestionSubmit(e) {
     const horaFinal = document.querySelector('input[name="hora_final"]');
     const horaTotal = document.querySelector('input[name="hora_total"]');
 
-    if (horaInicial && horaFinal && horaTotal && horaInicial.value && horaFinal.value) {
+    if (
+      horaInicial &&
+      horaFinal &&
+      horaTotal &&
+      horaInicial.value &&
+      horaFinal.value
+    ) {
       const inicio = timeToMinutes(horaInicial.value);
       const fim = timeToMinutes(horaFinal.value);
       let diferenca = fim - inicio;
@@ -462,7 +531,9 @@ async function handleSuggestionSubmit(e) {
   function minutesToTime(totalMinutes) {
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
   }
 
   function validateForm(form) {
@@ -551,70 +622,126 @@ async function handleSuggestionSubmit(e) {
     validateForm,
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const modalSugestao = document.getElementById('modal-sugestao');
+  document.addEventListener("DOMContentLoaded", () => {
+    const modalSugestao = document.getElementById("modal-sugestao");
     if (!modalSugestao) return;
 
-    const btnAbrirSugestao = document.getElementById('acao-enviar-sugestao');
-    const btnFecharSugestao = document.getElementById('modal-sugestao-close');
-    const formSugestao = document.getElementById('form-sugestao');
-    const categoriaSelect = document.getElementById('sugestao-categoria');
-    const categoriaOutroContainer = document.getElementById('sugestao-categoria-outro-container');
-    const feedbackDiv = document.getElementById('sugestao-feedback');
+    const btnAbrirSugestao = document.getElementById("acao-enviar-sugestao");
+    const btnFecharSugestao = document.getElementById("modal-sugestao-close");
+    const formSugestao = document.getElementById("form-sugestao");
+    const categoriaSelect = document.getElementById("sugestao-categoria");
+    const categoriaOutroContainer = document.getElementById(
+      "sugestao-categoria-outro-container"
+    );
+    const feedbackDiv = document.getElementById("sugestao-feedback");
 
     const openModal = () => {
-        formSugestao.reset();
-        feedbackDiv.innerHTML = '';
-        categoriaOutroContainer.classList.add('hidden');
-        modalSugestao.classList.remove('hidden');
+      formSugestao.reset();
+      feedbackDiv.innerHTML = "";
+      categoriaOutroContainer.classList.add("hidden");
+      modalSugestao.classList.remove("hidden");
     };
 
-    const closeModal = () => modalSugestao.classList.add('hidden');
+    const closeModal = () => modalSugestao.classList.add("hidden");
 
-    if (btnAbrirSugestao) btnAbrirSugestao.addEventListener('click', openModal);
-    if (btnFecharSugestao) btnFecharSugestao.addEventListener('click', closeModal);
-    modalSugestao.addEventListener('click', e => (e.target === modalSugestao) && closeModal());
-    
-    categoriaSelect.addEventListener('change', () => {
-        if (categoriaSelect.value === 'Outro') {
-            categoriaOutroContainer.classList.remove('hidden');
-        } else {
-            categoriaOutroContainer.classList.add('hidden');
-        }
+    if (btnAbrirSugestao) btnAbrirSugestao.addEventListener("click", openModal);
+    if (btnFecharSugestao)
+      btnFecharSugestao.addEventListener("click", closeModal);
+    modalSugestao.addEventListener(
+      "click",
+      (e) => e.target === modalSugestao && closeModal()
+    );
+
+    categoriaSelect.addEventListener("change", () => {
+      if (categoriaSelect.value === "Outro") {
+        categoriaOutroContainer.classList.remove("hidden");
+      } else {
+        categoriaOutroContainer.classList.add("hidden");
+      }
     });
 
-    formSugestao.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const submitBtn = formSugestao.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
-        feedbackDiv.className = 'mt-4 text-sm font-medium text-gray-500';
-        feedbackDiv.textContent = 'A enviar para o GitHub...';
+    formSugestao.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = formSugestao.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML =
+        '<i class="fas fa-spinner fa-spin mr-2"></i>A enviar...';
+      feedbackDiv.className = "mt-4 text-sm font-medium text-gray-500";
+      feedbackDiv.textContent = "A enviar para o GitHub...";
 
-        const formData = new FormData(formSugestao);
+      const formData = new FormData(formSugestao);
 
-        try {
-            const response = await fetch('/api/v1/sugestao', {
-                method: 'POST',
-                body: formData // FormData lida com 'multipart/form-data' automaticamente
-            });
+      try {
+        const response = await fetch("/api/v1/sugestao", {
+          method: "POST",
+          body: formData, // FormData lida com 'multipart/form-data' automaticamente
+        });
 
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message);
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
 
-            feedbackDiv.className = 'mt-4 text-sm font-medium text-green-600';
-            feedbackDiv.textContent = result.message;
+        feedbackDiv.className = "mt-4 text-sm font-medium text-green-600";
+        feedbackDiv.textContent = result.message;
 
-            setTimeout(closeModal, 3000);
-
-        } catch (error) {
-            feedbackDiv.className = 'mt-4 text-sm font-medium text-red-600';
-            feedbackDiv.textContent = `Erro: ${error.message}`;
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Enviar para o GitHub';
-        }
+        setTimeout(closeModal, 3000);
+      } catch (error) {
+        feedbackDiv.className = "mt-4 text-sm font-medium text-red-600";
+        feedbackDiv.textContent = `Erro: ${error.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = "Enviar para o GitHub";
+      }
     });
-});
+  });
+  async function loadNotifications() {
+    const container = document.querySelector(
+      "#notifications-dropdown .max-h-96"
+    );
+    if (!container) return;
 
+    // Mostra o estado de "carregando"
+    container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">Carregando notificações...</div>`;
+
+    try {
+      // Reutiliza a API do dashboard que já busca as pendências
+      const response = await fetch("/admin/api/dashboard-stats");
+      const data = await response.json();
+
+      if (!data.success || !data.pendingMovements) {
+        throw new Error("Não foi possível carregar as notificações.");
+      }
+
+      // Limpa o container
+      container.innerHTML = "";
+
+      if (data.pendingMovements.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-gray-500 text-sm">Nenhuma notificação nova.</div>`;
+      } else {
+        data.pendingMovements.forEach((mov) => {
+          const notificationHTML = `
+                    <a href="/admin/aprovacoes" class="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">
+                        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                            <i class="fas fa-hourglass-half text-amber-600"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-800 truncate">${
+                              mov.colaborador_nome
+                            }</p>
+                            <p class="text-xs text-gray-500">
+                                solicitou ${mov.hora_total.substring(
+                                  0,
+                                  5
+                                )} horas (${mov.entrada ? "Crédito" : "Débito"})
+                            </p>
+                        </div>
+                    </a>
+                `;
+          container.innerHTML += notificationHTML;
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao carregar notificações:", error);
+      container.innerHTML = `<div class="p-4 text-center text-red-500 text-sm">Erro ao carregar.</div>`;
+    }
+  }
 })();

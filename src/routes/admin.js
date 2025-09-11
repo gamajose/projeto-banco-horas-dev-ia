@@ -203,7 +203,7 @@ router.get("/api/recent-activity", requireStaff, async (req, res) => {
         FROM
             movimentacoes_logs ml
         JOIN
-            perfis p ON ml.perfil_id = p.id
+            perfis p ON ml.usuario_id = p.id
         JOIN
             setores d ON p.setor_id = d.id
         ORDER BY
@@ -371,7 +371,7 @@ router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
     if (req.userProfile) {
       await MovementLog.create({
         movimentacao_id: movementId,
-        perfil_id: req.userProfile.id,
+        usuario_id: req.userProfile.id,
         acao: "APROVADO",
         detalhes: `Movimentação aprovada pelo administrador.`,
       });
@@ -401,7 +401,7 @@ router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
     if (req.userProfile) {
       await MovementLog.create({
         movimentacao_id: movementId,
-        perfil_id: req.userProfile.id,
+        usuario_id: req.userProfile.id,
         acao: "REJEITADO",
         detalhes: `Movimentação rejeitada pelo administrador.`,
       });
@@ -516,7 +516,7 @@ router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
       if (req.userProfile) {
         await MovementLog.create({
           movimentacao_id: mov.id,
-          perfil_id: req.userProfile.id,
+          usuario_id: req.userProfile.id,
           acao: "APROVADO",
           detalhes: `Movimentação aprovada em massa pelo administrador.`,
         });

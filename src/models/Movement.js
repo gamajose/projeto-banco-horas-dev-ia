@@ -59,8 +59,12 @@ class Movement {
   static async findAll(filters = {}) {
     let sql = `
       SELECT
-        m.*, p.nome as colaborador_nome, s.nome as setor_nome,
-        st.nome as status_nome, st.analise, st.autorizado,
+        m.*, 
+        p.nome as colaborador_nome, -- CORREÇÃO APLICADA AQUI
+        s.nome as setor_nome,
+        st.nome as status_nome, 
+        st.analise, 
+        st.autorizado,
         fp.nome as forma_pagamento_nome
       FROM movimentacoes m
       JOIN perfis p ON m.colaborador_id = p.id

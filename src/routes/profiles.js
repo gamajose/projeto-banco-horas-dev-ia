@@ -1,6 +1,7 @@
 const express = require('express');
 const { isAuthenticated, requireStaff } = require('../middleware/auth');
 const Profile = require('../models/Profile');
+const Movement = require('../models/Movement');
 
 const router = express.Router();
 
@@ -37,8 +38,20 @@ router.patch('/:id/role', async (req, res) => {
         res.json({ success: true, message: 'Status de gerente atualizado com sucesso!', profile: updatedProfile });
     } catch (error) {
         console.error("Erro ao atualizar o status de gerente:", error);
-        res.status(500).json({ error: 'Erro interno do servidor.' });
+            res.status(500).json({ error: 'Erro interno do servidor.' });
+        }
+    });
+    
+router.get('/:id/movements', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const movements = await Movement.findAll({ colaborador_id: id }); 
+        res.json({ success: true, movements });
+    } catch (error) {
+        console.error("Erro ao buscar movimentações do perfil:", error);
+        res.status(500).json({ success: false, error: 'Erro ao buscar movimentações.' });
     }
 });
+
 
 module.exports = router;
