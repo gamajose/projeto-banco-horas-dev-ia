@@ -39,6 +39,7 @@ router.post('/login', async (req, res) => {
             req.flash('error_msg', 'Esta conta foi desativada. Entre em contato com o administrador.');
             return res.redirect('/auth/login');
         }
+        await User.updateLastLogin(user.id);
 
         // Se tudo estiver correto, cria o token JWT
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {

@@ -1,6 +1,7 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const { isAuthenticated, requireStaff } = require("../middleware/auth");
+const NotificationService = require("../notificationService");
 const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Department = require("../models/Department");
@@ -215,12 +216,10 @@ router.get("/api/recent-activity", requireStaff, async (req, res) => {
     res.status(200).json({ success: true, activities: recentActivity });
   } catch (error) {
     console.error("Error fetching recent activity:", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Erro ao carregar a atividade recente.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Erro ao carregar a atividade recente.",
+    });
   }
 });
 
@@ -377,6 +376,15 @@ router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
       });
     }
 
+    const movement = await Movement.findById(movementId);
+    const collaboratorProfile = await Profile.findById(movement.colaborador_id);
+    await NotificationService.movementStatusToCollaborator(
+      movement,
+      collaboratorProfile,
+      req.user,
+      "Aprovada"
+    );
+
     res.json({ success: true, message: "Movimentação aprovada com sucesso." });
   } catch (error) {
     console.error("Erro ao aprovar movimentação:", error);
@@ -406,6 +414,17 @@ router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
         detalhes: `Movimentação rejeitada pelo administrador.`,
       });
     }
+
+    // Enviar notificação por e-mail
+    const movement = await Movement.findById(movementId);
+    const collaboratorProfile = await Profile.findById(movement.colaborador_id);
+    await NotificationService.movementStatusToCollaborator(
+      movement,
+      collaboratorProfile,
+      req.user,
+      "Rejeitada"
+    );
+
     res.json({ success: true, message: "Movimentação rejeitada com sucesso." });
   } catch (error) {
     console.error("Erro ao rejeitar movimentação:", error);
@@ -490,12 +509,10 @@ router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
 
     if (!pendingStatus || !approvedStatus) {
       console.error("Erro: Status 'Pendente' ou 'Aprovado' não encontrado.");
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Status "Pendente" ou "Aprovado" não encontrado.',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'Status "Pendente" ou "Aprovado" não encontrado.',
+      });
     }
 
     const pendingMovements = await Movement.findAll({

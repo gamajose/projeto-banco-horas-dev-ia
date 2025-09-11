@@ -815,7 +815,7 @@
       }, 300);
     });
 
-    // ***** INÍCIO DA CORREÇÃO PRINCIPAL *****
+
     // Usamos 'mousedown' para capturar o clique antes que o campo de pesquisa perca o foco.
     searchResultsContainer.addEventListener("mousedown", (event) => {
       const searchItem = event.target.closest(".search-result-item");
@@ -830,7 +830,6 @@
         searchResultsContainer.classList.add("hidden");
       }
     });
-    // ***** FIM DA CORREÇÃO PRINCIPAL *****
 
     // Esconde os resultados se o campo de pesquisa perder o foco
     searchInput.addEventListener("blur", () => {
@@ -960,6 +959,9 @@
         .addEventListener("click", () => modal.classList.add("hidden"));
     }
   }
+
+  // Anexa a função à `window` para torná-la global
+  window.showProfileModal = showProfileModal;
 
   document.addEventListener("click", (event) => {
     // Lida com o clique num item do resultado da pesquisa

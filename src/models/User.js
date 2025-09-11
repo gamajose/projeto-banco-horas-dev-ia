@@ -8,6 +8,11 @@ class User {
     const sql = `SELECT * FROM usuarios WHERE id = $1`;
     return await db.get(sql, [id]);
   }
+  
+  static async updateLastLogin(id) {
+    const sql = `UPDATE usuarios SET last_login = CURRENT_TIMESTAMP WHERE id = $1`;
+    await db.run(sql, [id]);
+  }
 
   static async findByLogin(login) {
         const sql = `SELECT * FROM usuarios WHERE email = $1 OR username = $1`;
@@ -26,6 +31,11 @@ class User {
 
   static async findAll() {
     const sql = `SELECT * FROM usuarios ORDER BY first_name`;
+    return await db.all(sql);
+  }
+
+  static async findAllAdmins() {
+    const sql = `SELECT * FROM usuarios WHERE is_staff = TRUE AND is_active = TRUE`;
     return await db.all(sql);
   }
 
