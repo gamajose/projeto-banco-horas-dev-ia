@@ -33,12 +33,14 @@ class Database {
         id SERIAL PRIMARY KEY,
         first_name VARCHAR(100) NOT NULL,
         last_name VARCHAR(100) NOT NULL,
+        username VARCHAR(100) UNIQUE,
         email VARCHAR(255) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
         is_active BOOLEAN DEFAULT true,
         is_staff BOOLEAN DEFAULT false,
-        is_manager BOOLEAN DEFAULT false,
-        foto_url TEXT,
+        force_password_change BOOLEAN DEFAULT TRUE,
+        reset_password_token TEXT,
+        reset_password_expires TIMESTAMP,
         last_login TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -52,12 +54,33 @@ class Database {
       )`,
       `CREATE TABLE IF NOT EXISTS perfis (
         id SERIAL PRIMARY KEY,
-        usuario_id INT NOT NULL REFERENCES usuarios(id),
-        setor_id INT REFERENCES setores(id),
-        cargo VARCHAR(255),
-        carga_horaria_primeira INT DEFAULT 480,
-        carga_horaria_segunda INT DEFAULT 240,
-        observacoes TEXT,
+        usuario_id INT NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+        setor_id INT REFERENCES setores(id) ON DELETE SET NULL,
+        nome VARCHAR(255),
+        gerente BOOLEAN DEFAULT FALSE,
+        ch_primeira TIME,
+        ch_segunda TIME,
+        foto_url TEXT,
+        data_nascimento DATE,
+        sexo VARCHAR(50),
+        cpf VARCHAR(20),
+        telefone VARCHAR(20),
+        linkedin VARCHAR(255),
+        cep VARCHAR(10),
+        logradouro VARCHAR(255),
+        bairro VARCHAR(100),
+        cidade VARCHAR(100),
+        estado VARCHAR(50),
+        numero VARCHAR(20),
+        funcao VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS status (
+        id SERIAL PRIMARY KEY,
+        nome VARCHAR(100) NOT NULL UNIQUE,
+        analise BOOLEAN DEFAULT FALSE,
+        autorizado BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
@@ -87,13 +110,26 @@ class Database {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      `CREATE TABLE IF NOT EXISTS logs_movimentacao (
+      `CREATE TABLE IF NOT EXISTS movimentacoes (
         id SERIAL PRIMARY KEY,
-        movimentacao_id INT NOT NULL REFERENCES movimentacoes(id),
+        colaborador_id INT NOT NULL REFERENCES perfis(id) ON DELETE CASCADE,
+        data_movimentacao DATE NOT NULL,
+        hora_inicial TIME,
+        hora_final TIME,
+        hora_total VARCHAR(10),
+        motivo TEXT,
+        entrada BOOLEAN DEFAULT true,
+        status_id INT REFERENCES status(id),
+        forma_pagamento_id INT REFERENCES formas_pagamento(id),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS movimentacoes_logs (
+        id SERIAL PRIMARY KEY,
+        movimentacao_id INT NOT NULL REFERENCES movimentacoes(id) ON DELETE CASCADE,
         usuario_id INT NOT NULL REFERENCES usuarios(id),
         acao VARCHAR(100) NOT NULL,
-        valores_antigos TEXT,
-        valores_novos TEXT,
+        detalhes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`
     ];
@@ -141,13 +177,15 @@ class Database {
       const hashedPassword = await bcrypt.hash('admin123', 12);
       const result = await this.run(
         "INSERT INTO usuarios (first_name, last_name, email, password, is_active, is_staff, is_manager) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", 
-        ['Admin', 'Sistema', 'admin@bancohoras.com', hashedPassword, true, true, true]
+        ['admin', 'Sistema', 'admin@bancohoras.com', hashedPassword, true, true, true]
       );
 
-      const sectorId = await this.get("SELECT id FROM setores WHERE nome = 'Administração'");
+      const adminId = result.rows ? result.rows[0].id : result.lastID;
+
+      const sector = await this.get("SELECT id FROM setores WHERE nome = 'Administração'");
       await this.run(
-        "INSERT INTO perfis (usuario_id, setor_id, cargo) VALUES ($1, $2, $3)",
-        [result.rows ? result.rows[0].id : result.lastID, sectorId.id, 'Administrador do Sistema']
+        "INSERT INTO perfis (usuario_id, setor_id, nome, gerente, funcao) VALUES ($1, $2, $3, $4, $5)",
+        [adminId, sector.id, 'Administrador do Sistema', true, 'Administrador']
       );
 
       console.log('Usuário administrador criado: admin@bancohoras.com / admin123');
@@ -170,51 +208,101 @@ class Database {
   // ------------------------------
   // Métodos genéricos
   // ------------------------------
+  // async query(sql, params = []) {
+  //   if (this.type === 'sqlite') {
+  //     return new Promise((resolve, reject) => {
+  //       this.db.all(sql, params, (err, rows) => {
+  //         if (err) reject(err);
+  //         else resolve({ rows });
+  //       });
+  //     });
+  //   } else {
+  //     const client = await this.pool.connect();
+  //     try {
+  //       return await client.query(sql, params);
+  //     } finally {
+  //       client.release();
+  //     }
+  //   }
+  // }
+
+  // async run(sql, params = []) {
+  //   if (this.type === 'sqlite') {
+  //     return new Promise((resolve, reject) => {
+  //       this.db.run(sql, params, function (err) {
+  //         if (err) reject(err);
+  //         else resolve({ lastID: this.lastID, changes: this.changes });
+  //       });
+  //     });
+  //   } else {
+  //     const client = await this.pool.connect();
+  //     try {
+  //       return await client.query(sql, params);
+  //     } finally {
+  //       client.release();
+  //     }
+  //   }
+  // }
+
+  // async get(sql, params = []) {
+  //   if (this.type === 'sqlite') {
+  //     return new Promise((resolve, reject) => {
+  //       this.db.get(sql, params, (err, row) => {
+  //         if (err) reject(err);
+  //         else resolve(row);
+  //       });
+  //     });
+  //   } else {
+  //     const client = await this.pool.connect();
+  //     try {
+  //       const result = await client.query(sql, params);
+  //       return result.rows[0];
+  //     } finally {
+  //       client.release();
+  //     }
+  //   }
+  // }
+
+  // async all(sql, params = []) {
+  //   if (this.type === 'sqlite') {
+  //     return new Promise((resolve, reject) => {
+  //       this.db.all(sql, params, (err, rows) => {
+  //         if (err) reject(err);
+  //         else resolve(rows);
+  //       });
+  //     });
+  //   } else {
+  //     const client = await this.pool.connect();
+  //     try {
+  //       const result = await client.query(sql, params);
+  //       return result.rows;
+  //     } finally {
+  //       client.release();
+  //     }
+  //   }
+  // }
+   // ------------------------------
+  // Métodos genéricos
+  // ------------------------------
   async query(sql, params = []) {
-    if (this.type === 'sqlite') {
-      return new Promise((resolve, reject) => {
-        this.db.all(sql, params, (err, rows) => {
-          if (err) reject(err);
-          else resolve({ rows });
-        });
-      });
-    } else {
       const client = await this.pool.connect();
       try {
         return await client.query(sql, params);
       } finally {
         client.release();
       }
-    }
   }
 
   async run(sql, params = []) {
-    if (this.type === 'sqlite') {
-      return new Promise((resolve, reject) => {
-        this.db.run(sql, params, function (err) {
-          if (err) reject(err);
-          else resolve({ lastID: this.lastID, changes: this.changes });
-        });
-      });
-    } else {
       const client = await this.pool.connect();
       try {
         return await client.query(sql, params);
       } finally {
         client.release();
       }
-    }
   }
 
   async get(sql, params = []) {
-    if (this.type === 'sqlite') {
-      return new Promise((resolve, reject) => {
-        this.db.get(sql, params, (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        });
-      });
-    } else {
       const client = await this.pool.connect();
       try {
         const result = await client.query(sql, params);
@@ -222,18 +310,9 @@ class Database {
       } finally {
         client.release();
       }
-    }
   }
 
   async all(sql, params = []) {
-    if (this.type === 'sqlite') {
-      return new Promise((resolve, reject) => {
-        this.db.all(sql, params, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
-    } else {
       const client = await this.pool.connect();
       try {
         const result = await client.query(sql, params);
@@ -241,7 +320,6 @@ class Database {
       } finally {
         client.release();
       }
-    }
   }
 }
 
