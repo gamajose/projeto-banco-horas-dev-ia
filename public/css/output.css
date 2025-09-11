@@ -2114,6 +2114,10 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 36rem;
 }
 
+.max-w-xs {
+  max-width: 20rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }
@@ -3740,6 +3744,10 @@ h1, h2, h3, h4, h5, h6 {
 
   .sm\:hidden {
     display: none;
+  }
+
+  .sm\:w-64 {
+    width: 16rem;
   }
 
   .sm\:w-full {

@@ -29,8 +29,8 @@ router.get('/dashboard', isAuthenticated, async (req, res) => {
     const recentMovements = await Movement.findAll({ limit: 5 });
     const departmentStats = await Department.getDepartmentStats();
     const allUsers = await User.findAll();
-    const totalUsers = allUsers.length;
     const todosColaboradores = await Profile.findAll();
+    const totalUsers = todosColaboradores.length;
 
     res.render('dashboard/index', {
       title: 'Dashboard do Administrador',
