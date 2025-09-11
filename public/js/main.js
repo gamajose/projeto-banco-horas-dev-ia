@@ -13,6 +13,8 @@
     // Funções específicas dos novos modais
     initializeQuickActionsModal();
     initializeSuggestionModal();
+
+    initializeGlobalSearch();
   });
 
   // --- Funcionalidade de navegação e menus (Dropdowns, Sidebar) ---
@@ -41,8 +43,8 @@
           if (!isCurrentlyOpen) {
             dropdown.classList.remove("hidden");
 
-          // Se for o dropdown de notificações, carrega o seu conteúdo
-          if (btnId === "notifications-btn") {
+            // Se for o dropdown de notificações, carrega o seu conteúdo
+            if (btnId === "notifications-btn") {
               loadNotifications();
             }
           }
@@ -744,4 +746,236 @@
       container.innerHTML = `<div class="p-4 text-center text-red-500 text-sm">Erro ao carregar.</div>`;
     }
   }
+
+  /**
+   * Inicializa a funcionalidade da barra de pesquisa global.
+   */
+  function initializeGlobalSearch() {
+    const searchInput = document.getElementById("global-search");
+    if (!searchInput) return;
+
+    let searchResultsContainer = document.getElementById(
+      "search-results-container"
+    );
+    if (!searchResultsContainer) {
+      searchResultsContainer = document.createElement("div");
+      searchResultsContainer.id = "search-results-container";
+      // Garante que o container de resultados fique posicionado corretamente
+      searchResultsContainer.className =
+        "absolute mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden z-50";
+      searchInput.parentElement.appendChild(searchResultsContainer);
+    }
+
+    let debounceTimer;
+
+    searchInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        const query = searchInput.value;
+        if (query.length < 2) {
+          searchResultsContainer.classList.add("hidden");
+          return;
+        }
+
+        searchResultsContainer.classList.remove("hidden");
+        searchResultsContainer.innerHTML =
+          '<div class="px-4 py-2 text-sm text-gray-500">A pesquisar...</div>';
+
+        try {
+          const response = await fetch(
+            `/api/v1/search/profiles?q=${encodeURIComponent(query)}`
+          );
+          const result = await response.json();
+
+          if (result.success && result.profiles.length > 0) {
+            searchResultsContainer.innerHTML = result.profiles
+              .map(
+                (profile) => `
+                        <div class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer search-result-item" data-profile-id="${
+                          profile.id
+                        }">
+                            <img src="${
+                              profile.foto_url || "/images/default-avatar.png"
+                            }" alt="${
+                  profile.nome
+                }" class="w-8 h-8 rounded-full object-cover mr-3">
+                            <span class="font-medium">${profile.nome}</span>
+                        </div>
+                    `
+              )
+              .join("");
+          } else {
+            searchResultsContainer.innerHTML =
+              '<div class="px-4 py-2 text-sm text-gray-500">Nenhum resultado encontrado.</div>';
+          }
+        } catch (error) {
+          searchResultsContainer.innerHTML =
+            '<div class="px-4 py-2 text-sm text-red-500">Erro na pesquisa.</div>';
+        }
+      }, 300);
+    });
+
+    // ***** INÍCIO DA CORREÇÃO PRINCIPAL *****
+    // Usamos 'mousedown' para capturar o clique antes que o campo de pesquisa perca o foco.
+    searchResultsContainer.addEventListener("mousedown", (event) => {
+      const searchItem = event.target.closest(".search-result-item");
+      if (searchItem) {
+        event.preventDefault(); // Impede que o input perca o foco e esconda a lista
+        const profileId = searchItem.dataset.profileId;
+
+        showProfileModal(profileId);
+
+        // Limpa a pesquisa e esconde os resultados após a seleção
+        searchInput.value = "";
+        searchResultsContainer.classList.add("hidden");
+      }
+    });
+    // ***** FIM DA CORREÇÃO PRINCIPAL *****
+
+    // Esconde os resultados se o campo de pesquisa perder o foco
+    searchInput.addEventListener("blur", () => {
+      setTimeout(() => {
+        searchResultsContainer.classList.add("hidden");
+      }, 200);
+    });
+
+    // Mostra os resultados se o campo ganhar o foco e já tiver texto
+    searchInput.addEventListener("focus", () => {
+      if (searchInput.value.length >= 2) {
+        searchResultsContainer.classList.remove("hidden");
+      }
+    });
+  }
+
+  /**
+   * Busca os dados de um perfil e exibe o modal de visualização.
+   * @param {string} profileId - O ID do perfil a ser exibido.
+   */
+  async function showProfileModal(profileId) {
+    const modal = document.getElementById("modal-profile-view");
+    const modalContent = document.getElementById("modal-profile-content");
+    if (!modal || !modalContent) return;
+
+    modal.classList.remove("hidden");
+    modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-spinner fa-spin text-2xl text-red-500"></i><p class="mt-2">A carregar perfil...</p></div>`;
+
+    setTimeout(() => {
+      modalContent.classList.remove("opacity-0", "-translate-y-4");
+    }, 10);
+
+    try {
+      const response = await fetch(
+        `/api/v1/search/profiles/${profileId}/details`
+      );
+      const result = await response.json();
+
+      if (!result.success) throw new Error(result.message);
+
+      const { profile, movements } = result;
+      const birthDate = profile.data_nascimento
+        ? new Date(profile.data_nascimento).toLocaleDateString("pt-BR", {
+            timeZone: "UTC",
+          })
+        : "Não informado";
+
+      const movementsHTML =
+        movements.length > 0
+          ? movements
+              .map(
+                (mov) => `
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                <div>
+                    <p class="font-medium text-gray-800">${mov.motivo}</p>
+                    <p class="text-xs text-gray-500">${new Date(
+                      mov.data_movimentacao
+                    ).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
+                </div>
+                <div class="text-right flex-shrink-0 ml-4">
+                    <p class="font-mono font-semibold ${
+                      mov.entrada ? "text-green-600" : "text-red-600"
+                    }">
+                        ${mov.entrada ? "+" : "-"}${mov.hora_total}
+                    </p>
+                    <p class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block ${
+                      mov.autorizado
+                        ? "bg-green-100 text-green-800"
+                        : mov.analise
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }">
+                        ${mov.status_nome}
+                    </p>
+                </div>
+            </div>
+        `
+              )
+              .join("")
+          : '<p class="text-sm text-gray-500 text-center py-4">Nenhuma movimentação encontrada.</p>';
+
+      modalContent.innerHTML = `
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <div class="flex items-center space-x-4">
+                        <img src="${
+                          profile.foto_url || "/images/default-avatar.png"
+                        }" alt="${
+        profile.nome
+      }" class="w-20 h-20 rounded-full object-cover border-4 border-gray-100 shadow-md">
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">${
+                              profile.nome
+                            }</h3>
+                            <p class="text-sm text-gray-600">${
+                              profile.funcao || "Cargo não definido"
+                            }</p>
+                            <p class="text-sm text-gray-500">${
+                              profile.email
+                            }</p>
+                        </div>
+                    </div>
+                    <button id="modal-profile-close" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50/50 border-y border-gray-200/60">
+                <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos</h4>
+                <div class="max-h-64 overflow-y-auto pr-2">
+                    ${movementsHTML}
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50/50 text-right">
+                 <a href="/admin/colaboradores/editar/${profileId}" class="btn-primary btn-sm">Editar Perfil Completo</a>
+            </div>
+        `;
+
+      document
+        .getElementById("modal-profile-close")
+        .addEventListener("click", () => {
+          modalContent.classList.add("opacity-0", "-translate-y-4");
+          setTimeout(() => modal.classList.add("hidden"), 300);
+        });
+    } catch (error) {
+      modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-exclamation-triangle text-2xl text-red-500"></i><p class="mt-2">Erro ao carregar o perfil.</p><button id="modal-profile-close" class="mt-4 btn-secondary btn-sm">Fechar</button></div>`;
+      document
+        .getElementById("modal-profile-close")
+        .addEventListener("click", () => modal.classList.add("hidden"));
+    }
+  }
+
+  document.addEventListener("click", (event) => {
+    // Lida com o clique num item do resultado da pesquisa
+    const searchItem = event.target.closest(".search-result-item");
+    if (searchItem) {
+      const profileId = searchItem.dataset.profileId;
+      showProfileModal(profileId);
+    }
+
+    // Lida com o clique para fechar o modal de perfil (clicando no fundo)
+    const profileModal = document.getElementById("modal-profile-view");
+    if (event.target === profileModal) {
+      profileModal
+        .querySelector("#modal-profile-content")
+        .classList.add("opacity-0", "-translate-y-4");
+      setTimeout(() => profileModal.classList.add("hidden"), 300);
+    }
+  });
 })();

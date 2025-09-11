@@ -20,6 +20,7 @@ const adminRoutes = require("./routes/admin");
 const sugestaoRoutes = require("./routes/sugestao");
 const cookieParser = require("cookie-parser");
 const Movement = require('./models/Movement'); 
+const searchRoutes = require("./routes/search");
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -85,6 +86,7 @@ app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/movements", movementRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/profiles", profilesApiRoutes);
+app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/sugestao", sugestaoRoutes);
 app.use("/admin", adminRoutes);
 app.use("/profile", profileRoutes);
