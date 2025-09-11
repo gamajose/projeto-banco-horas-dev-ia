@@ -6,6 +6,7 @@ const {
   isApiAuthenticated,
 } = require("../middleware/auth");
 const Movement = require("../models/Movement");
+const NotificationService = require("../notificationService");
 const Profile = require("../models/Profile");
 const Status = require("../models/Status");
 const MovementLog = require("../models/MovementLog");
@@ -60,10 +61,13 @@ router.post(
         hora_inicial,
         hora_final,
         forma_pagamento_id,
-        colaborador_id
+        colaborador_id,
       } = req.body;
 
-      const targetProfileId = (req.user.is_staff && colaborador_id) ? colaborador_id : req.userProfile.id;
+      const targetProfileId =
+        req.user.is_staff && colaborador_id
+          ? colaborador_id
+          : req.userProfile.id;
 
       const pendingStatus = await Status.findByName("Pendente");
       if (!pendingStatus) {
@@ -85,6 +89,23 @@ router.post(
       };
 
       const newMovement = await Movement.create(movementData);
+      const collaboratorProfile = await Profile.findById(targetProfileId);
+      if (req.user.is_staff && colaborador_id) {
+        // Se um admin criou para um colaborador
+        const adminPerformer = req.user;
+        await NotificationService.adminMovementCreationToCollaborator(
+          newMovement,
+          collaboratorProfile,
+          adminPerformer
+        );
+      } else {
+        // Se o próprio colaborador criou
+        await NotificationService.newMovementToAdmins(
+          newMovement,
+          req.userProfile
+        );
+      }
+
       await MovementLog.logMovementCreation(newMovement.id, req.userProfile.id);
 
       res.status(201).json({

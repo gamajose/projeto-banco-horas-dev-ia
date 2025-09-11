@@ -1850,6 +1850,10 @@ h1, h2, h3, h4, h5, h6 {
   margin-left: 0.75rem;
 }
 
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .ml-auto {
   margin-left: auto;
 }
@@ -1896,10 +1900,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .mt-8 {
   margin-top: 2rem;
-}
-
-.ml-4 {
-  margin-left: 1rem;
 }
 
 .block {
@@ -2607,6 +2607,10 @@ h1, h2, h3, h4, h5, h6 {
   background-color: rgb(250 250 250 / var(--tw-bg-opacity, 1));
 }
 
+.bg-gray-50\/50 {
+  background-color: rgb(250 250 250 / 0.5);
+}
+
 .bg-gray-600 {
   --tw-bg-opacity: 1;
   background-color: rgb(82 82 82 / var(--tw-bg-opacity, 1));
@@ -2659,10 +2663,6 @@ h1, h2, h3, h4, h5, h6 {
 .bg-yellow-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
-}
-
-.bg-gray-50\/50 {
-  background-color: rgb(250 250 250 / 0.5);
 }
 
 .bg-opacity-50 {

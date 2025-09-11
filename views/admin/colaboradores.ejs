@@ -666,8 +666,12 @@ async function bulkDelete() {
 }
 
 async function viewCollaborator(id) {
-    // TODO: Implement view collaborator modal or redirect
-    showNotification('Funcionalidade em desenvolvimento', 'info');
+    // Chama a função global que já existe no main.js para mostrar o modal
+    if (window.showProfileModal) {
+        window.showProfileModal(id);
+    } else {
+        alert('Erro: A função para exibir o perfil não foi encontrada.');
+    }
 }
 
 async function deleteCollaborator(id, name) {

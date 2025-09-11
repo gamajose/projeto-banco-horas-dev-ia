@@ -41,6 +41,7 @@ class Database {
         force_password_change BOOLEAN DEFAULT TRUE,
         reset_password_token TEXT,
         reset_password_expires TIMESTAMP,
+        foto_url TEXT,
         last_login TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

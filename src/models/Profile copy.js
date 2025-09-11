@@ -58,8 +58,7 @@ class Profile {
         u.first_name, 
         u.last_name, 
         u.email, 
-        u.is_active,
-        u.last_login, 
+        u.is_active, 
         s.nome as setor_nome
       FROM perfis p
       JOIN usuarios u ON p.usuario_id = u.id
@@ -282,12 +281,9 @@ class Profile {
     let positiveMinutes = 0;
     let negativeMinutes = 0;
 
-     movements.forEach(mov => {
-      if (!mov.hora_total || typeof mov.hora_total !== 'string') return;
-      const [hours, minutes] = mov.hora_total.split(':').map(Number);
-      if (isNaN(hours) || isNaN(minutes)) return;
-
-      const timeInMinutes = (hours * 60) + minutes;
+    movements.forEach((mov) => {
+      const [hours, minutes] = mov.hora_total.split(":").map(Number);
+      const timeInMinutes = hours * 60 + minutes;
       if (mov.entrada) {
         positiveMinutes += timeInMinutes;
       } else {
@@ -299,23 +295,29 @@ class Profile {
 
     const formatTime = (mins) => {
       if (isNaN(mins)) return "00:00";
-      const sign = mins < 0 ? "-" : "";
+      const sign = mins < 0 ? "-" : "+";
       const absMins = Math.abs(mins);
-      const hours = Math.floor(absMins / 60).toString().padStart(2, "0");
+      const hours = Math.floor(absMins / 60)
+        .toString()
+        .padStart(2, "0");
       const minutes = (absMins % 60).toString().padStart(2, "0");
       return `${sign}${hours}:${minutes}`;
     };
 
     const formatPositive = (mins) => {
-      if (isNaN(mins) || mins <= 0) mins = 0;
-      const hours = Math.floor(mins / 60).toString().padStart(2, "0");
+      if (isNaN(mins) || mins <= 0) return "+00:00";
+      const hours = Math.floor(mins / 60)
+        .toString()
+        .padStart(2, "0");
       const minutes = (mins % 60).toString().padStart(2, "0");
       return `+${hours}:${minutes}`;
     };
 
     const formatNegative = (mins) => {
-      if (isNaN(mins) || mins <= 0) mins = 0;
-      const hours = Math.floor(mins / 60).toString().padStart(2, "0");
+      if (isNaN(mins) || mins <= 0) return "-00:00";
+      const hours = Math.floor(mins / 60)
+        .toString()
+        .padStart(2, "0");
       const minutes = (mins % 60).toString().padStart(2, "0");
       return `-${hours}:${minutes}`;
     };
