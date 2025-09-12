@@ -88,31 +88,43 @@ router.post(
         colaborador_id: targetProfileId,
       };
 
+      // 1. Salva as informações críticas no banco de dados
       const newMovement = await Movement.create(movementData);
-      const collaboratorProfile = await Profile.findById(targetProfileId);
-      if (req.user.is_staff && colaborador_id) {
-        // Se um admin criou para um colaborador
-        const adminPerformer = req.user;
-        await NotificationService.adminMovementCreationToCollaborator(
-          newMovement,
-          collaboratorProfile,
-          adminPerformer
-        );
-      } else {
-        // Se o próprio colaborador criou
-        await NotificationService.newMovementToAdmins(
-          newMovement,
-          req.userProfile
-        );
-      }
-
       await MovementLog.logMovementCreation(newMovement.id, req.userProfile.id);
 
+      // 2. Envia a resposta de sucesso IMEDIATAMENTE para o cliente
       res.status(201).json({
         success: true,
         message: "Movimentação enviada para aprovação!",
         movement: newMovement,
       });
+
+      // 3. Inicia o envio do e-mail em segundo plano, sem esperar pela sua conclusão
+      // Usamos uma função assíncrona auto-invocada (IIFE) para isso.
+      (async () => {
+        try {
+          const collaboratorProfile = await Profile.findById(targetProfileId);
+          if (req.user.is_staff && colaborador_id) {
+            const adminPerformer = req.user;
+            await NotificationService.adminMovementCreationToCollaborator(
+              newMovement,
+              collaboratorProfile,
+              adminPerformer
+            );
+          } else {
+            await NotificationService.newMovementToAdmins(
+              newMovement,
+              req.userProfile
+            );
+          }
+        } catch (emailError) {
+          // Se o envio do e-mail falhar, apenas registramos o erro no console.
+          // A operação principal já foi bem-sucedida para o usuário.
+          console.error("BACKGROUND_EMAIL_ERROR: Falha ao enviar notificação por e-mail na criação da movimentação.", emailError);
+        }
+      })();
+      // Fim da lógica de e-mail em segundo plano
+
     } catch (error) {
       console.error("Erro ao criar movimentação:", error);
       res

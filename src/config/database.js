@@ -5,6 +5,20 @@ class Database {
     this.initPostgreSQL();
   }
 
+  async getClient() {
+    const client = await this.pool.connect();
+    return client;
+  }
+
+  async all(sql, params = []) {
+      const client = await this.pool.connect();
+      try {
+        const result = await client.query(sql, params);
+        return result.rows;
+      } finally {
+        client.release();
+      }
+  }
 
   // ------------------------------
   // Inicialização do PostgreSQL

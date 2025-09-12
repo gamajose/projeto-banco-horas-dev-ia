@@ -14,11 +14,53 @@ class Movement {
       status_id,
       colaborador_id,
     } = movementData;
-    const result = await db.query(
-      `INSERT INTO movimentacoes 
-      (data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
-      [
+
+    // Obtém um cliente de conexão para controlar a transação
+    const client = await db.getClient();
+
+    try {
+      // Inicia a transação
+      await client.query('BEGIN');
+
+      // Verifica se já existe um registro quase idêntico nos últimos 5 minutos
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+      const duplicateCheckSql = `
+        SELECT id FROM movimentacoes
+        WHERE colaborador_id = $1
+          AND data_movimentacao = $2
+          AND hora_total = $3
+          AND motivo = $4
+          AND entrada = $5
+          AND created_at >= $6
+      `;
+      const duplicateCheckParams = [
+        colaborador_id,
+        data_movimentacao,
+        hora_total,
+        motivo,
+        entrada,
+        fiveMinutesAgo
+      ];
+      
+      const { rows: duplicateRows } = await client.query(duplicateCheckSql, duplicateCheckParams);
+
+      // Se um registro duplicado for encontrado...
+      if (duplicateRows.length > 0) {
+        console.warn('Movimentação duplicada detectada. A criação foi interrompida.', movementData);
+        // Desfaz a transação
+        await client.query('ROLLBACK');
+        // Retorna o primeiro registro encontrado para manter o fluxo consistente
+        return this.findById(duplicateRows[0].id);
+      }
+
+      // Se não for duplicado, insere o novo registro
+      const insertSql = `
+        INSERT INTO movimentacoes 
+        (data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
+      `;
+      const insertParams = [
         data_movimentacao,
         hora_inicial,
         hora_final,
@@ -28,9 +70,24 @@ class Movement {
         forma_pagamento_id,
         status_id,
         colaborador_id,
-      ]
-    );
-    return this.findById(result.rows[0].id);
+      ];
+      const result = await client.query(insertSql, insertParams);
+      
+      // Confirma a transação
+      await client.query('COMMIT');
+
+      // Retorna os dados completos do novo registro
+      return this.findById(result.rows[0].id);
+
+    } catch (e) {
+      // Em caso de erro, desfaz a transação
+      await client.query('ROLLBACK');
+      // Propaga o erro para ser tratado pela rota
+      throw e;
+    } finally {
+      // Libera o cliente de volta para o pool de conexões
+      client.release();
+    }
   }
 
   static async findById(id) {
