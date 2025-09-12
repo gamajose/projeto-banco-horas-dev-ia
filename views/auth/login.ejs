@@ -1,0 +1,49 @@
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-100">
+    <div class="w-full max-w-sm mx-auto">
+        <div class="relative">
+
+            <div class="absolute inset-x-0 -top-14 flex justify-center">
+                <div class="bg-red-600 h-34 w-34 rounded-full flex items-center justify-center shadow-lg">
+                    <img class="h-32 w-32 brightness-0 invert" src="/images/logo.png" alt="Logo da Empresa">
+                </div>
+            </div>
+
+            <div class="bg-white p-8 md:p-10 rounded-3xl shadow-xl space-y-6 pt-16">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-800"></h2>
+                    <p class="text-gray-500 mt-2"></p>
+                </div>
+
+                <form action="/auth/login" method="POST" class="space-y-6">
+                    <% if (error_msg && error_msg.length > 0) { %>
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 rounded-md" role="alert">
+                            <p class="text-sm"><%= error_msg %></p>
+                        </div>
+                    <% } %>
+                    
+                    <div>
+                        <label for="login" class="text-sm font-bold text-red-600">Login</label>
+                        <input id="login" name="login" type="text" required class="form-input mt-1" placeholder="Digite seu email ou usuario">
+                    </div>
+
+                    <div>
+                        <label for="password" class="text-sm font-bold text-red-600">Senha</label>
+                        <input id="password" name="password" type="password" required class="form-input mt-1" placeholder="Digite sua senha">
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn-primary w-full py-3">
+                            LOGAR
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center">
+                    <a href="/auth/esqueci-senha" class="text-sm font-medium text-red-600 hover:text-red-500">
+                        Esqueci a senha
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

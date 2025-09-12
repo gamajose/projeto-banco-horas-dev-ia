@@ -1,0 +1,41 @@
+2025-09-08 11:11:39 +00:00: Erro inicial ao conectar com o banco de dados: AggregateError [ECONNREFUSED]: 
+    at /home/user/webapp/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Database._testConnection (/home/user/webapp/src/config/database.js:18:22) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1652:14)
+        at afterConnectMultiple (node:net:1682:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+2025-09-08 11:17:56 +00:00: Erro no processo de login: Error: SQLITE_ERROR: no such column: username
+--> in Database#get('SELECT * FROM usuarios WHERE email = $1 OR username = $1', [ undefined ], [Function (anonymous)])
+    at /home/user/webapp/src/config/database.js:229:17
+    at new Promise (<anonymous>)
+    at Database.get (/home/user/webapp/src/config/database.js:228:14)
+    at User.findByLogin (/home/user/webapp/src/models/User.js:14:31)
+    at /home/user/webapp/src/routes/auth.js:29:33
+    at Layer.handleRequest (/home/user/webapp/node_modules/router/lib/layer.js:152:17)
+    at next (/home/user/webapp/node_modules/router/lib/route.js:157:13)
+    at Route.dispatch (/home/user/webapp/node_modules/router/lib/route.js:117:3)
+    at handle (/home/user/webapp/node_modules/router/index.js:435:11) {
+  errno: 1,
+  code: 'SQLITE_ERROR',
+  __augmented: true
+}

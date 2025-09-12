@@ -1,0 +1,1239 @@
+<div class="page-header">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-tachometer-alt text-red-600 mr-3"></i>
+                Dashboard
+            </h1>
+            <p class="page-description">Visão geral completa do sistema de banco de horas</p>
+        </div>
+        <div class="mt-4 sm:mt-0 flex space-x-3">
+            <button onclick="refreshDashboard()" class="btn-outline btn-sm">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Atualizar
+            </button>
+            <a href="/admin/relatorios" class="btn-primary btn-sm">
+                <i class="fas fa-chart-line mr-2"></i>
+                Relatórios
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="stat-card card-hover">
+        <a href="/admin/colaboradores">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-card-value" id="total-users-count">
+                        <%= totalUsers %>
+                    </div>
+                    <div class="stat-card-label">Total de Colaboradores</div>
+                    <div class="stat-card-change positive">+2 este mês</div>
+                </div>
+                <div class="text-blue-500 text-3xl opacity-20">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/admin/colaboradores" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    Gerenciar →
+                </a>
+            </div>
+        </a>
+    </div>
+
+    <div class="stat-card card-hover">
+        <a href="/admin/relatorios">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-card-icon bg-gradient-to-r from-green-500 to-green-600">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-card-value" id="total-movements-count">
+                        <%= stats.total %>
+                    </div>
+                    <div class="stat-card-label">Registros Totais</div>
+                    <div class="stat-card-change positive">+<%= stats.hoje || 0 %> hoje</div>
+                </div>
+                <div class="text-green-500 text-3xl opacity-20">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/admin/relatorios" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                    Ver Detalhes →
+                </a>
+            </div>
+        </a>
+    </div>
+
+    <div class="stat-card card-hover">
+        <a href="/admin/relatorios">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-card-value" id="approved-hours-count">
+                        <%= stats.aprovadas %>
+                    </div>
+                    <div class="stat-card-label">Horas Aprovadas</div>
+                    <div class="stat-card-change positive">95% aprovação</div>
+                </div>
+                <div class="text-emerald-500 text-3xl opacity-20">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/admin/relatorios?status_id=2"
+                    class="text-emerald-600 hover:text-emerald-700 text-sm font-medium">
+                    Histórico →
+                </a>
+            </div>
+        </a>
+    </div>
+
+    <div class="stat-card card-hover">
+        <a href="/admin/aprovacoes">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="stat-card-icon bg-gradient-to-r from-amber-500 to-amber-600">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-card-value" id="pending-requests-count">
+                        <%= stats.pendentes %>
+                    </div>
+                    <div class="stat-card-label">Pendentes</div>
+                    <div class="stat-card-change <%= stats.pendentes > 0 ? 'negative' : 'positive' %>">
+                        <%= stats.pendentes> 0 ? 'Requer atenção' : 'Tudo em dia' %>
+                    </div>
+                </div>
+                <div class="text-amber-500 text-3xl opacity-20">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/admin/aprovacoes" class="text-amber-600 hover:text-amber-700 text-sm font-medium">
+                    Analisar →
+                </a>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div class="lg:col-span-2 space-y-2">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-red-100 p-2 rounded-lg">
+                            <i class="fas fa-clipboard-check text-red-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Solicitações Pendentes</h2>
+                            <p class="text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
+                        </div>
+                    </div>
+                    <% if (stats.pendentes> 0) { %>
+                        <button id="approve-all-pending-btn" class="btn-success btn-sm">
+                            <i class="fas fa-check-double mr-2"></i>
+                            Aprovar Todas
+                        </button>
+                        <% } %>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-container">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr>
+                                <th class="table-header">Colaborador</th>
+                                <th class="table-header hidden sm:table-cell">Setor</th>
+                                <th class="table-header">Data/Hora</th>
+                                <th class="table-header">Tipo</th>
+                                <th class="table-header text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-requests-tbody">
+                            <% if (pendingMovements && pendingMovements.length> 0) { %>
+                                <% pendingMovements.forEach(mov=> { %>
+                                    <tr id="mov-row-<%= mov.id %>" class="table-row">
+                                        <td class="table-cell">
+                                            <div class="flex items-center space-x-3">
+                                                <img src="<%= mov.foto_url || '/images/default-avatar.png' %>"
+                                                    alt="<%= mov.colaborador_nome %>"
+                                                    class="w-8 h-8 rounded-full object-cover">
+                                                <div>
+                                                    <div class="font-semibold text-gray-900">
+                                                        <%= mov.colaborador_nome %>
+                                                    </div>
+                                                    <div class="text-sm text-gray-500 sm:hidden">
+                                                        <%= mov.setor_nome %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="table-cell hidden sm:table-cell">
+                                            <span class="badge badge-info">
+                                                <%= mov.setor_nome %>
+                                            </span>
+                                        </td>
+                                        <td class="table-cell">
+                                            <div class="text-sm">
+                                                <div class="font-medium">
+                                                    <%= new Date(mov.data_movimentacao).toLocaleDateString('pt-BR',
+                                                        {timeZone: 'UTC' }) %>
+                                                </div>
+                                                <div class="text-gray-500">
+                                                    <%= mov.hora_total %>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="table-cell">
+                                            <span class="badge <%= mov.entrada ? 'badge-success' : 'badge-danger' %>">
+                                                <i
+                                                    class="fas fa-<%= mov.entrada ? 'sign-in-alt' : 'sign-out-alt' %> mr-1"></i>
+                                                <%= mov.entrada ? 'Entrada' : 'Saída' %>
+                                            </span>
+                                        </td>
+                                        <td class="table-cell text-right">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <button class="btn-success btn-xs btn-approve" data-id="<%= mov.id %>"
+                                                    title="Aprovar">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button class="btn-danger btn-xs btn-reject" data-id="<%= mov.id %>"
+                                                    title="Rejeitar">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                                <button class="btn-secondary btn-xs"
+                                                    onclick="viewMovementDetails('<%= mov.id %>')" title="Detalhes">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <tr>
+                                                <td colspan="5" class="table-cell text-center py-12">
+                                                    <div class="text-gray-400">
+                                                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                                        <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                                                        <p class="text-sm">Todas as aprovações estão em dia!</p>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <div class="card-header border-b border-gray-200">
+                <nav class="-mb-px flex space-x-4" aria-label="Tabs">
+                    <button data-target="#quick-stats-panel" class="tab-btn active-tab">
+                        Estatísticas Rápidas
+                    </button>
+                    <button data-target="#recent-activity-panel" class="tab-btn inactive-tab">
+                        Atividade Recente
+                    </button>
+                </nav>
+            </div>
+            <div class="p-6">
+                <div id="quick-stats-panel" class="tab-panel">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center mb-4">
+                        <i class="fas fa-chart-pie text-red-600 mr-2"></i>
+                        Estatísticas de Aprovações
+                    </h3>
+                    <div style="height: 250px;">
+                        <canvas id="quickStatsChart"></canvas>
+                    </div>
+                </div>
+                <div id="recent-activity-panel" class="tab-panel hidden">
+                    <h3 class="text-lg font-bold text-gray-900 flex items-center mb-4">
+                        <i class="fas fa-history text-green-600 mr-2"></i>
+                        Atividade Recente
+                    </h3>
+                    <div id="recent-activity" class="space-y-3" style="max-height: 250px; overflow-y: auto;">
+                        <div class="text-center text-gray-500 py-4">
+                            <i class="fas fa-spinner fa-spin text-lg"></i>
+                            <p class="mt-2 text-sm">Carregando atividades...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <i class="fas fa-building text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900">Setores</h3>
+                        <p class="text-sm text-gray-600">Distribuição por departamento</p>
+                    </div>
+                </div>
+                <button id="btn-add-setor-dashboard" class="btn-secondary btn-xs">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="resumo-setor-list" class="space-y-3">
+                <% if (departmentStats && departmentStats.length> 0) { %>
+                    <% departmentStats.forEach(dept=> { %>
+                        <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                            data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                                        <i class="fas fa-users text-white text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-semibold text-gray-900">
+                                            <%= dept.nome %>
+                                        </div>
+                                        <div class="text-sm text-gray-500">
+                                            <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores !==1
+                                                    ? 'es' : '' %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+                        <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
+                                    <p>Nenhum setor cadastrado</p>
+                                </div>
+                                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="sector-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-6 border w-full max-w-2xl shadow-xl rounded-2xl bg-white animate-slide-up">
+        <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+            <h3 id="sector-modal-title" class="text-2xl font-bold text-gray-900">Colaboradores</h3>
+            <button id="sector-modal-close"
+                class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div class="mt-6 max-h-96 overflow-y-auto">
+            <div id="sector-modal-list" class="space-y-3">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="movement-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-xl rounded-2xl bg-white animate-slide-up">
+        <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900">Detalhes da Movimentação</h3>
+            <button id="movement-modal-close"
+                class="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        <div id="movement-modal-content" class="mt-6">
+        </div>
+    </div>
+</div>
+
+<div id="confirm-approve-all-modal-dashboard"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
+            <i class="fas fa-exclamation-triangle text-3xl text-yellow-500"></i>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-lg font-bold text-gray-900">Aprovar Todas as Solicitações?</h3>
+            <p class="mt-2 text-sm text-gray-500">
+                Tem certeza que deseja aprovar todas as solicitações pendentes de uma só vez?
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center space-x-4">
+            <button id="btn-cancelar-aprovacao-massa-dashboard" class="btn-secondary">
+                Cancelar
+            </button>
+            <button id="btn-confirmar-aprovacao-massa-dashboard" class="btn-success">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize dashboard
+        initializeDashboard();
+        loadRecentActivity();
+        initializeChart();
+
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            refreshDashboard();
+            loadRecentActivity();
+        }, 30000);
+
+        const btnAbrirModalSetor = document.getElementById('btn-add-setor-dashboard');
+        const modalNovoSetor = document.getElementById('modal-novo-setor');
+        const btnFecharModalSetor = document.getElementById('close-modal-setor');
+        const btnCancelarModalSetor = document.getElementById('cancel-modal-setor');
+        const formNovoSetor = document.getElementById('form-novo-setor');
+        const inputNomeSetor = document.getElementById('nome-novo-setor');
+        const feedbackSetorDiv = document.getElementById('modal-setor-feedback');
+        const listaDeSetores = document.getElementById('resumo-setor-list');
+
+        const abrirModalSetor = () => {
+            if (modalNovoSetor) {
+                inputNomeSetor.value = '';
+                feedbackSetorDiv.textContent = '';
+                modalNovoSetor.classList.remove('hidden');
+            }
+        };
+
+        const fecharModalSetor = () => {
+            if (modalNovoSetor) {
+                modalNovoSetor.classList.add('hidden');
+            }
+        };
+
+        if (btnAbrirModalSetor) {
+            btnAbrirModalSetor.addEventListener('click', abrirModalSetor);
+        }
+        if (btnFecharModalSetor) {
+            btnFecharModalSetor.addEventListener('click', fecharModalSetor);
+        }
+        if (btnCancelarModalSetor) {
+            btnCancelarModalSetor.addEventListener('click', fecharModalSetor);
+        }
+
+        if (formNovoSetor) {
+            formNovoSetor.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nomeSetor = inputNomeSetor.value.trim();
+
+                if (!nomeSetor) {
+                    feedbackSetorDiv.textContent = 'O nome do setor é obrigatório.';
+                    feedbackSetorDiv.className = 'text-sm mt-3 text-red-600';
+                    return;
+                }
+
+                feedbackSetorDiv.textContent = 'Salvando...';
+                feedbackSetorDiv.className = 'text-sm mt-3 text-gray-500';
+
+                try {
+                    const response = await fetch('/api/v1/departments', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nome: nomeSetor })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Falha ao criar o setor.');
+                    }
+
+                    const novoSetorHTML = `
+                    <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                         data-sector-id="${result.department.id}" data-sector-name="${result.department.nome}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-white text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-900">${result.department.nome}</div>
+                                    <div class="text-sm text-gray-500">0 colaboradores</div>
+                                </div>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                `;
+
+                    const emptyState = listaDeSetores.querySelector('.text-center');
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+
+                    listaDeSetores.insertAdjacentHTML('beforeend', novoSetorHTML);
+                    showNotification('Setor criado com sucesso!', 'success');
+                    fecharModalSetor();
+
+                } catch (error) {
+                    feedbackSetorDiv.textContent = `Erro: ${error.message}`;
+                    feedbackSetorDiv.className = 'text-sm mt-3 text-red-600';
+                }
+            });
+        }
+    });
+
+
+
+    //Função abas Relatório Rapido e Atividades Recentes
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (event) => {
+            // Remove a classe 'active-tab' de todos os botões de aba e adiciona 'inactive-tab'
+            tabs.forEach(t => {
+                t.classList.remove('active-tab');
+                t.classList.add('inactive-tab');
+            });
+            // Adiciona a classe 'active-tab' e remove 'inactive-tab' do botão clicado
+            event.target.classList.add('active-tab');
+            event.target.classList.remove('inactive-tab');
+
+            // Esconde todos os painéis e mostra o correspondente
+            panels.forEach(panel => panel.classList.add('hidden'));
+            const targetPanelId = event.target.dataset.target;
+            const targetPanel = document.querySelector(targetPanelId);
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+            }
+        });
+    });
+
+    // Funções de inicialização e manipuladores de eventos
+    function initializeDashboard() {
+        const pendingTableBody = document.getElementById('pending-requests-tbody');
+        const resumoPorSetorList = document.getElementById('resumo-setor-list');
+
+        // Modal de confirmação
+        const modalAprovarTodas = document.getElementById('confirm-approve-all-modal-dashboard');
+        const btnAprovarTodas = document.getElementById('approve-all-pending-btn');
+        const btnConfirmarAprovarTodas = document.getElementById('btn-confirmar-aprovacao-massa-dashboard');
+        const btnCancelarAprovarTodas = document.getElementById('btn-cancelar-aprovacao-massa-dashboard');
+
+        if (btnAprovarTodas && modalAprovarTodas) {
+            btnAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.remove('hidden');
+            });
+        }
+        if (btnCancelarAprovarTodas && modalAprovarTodas) {
+            btnCancelarAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.add('hidden');
+            });
+        }
+        if (btnConfirmarAprovarTodas && modalAprovarTodas) {
+            btnConfirmarAprovarTodas.addEventListener('click', () => {
+                modalAprovarTodas.classList.add('hidden');
+                handleApproveAll();
+            });
+        }
+
+        if (pendingTableBody) {
+            pendingTableBody.addEventListener('click', handleMovementAction);
+        }
+        if (resumoPorSetorList) {
+            resumoPorSetorList.addEventListener('click', handleSectorClick);
+        }
+
+        setupModalHandlers();
+    }
+
+    // Funções de ação
+    async function handleMovementAction(event) {
+        const target = event.target.closest('button');
+        if (!target) return;
+
+        const movementId = target.dataset.id;
+        let action = '';
+
+        if (target.classList.contains('btn-approve')) {
+            action = 'aprovar';
+        } else if (target.classList.contains('btn-reject')) {
+            action = 'rejeitar';
+        } else {
+            return;
+        }
+
+        // Add loading state
+        const originalHTML = target.innerHTML;
+        target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        target.disabled = true;
+
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/${action}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || `Erro ao ${action} movimentação`);
+            }
+
+            // Remove the row with animation
+            const row = document.getElementById(`mov-row-${movementId}`);
+            if (row) {
+                row.style.transition = 'all 0.3s ease';
+                row.style.backgroundColor = action === 'aprovar' ? '#dcfce7' : '#fef2f2';
+                row.style.transform = 'scale(0.98)';
+                row.style.opacity = '0.7';
+
+                setTimeout(() => {
+                    row.remove();
+
+                    // Check if table is empty
+                    const tbody = document.getElementById('pending-requests-tbody');
+                    if (tbody.children.length === 0) {
+                        tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="table-cell text-center py-12">
+                                <div class="text-gray-400">
+                                    <i class="fas fa-check-circle text-4xl mb-4"></i>
+                                    <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                                    <p class="text-sm">Todas as aprovações estão em dia!</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    }
+
+                    // Update counter
+                    updatePendingCount();
+                }, 300);
+            }
+
+            showNotification(`Movimentação ${action === 'aprovar' ? 'aprovada' : 'rejeitada'} com sucesso!`, 'success');
+
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification(error.message, 'error');
+            target.innerHTML = originalHTML;
+            target.disabled = false;
+        }
+    }
+
+    // Função que executa a aprovação em massa
+    async function handleApproveAll() {
+        showLoading();
+        try {
+            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
+                method: 'PATCH'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Refresh dashboard
+    async function refreshDashboard() {
+        try {
+            const response = await fetch('/admin/api/dashboard-stats');
+            const data = await response.json();
+
+            if (data.success) {
+                // Update counters
+                updateElement('total-users-count', data.totalUsers);
+                updateElement('total-movements-count', data.stats.total);
+                updateElement('approved-hours-count', data.stats.aprovadas);
+                updateElement('pending-requests-count', data.stats.pendentes);
+                updatePendingRequestsTable(data.pendingMovements);
+                updateNotificationBell(data.stats.pendentes);
+
+                // Update chart
+                updateChart(data.chartData);
+            }
+        } catch (error) {
+            console.error('Error refreshing dashboard:', error);
+        }
+    }
+
+    // Update pending count
+    function updatePendingCount() {
+        const tbody = document.getElementById('pending-requests-tbody');
+        const rows = tbody.querySelectorAll('tr:not(:has(.text-gray-400))'); // Exclude "no data" row
+        const count = rows.length;
+
+        updateElement('pending-requests-count', count);
+    }
+
+    // Update element with animation
+    function updateElement(id, value) {
+        const element = document.getElementById(id);
+        if (element && element.textContent != value) {
+            element.style.transform = 'scale(1.1)';
+            element.style.transition = 'transform 0.2s ease';
+
+            setTimeout(() => {
+                element.textContent = value;
+                element.style.transform = 'scale(1)';
+            }, 100);
+        }
+    }
+
+    // Load recent activity
+    async function loadRecentActivity() {
+        const container = document.getElementById('recent-activity');
+        if (!container) return;
+
+        try {
+            const response = await fetch('/admin/api/recent-activity');
+            const data = await response.json();
+
+            if (data.success && data.activities.length > 0) {
+                container.innerHTML = data.activities.map(activity => `
+                <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div class="w-8 h-8 bg-${activity.acao === 'APROVADO' ? 'green' : activity.acao === 'REJEITADO' ? 'red' : 'blue'}-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-${activity.acao === 'APROVADO' ? 'check' : activity.acao === 'REJEITADO' ? 'times' : 'bell'} text-${activity.acao === 'APROVADO' ? 'green' : activity.acao === 'REJEITADO' ? 'red' : 'blue'}-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900">${activity.user_name || 'Usuário Indefinido'}</p>
+                        <p class="text-xs text-gray-500 truncate">${activity.description}</p>
+                        <p class="text-xs text-gray-400 mt-1">${formatRelativeTime(activity.createdAt)}</p>
+                    </div>
+                </div>
+            `).join('');
+            } else {
+                container.innerHTML = `
+                <div class="text-center py-8 text-gray-400">
+                    <i class="fas fa-history text-3xl mb-3 opacity-50"></i>
+                    <p>Nenhuma atividade recente</p>
+                </div>
+            `;
+            }
+        } catch (error) {
+            console.error('Error loading recent activity:', error);
+            container.innerHTML = `
+            <div class="text-center py-8 text-red-400">
+                <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                <p>Erro ao carregar atividades</p>
+            </div>
+            `;
+        }
+    }
+
+    // Initialize chart
+    function initializeChart() {
+        const ctx = document.getElementById('quickStatsChart');
+        if (!ctx) return;
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aprovadas', 'Pendentes', 'Rejeitadas'],
+                datasets: [{
+                    data: [<%= stats.aprovadas || 0 %>, <%= stats.pendentes || 0 %>, <%= stats.rejeitadas || 0 %>],
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Update chart
+    function updateChart(data) {
+        // Chart update logic would go here
+        // For now, we'll just log the data
+        console.log('Chart data update:', data);
+    }
+
+    // Format relative time (reused from topbar)
+    function formatRelativeTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+
+        if (diffInMinutes < 1) return 'Agora mesmo';
+        if (diffInMinutes < 60) return `${diffInMinutes}min atrás`;
+
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h atrás`;
+
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 30) return `${diffInDays}d atrás`;
+
+        return date.toLocaleDateString('pt-BR');
+    }
+
+    let currentSectorId = null;
+
+
+    async function handleSectorClick(event) {
+        const trigger = event.target.closest('.sector-details-trigger');
+        if (!trigger) return;
+        event.preventDefault();
+
+        currentSectorId = trigger.dataset.sectorId; // Guarda o ID do setor
+        const sectorName = trigger.dataset.sectorName;
+
+        const modal = document.getElementById('sector-modal');
+        const modalTitle = document.getElementById('sector-modal-title');
+        const modalList = document.getElementById('sector-modal-list');
+
+        modalTitle.innerHTML = `Colaboradores - ${sectorName}`; // Usamos innerHTML para poder adicionar o botão de voltar
+        modalList.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>`;
+        modal.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/profiles?setor_id=${currentSectorId}`);
+            const result = await response.json();
+
+            if (result.success && result.profiles.length > 0) {
+                modalList.innerHTML = result.profiles.map(profile => `
+            <a href="#" onclick="event.preventDefault(); viewCollaboratorLogs('${profile.id}', '${profile.nome}')" class="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <div class="flex items-center space-x-4">
+                    <img class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
+                         src="${profile.foto_url || '/images/default-avatar.png'}" 
+                         alt="${profile.nome}">
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">${profile.nome}</div>
+                        <div class="text-sm text-gray-600">${profile.email}</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </a>
+            `).join('');
+            } else {
+                modalList.innerHTML = `<div class="text-center py-12"><p class="text-gray-500">Nenhum colaborador encontrado neste setor.</p></div>`;
+            }
+        } catch (error) {
+            modalList.innerHTML = `<p class="text-red-600">Erro ao carregar colaboradores.</p>`;
+        }
+    }
+
+    async function handleSectorClick(event) {
+        const trigger = event.target.closest('.sector-details-trigger');
+        if (!trigger) return;
+        event.preventDefault();
+
+        currentSectorId = trigger.dataset.sectorId; // Guarda o ID do setor
+        const sectorName = trigger.dataset.sectorName;
+
+        const modal = document.getElementById('sector-modal');
+        const modalTitle = document.getElementById('sector-modal-title');
+        const modalList = document.getElementById('sector-modal-list');
+
+        modalTitle.innerHTML = `Colaboradores - ${sectorName}`; // Usamos innerHTML para poder adicionar o botão de voltar
+        modalList.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>`;
+        modal.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/profiles?setor_id=${currentSectorId}`);
+            const result = await response.json();
+
+            if (result.success && result.profiles.length > 0) {
+                modalList.innerHTML = result.profiles.map(profile => `
+            <a href="#" onclick="event.preventDefault(); viewCollaboratorLogs('${profile.id}', '${profile.nome}')" class="block p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <div class="flex items-center space-x-4">
+                    <img class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
+                         src="${profile.foto_url || '/images/default-avatar.png'}" 
+                         alt="${profile.nome}">
+                    <div class="flex-1">
+                        <div class="font-semibold text-gray-900">${profile.nome}</div>
+                        <div class="text-sm text-gray-600">${profile.email}</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-gray-400"></i>
+                </div>
+            </a>
+            `).join('');
+            } else {
+                modalList.innerHTML = `<div class="text-center py-12"><p class="text-gray-500">Nenhum colaborador encontrado neste setor.</p></div>`;
+            }
+        } catch (error) {
+            modalList.innerHTML = `<p class="text-red-600">Erro ao carregar colaboradores.</p>`;
+        }
+    }
+
+    async function viewCollaboratorLogs(profileId, profileName) {
+        const modalTitle = document.getElementById('sector-modal-title');
+        const modalList = document.getElementById('sector-modal-list');
+
+        // Adiciona um botão "Voltar"
+        modalTitle.innerHTML = `
+        <button onclick="goBackToSectorList()" class="btn-secondary btn-xs mr-4">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </button>
+        <span>Histórico de ${profileName}</span>
+    `;
+        modalList.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>`;
+
+        try {
+            const response = await fetch(`/api/v1/profiles/${profileId}/movements`);
+            const result = await response.json();
+
+            if (result.success && result.movements.length > 0) {
+                modalList.innerHTML = `
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left font-semibold">Data</th>
+                            <th class="px-4 py-2 text-left font-semibold">Horas</th>
+                            <th class="px-4 py-2 text-left font-semibold">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.movements.map(mov => {
+                    const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+                    let statusClass = mov.status_nome === 'Aprovado' ? 'text-green-600' : mov.status_nome === 'Pendente' ? 'text-yellow-600' : 'text-red-600';
+                    let horasClass = mov.entrada ? 'text-green-600' : 'text-red-600';
+
+                    return `
+                                <tr class="border-b">
+                                    <td class="px-4 py-2">${dataFormatada}</td>
+                                    <td class="px-4 py-2 font-mono ${horasClass}">${mov.entrada ? '+' : '-'}${mov.hora_total}</td>
+                                    <td class="px-4 py-2 font-semibold ${statusClass}">${mov.status_nome}</td>
+                                </tr>
+                            `;
+                }).join('')}
+                    </tbody>
+                </table>
+            `;
+            } else {
+                modalList.innerHTML = `<div class="text-center py-12"><p class="text-gray-500">Nenhuma movimentação encontrada para este colaborador.</p></div>`;
+            }
+        } catch (error) {
+            modalList.innerHTML = `<p class="text-red-600">Erro ao carregar o histórico.</p>`;
+        }
+    }
+
+    function goBackToSectorList() {
+        // Simula um clique no gatilho do setor original para recarregar a lista
+        const trigger = document.querySelector(`.sector-details-trigger[data-sector-id='${currentSectorId}']`);
+        if (trigger) {
+            handleSectorClick({ target: trigger, preventDefault: () => { } });
+        }
+    }
+
+    // Setup modal handlers
+    function setupModalHandlers() {
+        // Sector modal
+        const sectorModal = document.getElementById('sector-modal');
+        const sectorModalClose = document.getElementById('sector-modal-close');
+
+        if (sectorModalClose) {
+            sectorModalClose.addEventListener('click', () => {
+                sectorModal.classList.add('hidden');
+            });
+        }
+
+        // Movement modal
+        const movementModal = document.getElementById('movement-modal');
+        const movementModalClose = document.getElementById('movement-modal-close');
+
+        if (movementModalClose) {
+            movementModalClose.addEventListener('click', () => {
+                movementModal.classList.add('hidden');
+            });
+        }
+
+        // Close modals on backdrop click
+        [sectorModal, movementModal].forEach(modal => {
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            }
+        });
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                sectorModal?.classList.add('hidden');
+                movementModal?.classList.add('hidden');
+            }
+        });
+    }
+
+    // View movement details
+    async function viewMovementDetails(movementId) {
+        const modal = document.getElementById('movement-modal');
+        const content = document.getElementById('movement-modal-content');
+
+        content.innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i>
+            <p class="mt-2 text-gray-600">Carregando detalhes...</p>
+        </div>
+    `;
+
+        modal.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/movements/${movementId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const movement = result.movement;
+                content.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex items-center space-x-4">
+                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
+                                    src="${movement.foto_url || '/images/default-avatar.png'}" 
+                                    alt="${movement.colaborador_nome}">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-900">${movement.colaborador_nome}</h4>
+                                <p class="text-sm text-gray-600">${movement.setor_nome}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label">Data</label>
+                                <p class="text-gray-900 font-medium">${new Date(movement.data_movimentacao).toLocaleDateString('pt-BR')}</p>
+                            </div>
+                            <div>
+                                <label class="form-label">Horário</label>
+                                <p class="text-gray-900 font-mono">${movement.hora_total}</p>
+                            </div>
+                            <div>
+                                <label class="form-label">Tipo</label>
+                                <p class="text-gray-900">
+                                    <span class="badge ${movement.entrada ? 'badge-success' : 'badge-danger'}">
+                                        ${movement.entrada ? 'Entrada' : 'Saída'}
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                <label class="form-label">Status</label>
+                                <p class="text-gray-900">
+                                    <span class="badge badge-warning">Pendente</span>
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Motivo</label>
+                            <p class="text-gray-900 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">${movement.motivo}</p>
+                        </div>
+                        
+                        <div class="flex space-x-3 pt-4">
+                            <button onclick="approveMovementFromModal('${movement.id}')" class="btn-success flex-1">
+                                <i class="fas fa-check mr-2"></i>
+                                Aprovar
+                            </button>
+                            <button onclick="rejectMovementFromModal('${movement.id}')" class="btn-danger flex-1">
+                                <i class="fas fa-times mr-2"></i>
+                                Rejeitar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                throw new Error(result.message || 'Erro ao carregar detalhes');
+            }
+        } catch (error) {
+            console.error('Error loading movement details:', error);
+            content.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-triangle text-3xl text-red-400 mb-4"></i>
+                <p class="text-red-600">Erro ao carregar detalhes da movimentação</p>
+            </div>
+            `;
+        }
+    }
+
+    // Approve movement from modal
+    async function approveMovementFromModal(movementId) {
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/aprovar`, {
+                method: 'PATCH'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('movement-modal').classList.add('hidden');
+                showNotification('Movimentação aprovada com sucesso!', 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentação: ' + error.message, 'error');
+        }
+    }
+
+    // Reject movement from modal
+    async function rejectMovementFromModal(movementId) {
+        try {
+            const response = await fetch(`/admin/movimentacoes/${movementId}/rejeitar`, {
+                method: 'PATCH'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('movement-modal').classList.add('hidden');
+                showNotification('Movimentação rejeitada com sucesso!', 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao rejeitar movimentação: ' + error.message, 'error');
+        }
+    }
+
+    // Approve all pending movements
+    async function approveAllPending() {
+        if (!confirm('Tem certeza que deseja aprovar TODAS as solicitações pendentes?')) {
+            return;
+        }
+
+        showLoading();
+
+        try {
+            const response = await fetch('/admin/movimentacoes/aprovar-todas', {
+                method: 'PATCH'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(`${result.approved} movimentações aprovadas com sucesso!`, 'success');
+                refreshDashboard();
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            showNotification('Erro ao aprovar movimentações: ' + error.message, 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function updatePendingRequestsTable(movements) {
+        const tbody = document.getElementById('pending-requests-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = ''; // Limpa a tabela atual
+
+        if (movements && movements.length > 0) {
+            movements.forEach(mov => {
+                const row = document.createElement('tr');
+                row.id = `mov-row-${mov.id}`;
+                row.className = 'table-row';
+
+                // Converte a data para o formato brasileiro
+                const formattedDate = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+
+                row.innerHTML = `
+                <td class="table-cell">
+                    <div class="flex items-center space-x-3">
+                        <img src="${mov.foto_url || '/images/default-avatar.png'}" alt="${mov.colaborador_nome}" class="w-8 h-8 rounded-full object-cover">
+                        <div>
+                            <div class="font-semibold text-gray-900">${mov.colaborador_nome}</div>
+                            <div class="text-sm text-gray-500 sm:hidden">${mov.setor_nome}</div>
+                        </div>
+                    </div>
+                </td>
+                <td class="table-cell hidden sm:table-cell">
+                    <span class="badge badge-info">${mov.setor_nome}</span>
+                </td>
+                <td class="table-cell">
+                    <div class="text-sm">
+                        <div class="font-medium">${formattedDate}</div>
+                        <div class="text-gray-500">${mov.hora_total}</div>
+                    </div>
+                </td>
+                <td class="table-cell">
+                    <span class="badge ${mov.entrada ? 'badge-success' : 'badge-danger'}">
+                        <i class="fas fa-${mov.entrada ? 'sign-in-alt' : 'sign-out-alt'} mr-1"></i>
+                        ${mov.entrada ? 'Entrada' : 'Saída'}
+                    </span>
+                </td>
+                <td class="table-cell text-right">
+                    <div class="flex items-center justify-end space-x-2">
+                        <button class="btn-success btn-xs btn-approve" data-id="${mov.id}" title="Aprovar"><i class="fas fa-check"></i></button>
+                        <button class="btn-danger btn-xs btn-reject" data-id="${mov.id}" title="Rejeitar"><i class="fas fa-times"></i></button>
+                        <button class="btn-secondary btn-xs" onclick="viewMovementDetails('${mov.id}')" title="Detalhes"><i class="fas fa-eye"></i></button>
+                    </div>
+                </td>
+            `;
+                tbody.appendChild(row);
+            });
+        } else {
+            // Caso não haja mais solicitações pendentes
+            tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="table-cell text-center py-12">
+                    <div class="text-gray-400">
+                        <i class="fas fa-check-circle text-4xl mb-4"></i>
+                        <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
+                        <p class="text-sm">Todas as aprovações estão em dia!</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        }
+    }
+    function updateNotificationBell(count) {
+        const notificationsBtn = document.getElementById('notifications-btn');
+        if (!notificationsBtn) return;
+
+        let badge = document.getElementById('notification-badge');
+
+        // Remove o badge antigo se existir
+        if (badge) {
+            badge.remove();
+        }
+
+        // Adiciona um novo badge se houver notificações
+        if (count > 0) {
+            badge = document.createElement('span');
+            badge.id = 'notification-badge';
+            badge.className = 'absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse';
+            badge.textContent = count;
+            notificationsBtn.appendChild(badge);
+        }
+    }
+</script>

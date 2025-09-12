@@ -1,0 +1,38 @@
+<div id="lancar-horas-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden z-50">
+    <div class="relative top-20 mx-auto p-6 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+        <div class="flex justify-between items-center pb-3">
+            <h3 class="text-2xl font-bold text-gray-800">Adicionar Horas</h3>
+            <button class="modal-close-btn text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+        </div>
+        <div class="mt-4">
+            <form id="form-lancamento" class="space-y-4">
+                <div>
+                    <label for="data_movimentacao" class="form-label">Data</label>
+                    <input type="date" name="data_movimentacao" required class="form-input">
+                </div>
+
+                <div>
+                    <label for="entrada" class="form-label">Tipo de Lançamento</label>
+                    <select name="entrada" id="entrada" class="form-input">
+                        <option value="true">Crédito (hora extra, etc.)</option>
+                        <option value="false">Débito (saída antecipada)</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="hora_total" class="form-label">Total de Horas (HH:MM)</label>
+                    <input type="text" id="hora_total" name="hora_total" placeholder="Ex: 02:30 ou 230" required class="form-input">
+                </div>
+                
+                <div>
+                    <label for="motivo" class="form-label">Motivo</label>
+                    <textarea name="motivo" id="motivo" rows="3" required class="form-input"></textarea>
+                </div>
+                
+                <div>
+                    <button type="submit" class="btn-primary w-full">Enviar para Aprovação</button>
+                </div>
+            </form>
+            <div id="form-feedback" class="mt-4 text-sm font-medium"></div>
+        </div>
+    </div>
+</div>

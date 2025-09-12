@@ -1,0 +1,150 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Relatórios de Movimentações</h1>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
+        <form id="form-filtros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+            <div>
+                <label for="data_inicio" class="form-label">Data de Início</label>
+                <input type="date" name="data_inicio" id="data_inicio" class="form-input">
+            </div>
+            <div>
+                <label for="data_fim" class="form-label">Data de Fim</label>
+                <input type="date" name="data_fim" id="data_fim" class="form-input">
+            </div>
+            <div>
+                <label for="colaborador_id" class="form-label">Colaborador</label>
+                <select name="colaborador_id" id="colaborador_id" class="form-input">
+                    <option value="">Todos</option>
+                    <% colaboradores.forEach(colab => { %>
+                        <option value="<%= colab.id %>"><%= colab.nome %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div>
+                <label for="status_id" class="form-label">Status</label>
+                <select name="status_id" id="status_id" class="form-input">
+                    <option value="">Todos</option>
+                    <% status.forEach(s => { %>
+                        <option value="<%= s.id %>"><%= s.nome %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </form>
+        <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 items-end mt-4">
+             <div class="col-start-1 lg:col-start-3">
+                <button type="submit" form="form-filtros" class="btn-primary w-full">Filtrar</button>
+            </div>
+            <div class="flex space-x-2">
+                <button type="button" id="btn-exportar-csv" class="btn-secondary w-full">Excel</button>
+                <button type="button" id="btn-exportar-pdf" class="btn-secondary w-full">PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-header">Colaborador</th>
+                        <th class="table-header">Data</th>
+                        <th class="table-header">Tipo</th>
+                        <th class="table-header">Horas</th>
+                        <th class="table-header">Status</th>
+                        <th class="table-header">Motivo</th>
+                    </tr>
+                </thead>
+                <tbody id="tabela-resultados" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const formFiltros = document.getElementById('form-filtros');
+    const tbodyResultados = document.getElementById('tabela-resultados');
+    const movimentacoesIniciais = <%- JSON.stringify(movimentacoes || []) %>;
+    
+    // Referências para os botões de exportação
+    const btnExportarCsv = document.getElementById('btn-exportar-csv');
+    const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+
+    const createRowHTML = (mov) => {
+        const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
+        const tipoHTML = mov.entrada 
+            ? `<span class="text-green-600 font-medium">Crédito</span>` 
+            : `<span class="text-red-600 font-medium">Débito</span>`;
+        const motivo = mov.motivo || '';
+
+
+        let status_color = '';
+        if (mov.status_nome === 'Aprovado'){
+            status_color = 'text-green-600';
+        }else if (mov.status_nome === 'Rejeitado'){
+            status_color = 'text-red-600';
+        }else{
+            status_color = 'text-yellow-600';
+        }
+        const status_name = `<span class="${status_color} font-medium">${mov.status_nome}</span>`;
+
+        // e noix
+        return `
+            <tr>
+                <td class="table-cell font-medium">${mov.colaborador_nome}</td>
+                <td class="table-cell">${dataFormatada}</td>
+                <td class="table-cell">${tipoHTML}</td>
+                <td class="table-cell font-mono">${mov.hora_total}</td>
+                <td class="table-cell">${status_name}</td>
+                <td class="table-cell text-sm text-gray-500">${motivo}</td>
+            </tr>
+        `;
+    };
+    
+    const renderTable = (data) => {
+        tbodyResultados.innerHTML = '';
+        if (data.length === 0) {
+            tbodyResultados.innerHTML = '<tr><td colspan="6" class="table-cell text-center text-gray-500 py-6">Nenhum resultado encontrado.</td></tr>';
+        } else {
+            data.forEach(mov => {
+                tbodyResultados.innerHTML += createRowHTML(mov);
+            });
+        }
+    };
+
+    renderTable(movimentacoesIniciais);
+
+    formFiltros.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(formFiltros);
+        const params = new URLSearchParams(formData);
+        try {
+            const response = await fetch(`/admin/api/relatorios?${params.toString()}`);
+            const result = await response.json();
+            if (result.success) {
+                renderTable(result.movimentacoes);
+            } else {
+                alert('Erro ao buscar os dados filtrados.');
+            }
+        } catch (error) {
+            console.error('Erro no fetch dos filtros:', error);
+            alert('Não foi possível aplicar os filtros.');
+        }
+    });
+
+    // Eventos para os botões de exportação
+    btnExportarCsv.addEventListener('click', () => {
+        const formData = new FormData(formFiltros);
+        const params = new URLSearchParams(formData);
+        window.location.href = `/admin/relatorios/exportar?${params.toString()}`;
+    });
+
+    btnExportarPdf.addEventListener('click', () => {
+        const formData = new FormData(formFiltros);
+        const params = new URLSearchParams(formData);
+        window.location.href = `/admin/relatorios/exportar-pdf?${params.toString()}`;
+    });
+});
+</script>

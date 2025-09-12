@@ -1,0 +1,56 @@
+<div id="modal-acao-rapida" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-lg">
+        <div class="flex justify-between items-center pb-3 border-b">
+            <h3 id="modal-acao-rapida-title" class="text-2xl font-bold text-gray-800">Ação Rápida</h3>
+            <button id="modal-acao-rapida-close" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
+        </div>
+        <div class="mt-4">
+            <form id="form-acao-rapida" class="space-y-4">
+                <input type="hidden" id="acao-rapida-entrada" name="entrada">
+
+                <% if (locals.user && user.is_staff) { %>
+                <div>
+                    <label for="acao-rapida-colaborador" class="form-label">Colaborador</label>
+                    <select name="colaborador_id" id="acao-rapida-colaborador" required class="form-input">
+                        <% if (locals.todosColaboradores && todosColaboradores.length > 0) { %>
+                            <% todosColaboradores.forEach(colab => { %>
+                                <option value="<%= colab.id %>"><%= colab.first_name %> <%= colab.last_name %></option>
+                            <% }) %>
+                        <% } else { %>
+                            <option value="">Nenhum colaborador encontrado</option>
+                        <% } %>
+                    </select>
+                </div>
+                <% } %>
+
+                <div>
+                    <label for="acao-rapida-data" class="form-label">Data da Movimentação</label>
+                    <input type="date" name="data_movimentacao" id="acao-rapida-data" required class="form-input">
+                </div>
+
+                <div id="container-tipo-ajuste" class="hidden">
+                    <label for="acao-rapida-tipo" class="form-label">Tipo de Lançamento</label>
+                    <select name="entrada_ajuste" id="acao-rapida-tipo" class="form-input">
+                        <option value="true">Crédito (hora extra, etc.)</option>
+                        <option value="false">Débito (saída antecipada)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="acao-rapida-horas" class="form-label">Total de Horas (HH:MM)</label>
+                    <input type="text" name="hora_total" id="acao-rapida-horas" placeholder="Ex: 02:30" required class="form-input">
+                </div>
+
+                <div>
+                    <label for="acao-rapida-motivo" class="form-label">Motivo</label>
+                    <textarea name="motivo" id="acao-rapida-motivo" rows="3" required class="form-input"></textarea>
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" class="btn-primary w-full">Enviar para Aprovação</button>
+                </div>
+            </form>
+            <div id="acao-rapida-feedback" class="mt-4 text-sm font-medium"></div>
+        </div>
+    </div>
+</div>

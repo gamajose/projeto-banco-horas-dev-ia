@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Página</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+            </div>
+
+            <div class="mt-6 text-center">
+                <h1 class="text-3xl font-bold text-gray-900">
+                    Oops! Algo deu errado
+                </h1>
+
+                <div class="mt-4">
+                    <h2 class="text-xl font-semibold text-gray-700">
+                        <%= message || 'Erro interno do servidor' %>
+                    </h2>
+                </div>
+
+                <% if (typeof error !=='undefined' && error.stack && process.env.NODE_ENV==='development' ) { %>
+                    <div class="mt-6 bg-gray-100 rounded-lg p-4">
+                        <details class="text-left">
+                            <summary class="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-900">
+                                Detalhes do erro (desenvolvimento)
+                            </summary>
+                            <pre
+                                class="mt-4 text-xs text-gray-500 overflow-auto whitespace-pre-wrap"><%= error.stack %></pre>
+                        </details>
+                    </div>
+                    <% } %>
+
+                        <div class="mt-8 space-y-3">
+                            <% if (locals.user) { %>
+                                <a href="/dashboard"
+                                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Voltar ao Dashboard
+                                </a>
+                                <% } else { %>
+                                    <a href="/"
+                                        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Voltar ao Início
+                                    </a>
+                                    <% } %>
+
+                                        <button onclick="window.history.back()"
+                                            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                            Voltar à página anterior
+                                        </button>
+                        </div>
+
+                        <div class="mt-6 text-sm text-gray-500">
+                            <p>Se o problema persistir, entre em contato com o suporte.</p>
+                        </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

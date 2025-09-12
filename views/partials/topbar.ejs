@@ -1,0 +1,155 @@
+<header class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-30">
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-4">
+
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                    <img src="/images/RedLogo.png" class="h-8">
+                    </a>
+                </div>
+
+                <div class="lg:hidden">
+                    <h1 class="text-lg font-semibold text-gray-900">
+                        <%= title || 'Dashboard' %>
+                    </h1>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:block relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" id="global-search" placeholder="Pesquisar..."
+                        class="w-64 pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors">
+                </div>
+
+                <div class="relative">
+                    <button id="notifications-btn"
+                        class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors relative">
+                        <i class="fas fa-bell text-lg"></i>
+                        <% if (locals.unreadNotifications> 0) { %>
+                            <span id="notification-badge"
+                                class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                                <%= locals.unreadNotifications %>
+                            </span>
+                            <% } %>
+                    </button>
+                    <div id="notifications-dropdown"
+                        class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden z-50">
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <h3 class="text-sm font-semibold text-gray-900">Notificações</h3>
+                        </div>
+                        <div class="max-h-96 overflow-y-auto">
+                            <div class="p-4 text-center text-gray-500 text-sm">
+                                Carregando notificações...
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-100 px-4 py-2">
+                            <a href="/admin/aprovacoes" class="text-sm text-red-600 hover:text-red-700 font-medium">
+                                Ver todas as notificações
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button id="quick-actions-btn"
+                        class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        <i class="fas fa-plus text-lg"></i>
+                    </button>
+
+                    <div id="quick-actions-dropdown"
+                        class="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden z-50">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <h3 class="text-sm font-semibold text-gray-900">Ações Rápidas</h3>
+                        </div>
+
+                        <div id="acao-registrar-entrada" class="flex items-center px-4 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                            <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-sign-in-alt text-emerald-600"></i>
+                            </div>  
+                            Registrar Entrada
+                        </div>
+
+                        <div id="acao-registrar-saida" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">                            
+                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                            </div>
+                            Registrar Saída
+                        </div>
+
+                        <div id="acao-enviar-sugestao" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-edit text-blue-600"></i>
+                            </div>
+                            Sugestão
+                        </div>
+                        
+                        <% if (user && user.is_staff) { %>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="/admin/colaboradores/novo"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-user-plus text-purple-600"></i>
+                                </div>
+                                Novo Colaborador
+                            </a>
+                            <% } %>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <button id="user-menu-btn"
+                        class="flex items-center space-x-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-2 transition-colors">
+                        <img class="h-8 w-8 rounded-full object-cover"
+                            src="<%= userProfile.foto_url || '/images/default-avatar.png' %>" alt="Foto de Perfil">
+                        <span class="hidden md:block font-medium text-sm">
+                            <%= user.first_name %>
+                        </span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+
+                    <div id="user-menu-dropdown"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 py-2 hidden z-50">
+                        <a href="/profile/editar"
+                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-user-edit mr-3 text-gray-400"></i>
+                            Meu Perfil
+                        </a>
+                        <a href="/profile/change-password"
+                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-key mr-3 text-gray-400"></i>
+                            Alterar Senha
+                        </a>
+                        <% if (user && user.is_staff) { %>
+                            <a href="/dashboard"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i class="fas fa-tachometer-alt mr-3 text-gray-400"></i>
+                                Meu Painel
+                            </a>
+                            <% } %>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="/auth/logout"
+                                    class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-sign-out-alt mr-3 text-red-400"></i>
+                                    Sair
+                                </a>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                    <i class="fas fa-clock mr-2 text-gray-400"></i>
+                    <span id="current-time">--:--</span>
+                </div>
+
+                <div class="hidden lg:flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-600">Online</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
