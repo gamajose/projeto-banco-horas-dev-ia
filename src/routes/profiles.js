@@ -8,10 +8,11 @@ const router = express.Router();
 // Middleware para garantir que todas as rotas de API de perfis são para Admins
 router.use(isAuthenticated, requireStaff);
 
-// Rota da API para LISTAR perfis
+// Rota da API para LISTAR perfis (AGORA COM FILTRO)
 router.get('/', async (req, res) => {
     try {
-        const profiles = await Profile.findAll();
+        // A mágica acontece aqui: passamos req.query para o método findAll
+        const profiles = await Profile.findAll(req.query);
         res.json({ success: true, profiles });
     } catch (error) {
         console.error("Erro ao buscar perfis via API:", error);

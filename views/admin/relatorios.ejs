@@ -1,6 +1,25 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Relatórios de Movimentações</h1>
 
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="stat-card bg-emerald-50">
+            <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i></div>
+            <div id="total-positivas" class="stat-card-value text-emerald-600">+00:00</div>
+            <div class="stat-card-label">Total de Créditos (Aprovados)</div>
+        </div>
+        <div class="stat-card bg-red-50">
+            <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600"><i class="fas fa-minus-circle"></i></div>
+            <div id="total-negativas" class="stat-card-value text-red-600">-00:00</div>
+            <div class="stat-card-label">Total de Débitos (Aprovados)</div>
+        </div>
+        <div class="stat-card bg-gray-50">
+            <div class="stat-card-icon bg-gradient-to-r from-gray-500 to-gray-600"><i class="fas fa-balance-scale"></i></div>
+            <div id="saldo-total" class="stat-card-value text-gray-800">00:00</div>
+            <div class="stat-card-label">Saldo do Período (Aprovado)</div>
+        </div>
+    </div>
+
+
     <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
         <form id="form-filtros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
@@ -67,10 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const formFiltros = document.getElementById('form-filtros');
     const tbodyResultados = document.getElementById('tabela-resultados');
     const movimentacoesIniciais = <%- JSON.stringify(movimentacoes || []) %>;
-    
     // Referências para os botões de exportação
     const btnExportarCsv = document.getElementById('btn-exportar-csv');
     const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+
+    // Referências para os cards de resumo
+    const totalPositivasEl = document.getElementById('total-positivas');
+    const totalNegativasEl = document.getElementById('total-negativas');
+    const saldoTotalEl = document.getElementById('saldo-total');
+
 
     const createRowHTML = (mov) => {
         const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
@@ -89,7 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
             status_color = 'text-yellow-600';
         }
         const status_name = `<span class="${status_color} font-medium">${mov.status_nome}</span>`;
-
         // e noix
         return `
             <tr>
@@ -103,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
     
-    const renderTable = (data) => {
+    const renderTable = (data, summary) => {
         tbodyResultados.innerHTML = '';
         if (data.length === 0) {
             tbodyResultados.innerHTML = '<tr><td colspan="6" class="table-cell text-center text-gray-500 py-6">Nenhum resultado encontrado.</td></tr>';
@@ -112,19 +135,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 tbodyResultados.innerHTML += createRowHTML(mov);
             });
         }
+        // Atualiza os cards
+        if(summary) {
+            totalPositivasEl.textContent = summary.totalHorasPositivas;
+            totalNegativasEl.textContent = summary.totalHorasNegativas;
+            saldoTotalEl.textContent = summary.saldoTotalHoras;
+        }
     };
 
-    renderTable(movimentacoesIniciais);
-
-    formFiltros.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    const applyFilters = async () => {
         const formData = new FormData(formFiltros);
         const params = new URLSearchParams(formData);
         try {
             const response = await fetch(`/admin/api/relatorios?${params.toString()}`);
             const result = await response.json();
             if (result.success) {
-                renderTable(result.movimentacoes);
+                renderTable(result.movimentacoes, result.summary);
             } else {
                 alert('Erro ao buscar os dados filtrados.');
             }
@@ -132,6 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro no fetch dos filtros:', error);
             alert('Não foi possível aplicar os filtros.');
         }
+    };
+    
+    // Carrega os dados iniciais
+    applyFilters();
+
+    formFiltros.addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyFilters();
     });
 
     // Eventos para os botões de exportação
@@ -144,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnExportarPdf.addEventListener('click', () => {
         const formData = new FormData(formFiltros);
         const params = new URLSearchParams(formData);
-        window.location.href = `/admin/relatorios/exportar-pdf?${params.toString()}`;
+        window.open(`/admin/relatorios/exportar-pdf?${params.toString()}`, '_blank');
     });
 });
 </script>

@@ -20,6 +20,37 @@ router.use(isAuthenticated, requireStaff);
 router.get("/colaboradores", async (req, res) => {
   try {
     const colaboradores = await Profile.findAll();
+    let totalHorasPositivas = 0;
+    let totalHorasNegativas = 0;
+
+    // Itera sobre cada colaborador para calcular seu saldo
+    for (const colab of colaboradores) {
+      const balance = await Profile.calculateHourBalance(colab.id);
+      colab.saldoPositivo = balance.positive;
+      colab.saldoNegativo = balance.negative;
+      colab.saldoTotal = balance.formatted;
+
+      // Soma os minutos para o total geral
+      totalHorasPositivas += parseFloat(balance.positive.replace('+', '').replace(':', '.')) * 60;
+      totalHorasNegativas += parseFloat(balance.negative.replace('-', '').replace(':', '.')) * 60;
+    }
+
+    // Função para formatar o total de minutos para HH:MM
+    const formatTotalMinutes = (mins) => {
+        const hours = Math.floor(mins / 60).toString().padStart(2, '0');
+        const minutes = Math.round(mins % 60).toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    };
+    
+    const saldoGeral = totalHorasPositivas - totalHorasNegativas;
+    const sign = saldoGeral < 0 ? "-" : "+";
+    const absSaldoGeral = Math.abs(saldoGeral);
+    
+    const formattedTotalPositive = `+${formatTotalMinutes(totalHorasPositivas)}`;
+    const formattedTotalNegative = `-${formatTotalMinutes(totalHorasNegativas)}`;
+    const formattedTotalSaldo = `${sign}${formatTotalMinutes(absSaldoGeral)}`;
+
+
     res.render("admin/colaboradores", {
       title: "Gestão de Colaboradores",
       layout: "layouts/main",
@@ -27,14 +58,19 @@ router.get("/colaboradores", async (req, res) => {
       user: req.user,
       userProfile: req.userProfile,
       colaboradores,
+      totalHorasPositivas: formattedTotalPositive,
+      totalHorasNegativas: formattedTotalNegative,
+      saldoTotalHoras: formattedTotalSaldo,
     });
   } catch (error) {
+    console.error("Erro ao carregar a lista de colaboradores:", error);
     res.status(500).render("error", {
       title: "Erro",
       message: "Não foi possível carregar a lista de colaboradores.",
     });
   }
 });
+
 
 // Rota para MOSTRAR o formulário de novo colaborador
 router.get("/colaboradores/novo", async (req, res) => {
@@ -554,13 +590,46 @@ router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
 });
 
 router.get("/api/relatorios", async (req, res) => {
-  try {
-    const movimentacoesFiltradas = await Movement.findAll(req.query);
-    res.json({ success: true, movimentacoes: movimentacoesFiltradas });
-  } catch (error) {
-    console.error("Erro ao filtrar relatórios via API:", error);
-    res.status(500).json({ success: false, message: "Erro ao buscar dados." });
-  }
+    try {
+        const movimentacoesFiltradas = await Movement.findAll(req.query);
+
+        // Lógica para calcular os totais
+        let totalHorasPositivas = 0;
+        let totalHorasNegativas = 0;
+
+        movimentacoesFiltradas.forEach(mov => {
+            if (mov.status_nome === 'Aprovado') { // Apenas horas aprovadas contam para o saldo
+                const [hours, minutes] = mov.hora_total.split(':').map(Number);
+                const timeInMinutes = (hours * 60) + minutes;
+                if (mov.entrada) {
+                    totalHorasPositivas += timeInMinutes;
+                } else {
+                    totalHorasNegativas += timeInMinutes;
+                }
+            }
+        });
+
+        const formatTotalMinutes = (mins) => {
+            const hours = Math.floor(mins / 60).toString().padStart(2, '0');
+            const minutes = Math.round(mins % 60).toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        };
+
+        const saldoGeral = totalHorasPositivas - totalHorasNegativas;
+        const sign = saldoGeral < 0 ? "-" : "";
+        const absSaldoGeral = Math.abs(saldoGeral);
+
+        const summary = {
+            totalHorasPositivas: `+${formatTotalMinutes(totalHorasPositivas)}`,
+            totalHorasNegativas: `-${formatTotalMinutes(totalHorasNegativas)}`,
+            saldoTotalHoras: `${sign}${formatTotalMinutes(absSaldoGeral)}`
+        };
+
+        res.json({ success: true, movimentacoes: movimentacoesFiltradas, summary: summary });
+    } catch (error) {
+        console.error("Erro ao filtrar relatórios via API:", error);
+        res.status(500).json({ success: false, message: "Erro ao buscar dados." });
+    }
 });
 
 router.get("/relatorios/exportar", async (req, res) => {
@@ -597,61 +666,73 @@ router.get("/relatorios/exportar", async (req, res) => {
 });
 
 router.get("/relatorios/exportar-pdf", async (req, res) => {
-  try {
-    const movimentacoes = await Movement.findAll(req.query);
-    const filename = `relatorio_${new Date().toISOString().split("T")[0]}.pdf`;
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    const doc = new PDFDocument({ margin: 30, size: "A4" });
-    doc.pipe(res);
-    doc.fontSize(16).text("Relatório de Movimentações", { align: "center" });
-    doc.moveDown();
-    const tableTop = 100;
-    const rowData = ["Colaborador", "Data", "Tipo", "Horas", "Status"];
-    const drawTable = (data) => {
-      let y = tableTop;
-      const rowHeight = 20;
-      const colWidths = [120, 70, 50, 50, 80];
-      doc.fontSize(10).font("Helvetica-Bold");
-      rowData.forEach((header, i) => {
-        doc.text(
-          header,
-          30 + (i > 0 ? colWidths.slice(0, i).reduce((a, b) => a + b) : 0),
-          y
-        );
-      });
-      doc.font("Helvetica");
-      y += rowHeight;
-      data.forEach((mov) => {
-        const row = [
-          mov.colaborador_nome,
-          new Date(mov.data_movimentacao).toLocaleDateString("pt-BR", {
-            timeZone: "UTC",
-          }),
-          mov.entrada ? "Crédito" : "Débito",
-          mov.hora_total,
-          mov.status_nome,
-        ];
-        row.forEach((cell, i) => {
-          doc.text(
-            cell,
-            30 + (i > 0 ? colWidths.slice(0, i).reduce((a, b) => a + b) : 0),
-            y,
-            { width: colWidths[i], ellipsis: true }
-          );
-        });
-        y += rowHeight;
-        if (y > 750) {
-          doc.addPage();
-          y = tableTop;
+    try {
+        const movimentacoes = await Movement.findAll(req.query);
+        const filename = `relatorio_${new Date().toISOString().split("T")[0]}.pdf`;
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        const doc = new PDFDocument({ margin: 30, size: "A4" });
+        doc.pipe(res);
+        
+        doc.fontSize(16).text("Relatório Geral de Movimentações", { align: "center" });
+        doc.moveDown();
+
+        // Se um colaborador específico foi selecionado, adiciona o resumo
+        if (req.query.colaborador_id && movimentacoes.length > 0) {
+            const profileId = req.query.colaborador_id;
+            const balance = await Profile.calculateHourBalance(profileId);
+            
+            doc.fontSize(12).font("Helvetica-Bold").text('Resumo de Horas Aprovadas (Período Filtrado)');
+            doc.fontSize(10).font("Helvetica").text(`Total de Créditos: ${balance.positive} | Total de Débitos: ${balance.negative}`);
+            doc.fontSize(10).font("Helvetica-Bold").text(`Saldo do Período: ${balance.formatted}`);
+            doc.moveDown(2);
         }
-      });
-    };
-    drawTable(movimentacoes);
-    doc.end();
-  } catch (error) {
-    console.error("Erro ao exportar PDF:", error);
-    res.status(500).send("Não foi possível gerar o relatório em PDF.");
-  }
+
+
+        const tableTop = doc.y;
+        const rowData = ["Colaborador", "Data", "Tipo", "Horas", "Status", "Motivo"];
+        const colWidths = [100, 60, 50, 50, 70, 150];
+        
+        doc.fontSize(10).font("Helvetica-Bold");
+        let currentX = 30;
+        rowData.forEach((header, i) => {
+            doc.text(header, currentX, tableTop);
+            currentX += colWidths[i] + 5;
+        });
+
+        doc.font("Helvetica");
+        let y = tableTop + 20;
+
+        movimentacoes.forEach((mov) => {
+            const row = [
+                mov.colaborador_nome,
+                new Date(mov.data_movimentacao).toLocaleDateString("pt-BR", {
+                    timeZone: "UTC",
+                }),
+                mov.entrada ? "Crédito" : "Débito",
+                mov.hora_total,
+                mov.status_nome,
+                mov.motivo || ''
+            ];
+
+            let cellX = 30;
+            row.forEach((cell, i) => {
+                doc.text(cell.toString(), cellX, y, { width: colWidths[i], ellipsis: true });
+                cellX += colWidths[i] + 5;
+            });
+
+            y += 20;
+            if (y > 750) {
+                doc.addPage();
+                y = 50;
+            }
+        });
+
+        doc.end();
+    } catch (error) {
+        console.error("Erro ao exportar PDF:", error);
+        res.status(500).send("Não foi possível gerar o relatório em PDF.");
+    }
 });
+
 module.exports = router;

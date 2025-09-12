@@ -22,9 +22,10 @@
                     <% }) %>
                 </select>
             </div>
-            <div class="flex-shrink-0 flex space-x-2">
-                <button type="submit" class="btn-primary flex-1">Filtrar</button>
-                <button type="button" id="btn-exportar-pdf" class="btn-secondary flex-1">PDF</button>
+            
+            <div class="flex-shrink-0 flex space-x-2 w-full sm:w-auto">
+                <button type="submit" class="btn-primary w-full sm:w-auto">Filtrar</button>
+                <button type="button" id="btn-exportar-pdf" class="btn-secondary w-full sm:w-auto">PDF</button>
             </div>
         </form>
     </div>
@@ -51,16 +52,12 @@
 </div>
 
 
-<!------------------------------------------------- Função ---------------------------------------------------------------------->
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const formFiltros = document.getElementById('form-filtros');
         const tbodyResultados = document.getElementById('tabela-resultados');
         const movimentacoesIniciais = <%- JSON.stringify(movimentacoes) %>;
         const btnExportarPdf = document.getElementById('btn-exportar-pdf');
-
         const createRowHTML = (mov) => {
             const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
             const tipoHTML = mov.entrada
@@ -69,7 +66,6 @@
             const motivo = mov.motivo || '';
             const statusClass = mov.status_nome === 'Aprovado' ? 'bg-green-100 text-green-800' : (mov.status_nome === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
             const statusBadge = `<p class="text-xs font-semibold px-2 py-1 rounded-full ${statusClass}">${mov.status_nome}</p>`;
-            
             return `
                 <tr>
                     <td class="table-cell">${dataFormatada}</td>
@@ -106,7 +102,6 @@
         };
         
         loadInitialData();
-
         formFiltros.addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(formFiltros);
@@ -124,7 +119,6 @@
                 alert('Não foi possível aplicar os filtros.');
             }
         });
-
         btnExportarPdf.addEventListener('click', () => {
             const params = new URLSearchParams(new FormData(formFiltros));
             window.open(`/profile/relatorio/exportar-pdf?${params.toString()}`, '_blank');

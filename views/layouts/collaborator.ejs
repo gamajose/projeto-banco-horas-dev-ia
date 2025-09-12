@@ -13,7 +13,7 @@
 
 <body class="font-sans">
 
-    <div class="container mx-auto max-w-lg p-4">
+    <div class="container mx-auto max-w-4xl p-4">
         <header class="flex justify-between items-center py-4">
             <div class="text-left">
                 <h1 class="text-2xl font-bold text-gray-800">Bom dia, <%= user.first_name || 'Colaborador' %>!</h1>
@@ -28,17 +28,17 @@
         </header>
 
         <nav class="my-6">
-            <ul class="flex justify-around bg-white rounded-full shadow-md p-2">
+            <ul class="grid grid-cols-4 gap-2 bg-white rounded-full shadow-md p-2">
                 <li><a href="/meu-perfil"
-                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'home' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Home</a>
+                        class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'home' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Home</a>
                 </li>
-
                 <li><a href="/profile/gerenciar"
-                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'gerenciar' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Gerenciar
-                        Horas</a></li>
-
+                        class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'gerenciar' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Gerenciar Horas</a></li>
                 <li><a href="/profile/relatorio"
-                        class="flex-1 text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200 <%= activePage === 'relatorio' ? 'bg-red-600 text-white shadow-md hover:bg-red-700' : '' %>">Relatório</a>
+                        class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'relatorio' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Relatório</a>
+                </li>
+                <li><button id="btn-sugestao-colab"
+                        class="nav-item w-full flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm text-gray-800 hover:bg-gray-200 transition-colors duration-200">Sugestão</button>
                 </li>
             </ul>
         </nav>
@@ -71,6 +71,9 @@
             </div>
         </div>
     </div>
+    
+    <%- include('../partials/modal-sugestao', { userProfile: locals.userProfile || {} }) %>
+
 
 </body>
 
@@ -82,29 +85,46 @@
         const modal = document.getElementById('options-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
         const modalContent = document.getElementById('modal-content-wrapper');
+        const btnSugestaoColab = document.getElementById('btn-sugestao-colab');
+        const modalSugestao = document.getElementById('modal-sugestao');
+        const closeModalSugestaoBtn = document.getElementById('modal-sugestao-close');
 
-        function openModal() {
-            modal.classList.remove('hidden');
+
+        function openModal(modalEl, contentEl) {
+            modalEl.classList.remove('hidden');
             setTimeout(() => {
-                modal.classList.add('opacity-100');
-                modalContent.classList.remove('scale-95');
+                modalEl.classList.add('opacity-100');
+                if (contentEl) contentEl.classList.remove('scale-95');
             }, 10);
         }
 
-        function closeModal() {
-            modal.classList.remove('opacity-100');
-            modalContent.classList.add('scale-95');
+        function closeModal(modalEl, contentEl) {
+            modalEl.classList.remove('opacity-100');
+            if (contentEl) contentEl.classList.add('scale-95');
             setTimeout(() => {
-                modal.classList.add('hidden');
+                modalEl.classList.add('hidden');
             }, 300);
         }
 
         if (openMenuBtn && modal && closeModalBtn) {
-            openMenuBtn.addEventListener('click', openModal);
-            closeModalBtn.addEventListener('click', closeModal);
+            openMenuBtn.addEventListener('click', () => openModal(modal, modalContent));
+            closeModalBtn.addEventListener('click', () => closeModal(modal, modalContent));
             modal.addEventListener('click', (e) => {
                 if (e.target.id === 'options-modal') {
-                    closeModal();
+                    closeModal(modal, modalContent);
+                }
+            });
+        }
+
+        // Lógica para abrir e fechar o modal de sugestão
+        if (btnSugestaoColab && modalSugestao) {
+            btnSugestaoColab.addEventListener('click', () => openModal(modalSugestao));
+        }
+        if (closeModalSugestaoBtn && modalSugestao) {
+            closeModalSugestaoBtn.addEventListener('click', () => closeModal(modalSugestao));
+             modalSugestao.addEventListener('click', (e) => {
+                if (e.target.id === 'modal-sugestao') {
+                    closeModal(modalSugestao);
                 }
             });
         }
