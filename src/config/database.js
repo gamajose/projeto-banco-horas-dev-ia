@@ -111,20 +111,6 @@ class Database {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
-      `CREATE TABLE IF NOT EXISTS movimentacoes (
-        id SERIAL PRIMARY KEY,
-        colaborador_id INT NOT NULL REFERENCES perfis(id) ON DELETE CASCADE,
-        data_movimentacao DATE NOT NULL,
-        hora_inicial TIME,
-        hora_final TIME,
-        hora_total VARCHAR(10),
-        motivo TEXT,
-        entrada BOOLEAN DEFAULT true,
-        status_id INT REFERENCES status(id),
-        forma_pagamento_id INT REFERENCES formas_pagamento(id),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`,
       `CREATE TABLE IF NOT EXISTS movimentacoes_logs (
         id SERIAL PRIMARY KEY,
         movimentacao_id INT NOT NULL REFERENCES movimentacoes(id) ON DELETE CASCADE,
