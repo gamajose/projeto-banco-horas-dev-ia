@@ -275,9 +275,9 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="flex items-center justify-between">
+    <div>
+        <div class="card">
+            <div class="card-header">
                 <div class="flex items-center space-x-3">
                     <div class="bg-blue-100 p-2 rounded-lg">
                         <i class="fas fa-building text-blue-600"></i>
@@ -287,43 +287,40 @@
                         <p class="text-sm text-gray-600">Distribuição por departamento</p>
                     </div>
                 </div>
-                <button id="btn-add-setor-dashboard" class="btn-secondary btn-xs">
-                    <i class="fas fa-plus"></i>
-                </button>
             </div>
-        </div>
-        <div class="card-body">
-            <div id="resumo-setor-list" class="space-y-3">
-                <% if (departmentStats && departmentStats.length> 0) { %>
-                    <% departmentStats.forEach(dept=> { %>
-                        <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
-                            data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <div
-                                        class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-users text-white text-sm"></i>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold text-gray-900">
-                                            <%= dept.nome %>
+            <div class="card-body">
+                <div id="resumo-setor-list" class="space-y-3">
+                    <% if (departmentStats && departmentStats.length> 0) { %>
+                        <% departmentStats.forEach(dept=> { %>
+                            <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                                data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-3">
+                                        <div
+                                            class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-users text-white text-sm"></i>
                                         </div>
-                                        <div class="text-sm text-gray-500">
-                                            <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores !==1
-                                                    ? 'es' : '' %>
+                                        <div>
+                                            <div class="font-semibold text-gray-900">
+                                                <%= dept.nome %>
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores
+                                                        !==1 ? 'es' : '' %>
+                                            </div>
                                         </div>
                                     </div>
+                                    <i class="fas fa-chevron-right text-gray-400"></i>
                                 </div>
-                                <i class="fas fa-chevron-right text-gray-400"></i>
                             </div>
-                        </div>
-                        <% }) %>
-                            <% } else { %>
-                                <div class="text-center py-8 text-gray-500">
-                                    <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
-                                    <p>Nenhum setor cadastrado</p>
-                                </div>
-                                <% } %>
+                            <% }) %>
+                                <% } else { %>
+                                    <div class="text-center py-8 text-gray-500">
+                                        <i class="fas fa-building text-3xl mb-3 opacity-50"></i>
+                                        <p>Nenhum setor cadastrado</p>
+                                    </div>
+                                    <% } %>
+                </div>
             </div>
         </div>
     </div>
@@ -394,103 +391,7 @@
             refreshDashboard();
             loadRecentActivity();
         }, 30000);
-
-        const btnAbrirModalSetor = document.getElementById('btn-add-setor-dashboard');
-        const modalNovoSetor = document.getElementById('modal-novo-setor');
-        const btnFecharModalSetor = document.getElementById('close-modal-setor');
-        const btnCancelarModalSetor = document.getElementById('cancel-modal-setor');
-        const formNovoSetor = document.getElementById('form-novo-setor');
-        const inputNomeSetor = document.getElementById('nome-novo-setor');
-        const feedbackSetorDiv = document.getElementById('modal-setor-feedback');
-        const listaDeSetores = document.getElementById('resumo-setor-list');
-
-        const abrirModalSetor = () => {
-            if (modalNovoSetor) {
-                inputNomeSetor.value = '';
-                feedbackSetorDiv.textContent = '';
-                modalNovoSetor.classList.remove('hidden');
-            }
-        };
-
-        const fecharModalSetor = () => {
-            if (modalNovoSetor) {
-                modalNovoSetor.classList.add('hidden');
-            }
-        };
-
-        if (btnAbrirModalSetor) {
-            btnAbrirModalSetor.addEventListener('click', abrirModalSetor);
-        }
-        if (btnFecharModalSetor) {
-            btnFecharModalSetor.addEventListener('click', fecharModalSetor);
-        }
-        if (btnCancelarModalSetor) {
-            btnCancelarModalSetor.addEventListener('click', fecharModalSetor);
-        }
-
-        if (formNovoSetor) {
-            formNovoSetor.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const nomeSetor = inputNomeSetor.value.trim();
-
-                if (!nomeSetor) {
-                    feedbackSetorDiv.textContent = 'O nome do setor é obrigatório.';
-                    feedbackSetorDiv.className = 'text-sm mt-3 text-red-600';
-                    return;
-                }
-
-                feedbackSetorDiv.textContent = 'Salvando...';
-                feedbackSetorDiv.className = 'text-sm mt-3 text-gray-500';
-
-                try {
-                    const response = await fetch('/api/v1/departments', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nome: nomeSetor })
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        throw new Error(result.error || 'Falha ao criar o setor.');
-                    }
-
-                    const novoSetorHTML = `
-                    <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
-                         data-sector-id="${result.department.id}" data-sector-name="${result.department.nome}">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 bg-gradient-to-r from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                                    <i class="fas fa-users text-white text-sm"></i>
-                                </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900">${result.department.nome}</div>
-                                    <div class="text-sm text-gray-500">0 colaboradores</div>
-                                </div>
-                            </div>
-                            <i class="fas fa-chevron-right text-gray-400"></i>
-                        </div>
-                    </div>
-                `;
-
-                    const emptyState = listaDeSetores.querySelector('.text-center');
-                    if (emptyState) {
-                        emptyState.remove();
-                    }
-
-                    listaDeSetores.insertAdjacentHTML('beforeend', novoSetorHTML);
-                    showNotification('Setor criado com sucesso!', 'success');
-                    fecharModalSetor();
-
-                } catch (error) {
-                    feedbackSetorDiv.textContent = `Erro: ${error.message}`;
-                    feedbackSetorDiv.className = 'text-sm mt-3 text-red-600';
-                }
-            });
-        }
     });
-
-
 
     //Função abas Relatório Rapido e Atividades Recentes
     const tabs = document.querySelectorAll('.tab-btn');
