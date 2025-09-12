@@ -686,6 +686,36 @@ router.get("/relatorios/exportar-pdf", async (req, res) => {
             doc.fontSize(10).font("Helvetica").text(`Total de Créditos: ${balance.positive} | Total de Débitos: ${balance.negative}`);
             doc.fontSize(10).font("Helvetica-Bold").text(`Saldo do Período: ${balance.formatted}`);
             doc.moveDown(2);
+        } else {
+            // Se nenhum colaborador for selecionado, calcula o resumo geral
+            let totalHorasPositivas = 0;
+            let totalHorasNegativas = 0;
+
+            movimentacoes.forEach(mov => {
+                if (mov.status_nome === 'Aprovado') { 
+                    const [hours, minutes] = mov.hora_total.split(':').map(Number);
+                    const timeInMinutes = (hours * 60) + minutes;
+                    if (mov.entrada) {
+                        totalHorasPositivas += timeInMinutes;
+                    } else {
+                        totalHorasNegativas += timeInMinutes;
+                    }
+                }
+            });
+            const formatTotalMinutes = (mins) => {
+                const hours = Math.floor(mins / 60).toString().padStart(2, '0');
+                const minutes = Math.round(mins % 60).toString().padStart(2, '0');
+                return `${hours}:${minutes}`;
+            };
+
+            const saldoGeral = totalHorasPositivas - totalHorasNegativas;
+            const sign = saldoGeral < 0 ? "-" : "";
+            const absSaldoGeral = Math.abs(saldoGeral);
+            
+            doc.fontSize(12).font("Helvetica-Bold").text('Resumo de Horas Aprovadas (Período Filtrado)');
+            doc.fontSize(10).font("Helvetica").text(`Total de Créditos: +${formatTotalMinutes(totalHorasPositivas)} | Total de Débitos: -${formatTotalMinutes(totalHorasNegativas)}`);
+            doc.fontSize(10).font("Helvetica-Bold").text(`Saldo do Período: ${sign}${formatTotalMinutes(absSaldoGeral)}`);
+            doc.moveDown(2);
         }
 
 
