@@ -140,8 +140,8 @@
     @apply bg-gradient-to-r from-gray-50 to-gray-100/50 px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider border-b border-gray-200/60;
   }
 
-  .table-cell {
-    @apply px-6 py-4 text-sm text-gray-900 border-b border-gray-100/50;
+ .table-cell {
+    @apply px-4 py-3 text-sm whitespace-nowrap;
   }
 
   .table-row {

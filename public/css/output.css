@@ -1204,16 +1204,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .table-cell {
-  border-bottom-width: 1px;
-  border-color: rgb(245 245 245 / 0.5);
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  white-space: nowrap;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   font-size: 0.875rem;
   line-height: 1.25rem;
-  --tw-text-opacity: 1;
-  color: rgb(23 23 23 / var(--tw-text-opacity, 1));
 }
 
 .table-row {
@@ -3401,46 +3398,37 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 640px) {
   .sm\:table-cell {
-    border-bottom-width: 1px;
-    border-color: rgb(245 245 245 / 0.5);
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    white-space: nowrap;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    --tw-text-opacity: 1;
-    color: rgb(23 23 23 / var(--tw-text-opacity, 1));
   }
 }
 
 @media (min-width: 768px) {
   .md\:table-cell {
-    border-bottom-width: 1px;
-    border-color: rgb(245 245 245 / 0.5);
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    white-space: nowrap;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    --tw-text-opacity: 1;
-    color: rgb(23 23 23 / var(--tw-text-opacity, 1));
   }
 }
 
 @media (min-width: 1024px) {
   .lg\:table-cell {
-    border-bottom-width: 1px;
-    border-color: rgb(245 245 245 / 0.5);
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    white-space: nowrap;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    --tw-text-opacity: 1;
-    color: rgb(23 23 23 / var(--tw-text-opacity, 1));
   }
 }
 
