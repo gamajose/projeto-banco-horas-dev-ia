@@ -765,4 +765,28 @@ router.get("/relatorios/exportar-pdf", async (req, res) => {
     }
 });
 
+router.delete("/colaboradores/:id", async (req, res) => {
+  try {
+    const profileId = req.params.id;
+    const profile = await Profile.findById(profileId);
+
+    if (!profile) {
+      return res.status(404).json({ success: false, message: "Colaborador não encontrado." });
+    }
+
+    // A restrição ON DELETE CASCADE na base de dados irá tratar de apagar o perfil associado.
+    const foiApagado = await User.delete(profile.usuario_id);
+
+    if (foiApagado) {
+      res.json({ success: true, message: "Colaborador excluído com sucesso." });
+    } else {
+      // Isto pode acontecer se o utilizador já tiver sido apagado mas o perfil não.
+      throw new Error("O utilizador associado a este perfil não foi encontrado para exclusão.");
+    }
+  } catch (error) {
+    console.error("Erro ao excluir colaborador:", error);
+    res.status(500).json({ success: false, message: "Erro interno ao excluir o colaborador." });
+  }
+});
+
 module.exports = router;

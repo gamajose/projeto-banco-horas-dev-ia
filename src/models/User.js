@@ -8,6 +8,13 @@ class User {
     const sql = `SELECT * FROM usuarios WHERE id = $1`;
     return await db.get(sql, [id]);
   }
+
+  static async delete(id) {
+    const sql = `DELETE FROM usuarios WHERE id = $1`;
+    const result = await db.run(sql, [id]);
+    // Para postgres, rowCount informa o número de linhas afetadas
+    return result.rowCount > 0;
+  }
   
   static async updateLastLogin(id) {
     const sql = `UPDATE usuarios SET last_login = CURRENT_TIMESTAMP WHERE id = $1`;

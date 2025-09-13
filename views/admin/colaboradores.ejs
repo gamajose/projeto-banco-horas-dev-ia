@@ -32,37 +32,53 @@
         </div>
         <div class="pt-4 px-2">
             <div id="total-panel" class="tab-panel">
-                <div class="stat-card-value"><%= colaboradores.length %></div>
+                <div class="stat-card-value">
+                    <%= colaboradores.length %>
+                </div>
                 <div class="stat-card-label">Colaboradores Totais</div>
             </div>
             <div id="ativos-panel" class="tab-panel hidden">
-                <div class="stat-card-value"><%= colaboradores.filter(c => c.is_active).length %></div>
+                <div class="stat-card-value">
+                    <%= colaboradores.filter(c=> c.is_active).length %>
+                </div>
                 <div class="stat-card-label">Colaboradores Ativos</div>
             </div>
             <div id="inativos-panel" class="tab-panel hidden">
-                <div class="stat-card-value"><%= colaboradores.filter(c => !c.is_active).length %></div>
+                <div class="stat-card-value">
+                    <%= colaboradores.filter(c=> !c.is_active).length %>
+                </div>
                 <div class="stat-card-label">Colaboradores Inativos</div>
             </div>
             <div id="gerentes-panel" class="tab-panel hidden">
-                <div class="stat-card-value"><%= colaboradores.filter(c => c.is_manager).length %></div>
+                <div class="stat-card-value">
+                    <%= colaboradores.filter(c=> c.is_manager).length %>
+                </div>
                 <div class="stat-card-label">Total de Gerentes</div>
             </div>
         </div>
     </div>
 
     <div class="stat-card bg-emerald-50">
-        <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i></div>
-        <div class="stat-card-value text-emerald-600"><%= totalHorasPositivas %></div>
+        <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i>
+        </div>
+        <div class="stat-card-value text-emerald-600">
+            <%= totalHorasPositivas %>
+        </div>
         <div class="stat-card-label">Total de Horas Positivas</div>
     </div>
     <div class="stat-card bg-red-50">
         <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600"><i class="fas fa-minus-circle"></i></div>
-        <div class="stat-card-value text-red-600"><%= totalHorasNegativas %></div>
+        <div class="stat-card-value text-red-600">
+            <%= totalHorasNegativas %>
+        </div>
         <div class="stat-card-label">Total de Horas Negativas</div>
     </div>
     <div class="stat-card bg-blue-50">
-        <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600"><i class="fas fa-balance-scale"></i></div>
-        <div class="stat-card-value text-blue-800"><%= saldoTotalHoras %></div>
+        <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600"><i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="stat-card-value text-blue-800">
+            <%= saldoTotalHoras %>
+        </div>
         <div class="stat-card-label">Saldo Geral de Horas</div>
     </div>
 </div>
@@ -81,11 +97,11 @@
             <select id="department-filter" class="form-input">
                 <option value="">Todos os setores</option>
                 <% const uniqueDepartments=[...new Set(colaboradores.map(c=> c.setor_nome).filter(Boolean))]; %>
-                <% uniqueDepartments.forEach(dept => { %>
-                    <option value="<%= dept %>">
-                        <%= dept %>
-                    </option>
-                <% }); %>
+                    <% uniqueDepartments.forEach(dept=> { %>
+                        <option value="<%= dept %>">
+                            <%= dept %>
+                        </option>
+                        <% }); %>
             </select>
 
             <select id="status-filter" class="form-input">
@@ -128,19 +144,22 @@
                 <thead>
                     <tr>
                         <th class="table-header">
-                            <input type="checkbox" id="select-all" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                            <input type="checkbox" id="select-all"
+                                class="rounded border-gray-300 text-red-600 focus:ring-red-500">
                         </th>
                         <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('name')">
                             Nome
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
-                        <th class="table-header hidden md:table-cell cursor-pointer hover:bg-gray-100" onclick="sortTable('department')">
+                        <th class="table-header hidden md:table-cell cursor-pointer hover:bg-gray-100"
+                            onclick="sortTable('department')">
                             Setor
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
                         <th class="table-header hidden lg:table-cell">Horas Positivas</th>
                         <th class="table-header hidden lg:table-cell">Horas Negativas</th>
                         <th class="table-header hidden lg:table-cell">Saldo</th>
+                        <th class="table-header hidden md:table-cell">Último Acesso</th>
                         <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('status')">
                             Status
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
@@ -149,14 +168,16 @@
                     </tr>
                 </thead>
                 <tbody id="collaborators-tbody">
-                    <% colaboradores.forEach(colab => { %>
-                        <tr class="table-row collaborator-row"
+                    <% colaboradores.forEach(colab=> { %>
+                        <tr id="collaborator-row-<%= colab.id %>" class="table-row collaborator-row"
                             data-name="<%= colab.first_name %> <%= colab.last_name %>" data-email="<%= colab.email %>"
                             data-department="<%= colab.setor_nome || '' %>"
                             data-status="<%= colab.is_active ? 'active' : 'inactive' %>">
 
                             <td class="table-cell">
-                                <input type="checkbox" class="collaborator-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500" value="<%= colab.id %>">
+                                <input type="checkbox"
+                                    class="collaborator-checkbox rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                    value="<%= colab.id %>">
                             </td>
 
                             <td class="table-cell">
@@ -171,13 +192,15 @@
                                     <div>
                                         <div class="font-semibold text-gray-900">
                                             <%= colab.first_name %>
-                                            <%= colab.last_name %>
-                                            <% if (colab.is_manager) { %>
-                                                <i class="fas fa-crown text-yellow-500 ml-1" title="Gerente"></i>
-                                            <% } %>
-                                            <% if (colab.is_staff) { %>
-                                                <i class="fas fa-shield-alt text-red-500 ml-1" title="Administrador"></i>
-                                            <% } %>
+                                                <%= colab.last_name %>
+                                                    <% if (colab.is_manager) { %>
+                                                        <i class="fas fa-crown text-yellow-500 ml-1"
+                                                            title="Gerente"></i>
+                                                        <% } %>
+                                                            <% if (colab.is_staff) { %>
+                                                                <i class="fas fa-shield-alt text-red-500 ml-1"
+                                                                    title="Administrador"></i>
+                                                                <% } %>
                                         </div>
                                         <div class="text-sm text-gray-600">
                                             <i class="fas fa-envelope mr-1"></i>
@@ -196,17 +219,41 @@
                                         <i class="fas fa-building mr-1"></i>
                                         <%= colab.setor_nome %>
                                     </span>
-                                <% } else { %>
-                                    <span class="text-gray-400 text-sm">Sem setor</span>
-                                <% } %>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-sm">Sem setor</span>
+                                        <% } %>
                             </td>
 
-                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-emerald-600"><%= colab.saldoPositivo %></td>
-                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-red-600"><%= colab.saldoNegativo %></td>
-                            <td class="table-cell hidden lg:table-cell font-mono font-bold text-blue-800"><%= colab.saldoTotal %></td>
+                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-emerald-600">
+                                <%= colab.saldoPositivo %>
+                            </td>
+                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-red-600">
+                                <%= colab.saldoNegativo %>
+                            </td>
+                            <td
+                                class="table-cell hidden lg:table-cell font-mono font-bold <%= colab.saldoTotal.startsWith('-') ? 'text-red-700' : 'text-gray-800' %>">
+                                <%= colab.saldoTotal %>
+                            </td>
+
+                            <td class="table-cell hidden md:table-cell">
+                                <% if (colab.last_login) { %>
+                                    <div class="text-sm">
+                                        <div>
+                                            <%= new Date(colab.last_login).toLocaleDateString('pt-BR') %>
+                                        </div>
+                                        <div class="text-gray-500">
+                                            <%= new Date(colab.last_login).toLocaleTimeString('pt-BR', {hour: '2-digit'
+                                                , minute:'2-digit'}) %>
+                                        </div>
+                                    </div>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-sm">Nunca</span>
+                                        <% } %>
+                            </td>
 
                             <td class="table-cell">
-                                <button type="button" class="toggle-status-btn badge <%= colab.is_active ? 'badge-success' : 'badge-danger' %> cursor-pointer transition-colors hover:opacity-80"
+                                <button type="button"
+                                    class="toggle-status-btn badge <%= colab.is_active ? 'badge-success' : 'badge-danger' %> cursor-pointer transition-colors hover:opacity-80"
                                     data-id="<%= colab.id %>" data-active="<%= colab.is_active %>">
                                     <i class="fas fa-<%= colab.is_active ? 'check-circle' : 'times-circle' %> mr-1"></i>
                                     <%= colab.is_active ? 'Ativo' : 'Inativo' %>
@@ -214,19 +261,23 @@
                             </td>
                             <td class="table-cell text-right">
                                 <div class="flex items-center justify-end space-x-2">
-                                    <button class="btn-secondary btn-xs view-collaborator-btn" data-profile-id="<%= colab.id %>" title="Visualizar">
+                                    <button class="btn-secondary btn-xs view-collaborator-btn"
+                                        data-profile-id="<%= colab.id %>" title="Visualizar">
                                         <i class="fas fa-eye"></i>
                                     </button>
-                                    <a href="/admin/colaboradores/editar/<%= colab.id %>" class="btn-primary btn-xs" title="Editar">
+                                    <a href="/admin/colaboradores/editar/<%= colab.id %>" class="btn-primary btn-xs"
+                                        title="Editar">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button onclick="deleteCollaborator('<%= colab.id %>', '<%= colab.first_name %> <%= colab.last_name %>')" class="btn-danger btn-xs" title="Excluir">
+                                    <button
+                                        onclick="openDeleteModal('<%= colab.id %>', '<%= colab.first_name %> <%= colab.last_name %>')"
+                                        class="btn-danger btn-xs" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                    <% }); %>
+                        <% }); %>
                 </tbody>
             </table>
 
@@ -244,7 +295,8 @@
     </div>
 </div>
 
-<div id="bulk-actions-bar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-40">
+<div id="bulk-actions-bar"
+    class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-40">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
             <span id="selected-count" class="text-sm font-medium text-gray-700">0 selecionados</span>
@@ -272,9 +324,17 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initializeCollaboratorsPage();
-    // Lógica das Abas
+        // Lógica das Abas
         const tabs = document.querySelectorAll('.tab-btn');
         const panels = document.querySelectorAll('.tab-panel');
+
+        const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+        const btnCancelDelete = document.getElementById('btn-cancel-delete');
+
+        if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', executeDelete);
+        if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+
+
 
         tabs.forEach(tab => {
             tab.addEventListener('click', (event) => {
@@ -670,32 +730,65 @@
         }
     }
 
-    async function deleteCollaborator(id, name) {
-        if (!confirm(`Excluir o colaborador "${name}"? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
+    let collaboratorIdToDelete = null;
+
+    function openDeleteModal(id, name) {
+        collaboratorIdToDelete = id;
+        const modal = document.getElementById('modal-confirm-delete');
+        const message = modal.querySelector('#confirm-delete-message');
+        message.innerHTML = `Tem certeza que deseja excluir <strong>${name}</strong>? Esta ação é irreversível.`;
+        modal.classList.remove('hidden');
+    }
+
+    async function executeDelete() {
+        if (!collaboratorIdToDelete) return;
 
         showLoading();
 
         try {
-            const response = await fetch(`/admin/colaboradores/${id}`, {
+            const response = await fetch(`/admin/colaboradores/${collaboratorIdToDelete}`, {
                 method: 'DELETE'
             });
-
             const result = await response.json();
 
             if (result.success) {
                 showNotification('Colaborador excluído com sucesso!', 'success');
-                location.reload();
+                const rowToRemove = document.getElementById(`collaborator-row-${collaboratorIdToDelete}`);
+                if (rowToRemove) {
+                    rowToRemove.style.transition = 'opacity 0.3s ease';
+                    rowToRemove.style.opacity = '0';
+                    setTimeout(() => {
+                        rowToRemove.remove();
+                        updateCounts(); // Atualiza a contagem de colaboradores
+                    }, 300);
+                } else {
+                    location.reload();
+                }
             } else {
                 throw new Error(result.message);
             }
         } catch (error) {
             showNotification('Erro ao excluir colaborador: ' + error.message, 'error');
         } finally {
+            closeDeleteModal();
             hideLoading();
+            collaboratorIdToDelete = null;
         }
     }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('modal-confirm-delete');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function updateCounts() {
+        const totalCount = document.querySelectorAll('.collaborator-row').length;
+        document.getElementById('total-count').textContent = totalCount;
+        applyFilters(); // Re-aplica filtros para atualizar a contagem "mostrando"
+    }
+
 
     function exportCollaborators() {
         showLoading();
