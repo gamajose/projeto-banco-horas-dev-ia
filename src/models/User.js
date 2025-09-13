@@ -61,7 +61,7 @@ class User {
   }
 
  static async update(id, userData) {
-    const { username, email, password, first_name, last_name } = userData;
+    const { username, email, password, first_name, last_name, is_active } = userData;
     const fields = [];
     const params = [];
     let paramIndex = 1;
@@ -71,6 +71,11 @@ class User {
     if (first_name) { fields.push(`first_name = $${paramIndex++}`); params.push(first_name); }
     if (last_name) { fields.push(`last_name = $${paramIndex++}`); params.push(last_name); }
     
+    if (is_active !== undefined) { 
+      fields.push(`is_active = $${paramIndex++}`); 
+      params.push(is_active); 
+    }
+
     if (password) {
       const salt = await bcrypt.genSalt(12);
       const password_hash = await bcrypt.hash(password, salt);
@@ -84,7 +89,8 @@ class User {
     if (fields.length === 0) return; // Nenhum campo para atualizar
 
     params.push(id);
-    const sql = `UPDATE usuarios SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramIndex} RETURNING *`;
+    const sql = `update
+     usuarios SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramIndex} RETURNING *`;
     const result = await db.query(sql, params);
     return result.rows[0];
   }

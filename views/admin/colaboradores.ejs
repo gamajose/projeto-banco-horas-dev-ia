@@ -156,11 +156,12 @@
                             Setor
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
-                        <th class="table-header hidden lg:table-cell">Horas Positivas</th>
-                        <th class="table-header hidden lg:table-cell">Horas Negativas</th>
-                        <th class="table-header hidden lg:table-cell">Saldo</th>
-                        <th class="table-header hidden md:table-cell">Último Acesso</th>
-                        <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('status')">
+                        <th class="table-header text-center hidden lg:table-cell">Horas Positivas</th>
+                        <th class="table-header text-center hidden lg:table-cell">Horas Negativas</th>
+                        <th class="table-header text-center hidden lg:table-cell">Saldo</th>
+                        <th class="table-header text-center hidden md:table-cell">Último Acesso</th>
+                        <th class="table-header text-center cursor-pointer hover:bg-gray-100"
+                            onclick="sortTable('status')">
                             Status
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
@@ -224,18 +225,20 @@
                                         <% } %>
                             </td>
 
-                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-emerald-600">
+                            <td
+                                class="table-cell text-center hidden lg:table-cell font-mono font-semibold text-emerald-600">
                                 <%= colab.saldoPositivo %>
                             </td>
-                            <td class="table-cell hidden lg:table-cell font-mono font-semibold text-red-600">
+                            <td
+                                class="table-cell text-center hidden lg:table-cell font-mono font-semibold text-red-600">
                                 <%= colab.saldoNegativo %>
                             </td>
                             <td
-                                class="table-cell hidden lg:table-cell font-mono font-bold <%= colab.saldoTotal.startsWith('-') ? 'text-red-700' : 'text-gray-800' %>">
+                                class="table-cell text-center hidden lg:table-cell font-mono font-bold <%= colab.saldoTotal.startsWith('-') ? 'text-red-700' : 'text-gray-800' %>">
                                 <%= colab.saldoTotal %>
                             </td>
 
-                            <td class="table-cell hidden md:table-cell">
+                            <td class="table-cell text-center hidden md:table-cell">
                                 <% if (colab.last_login) { %>
                                     <div class="text-sm">
                                         <div>
@@ -251,7 +254,7 @@
                                         <% } %>
                             </td>
 
-                            <td class="table-cell">
+                            <td class="table-cell text-center">
                                 <button type="button"
                                     class="toggle-status-btn badge <%= colab.is_active ? 'badge-success' : 'badge-danger' %> cursor-pointer transition-colors hover:opacity-80"
                                     data-id="<%= colab.id %>" data-active="<%= colab.is_active %>">
