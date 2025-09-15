@@ -1,6 +1,6 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { isAuthenticated, requireStaff } = require("../middleware/auth");
+const { isAuthenticated, isApiAuthenticated, requireStaff } = require("../middleware/auth");
 const NotificationService = require("../notificationService");
 const Profile = require("../models/Profile");
 const User = require("../models/User");
@@ -14,10 +14,8 @@ const router = express.Router();
 
 const db = require("../config/database");
 
-router.use(isAuthenticated, requireStaff);
-
 // Rota para a página de LISTAGEM de colaboradores
-router.get("/colaboradores", async (req, res) => {
+router.get("/colaboradores", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const colaboradores = await Profile.findAll();
     let totalHorasPositivas = 0;
@@ -73,7 +71,7 @@ router.get("/colaboradores", async (req, res) => {
 
 
 // Rota para MOSTRAR o formulário de novo colaborador
-router.get("/colaboradores/novo", async (req, res) => {
+router.get("/colaboradores/novo", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const setores = await Department.findAll();
     res.render("admin/novo-colaborador", {
@@ -92,7 +90,7 @@ router.get("/colaboradores/novo", async (req, res) => {
 });
 
 // Rota para PROCESSAR o formulário de novo colaborador
-router.post("/colaboradores", async (req, res) => {
+router.post("/colaboradores", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const {
       username,
@@ -132,7 +130,7 @@ router.post("/colaboradores", async (req, res) => {
 });
 
 // ROTA PARA MOSTRAR O FORMULÁRIO DE EDIÇÃO
-router.get("/colaboradores/editar/:id", async (req, res) => {
+router.get("/colaboradores/editar/:id", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const profileId = req.params.id;
     const colaborador = await Profile.findById(profileId);
@@ -162,7 +160,7 @@ router.get("/colaboradores/editar/:id", async (req, res) => {
 });
 
 // ROTA PARA PROCESSAR A ATUALIZAÇÃO
-router.post("/colaboradores/editar/:id", async (req, res) => {
+router.post("/colaboradores/editar/:id", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const profileId = req.params.id;
     const {
@@ -205,7 +203,7 @@ router.post("/colaboradores/editar/:id", async (req, res) => {
 });
 
 // ROTA PARA ALTERAR O STATUS (ATIVO/INATIVO) DE UM COLABORADOR
-router.patch("/colaboradores/:id/status", async (req, res) => {
+router.patch("/colaboradores/:id/status", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const profileId = req.params.id;
     const { isActive } = req.body;
@@ -227,7 +225,7 @@ router.patch("/colaboradores/:id/status", async (req, res) => {
 });
 
 // Rota para a API de atividade recente
-router.get("/api/recent-activity", requireStaff, async (req, res) => {
+router.get("/api/recent-activity", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const sql = `
         SELECT
@@ -259,7 +257,7 @@ router.get("/api/recent-activity", requireStaff, async (req, res) => {
   }
 });
 
-router.get("/setores", async (req, res) => {
+router.get("/setores", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const setores = await Department.findAll();
     res.render("admin/setores", {
@@ -279,7 +277,7 @@ router.get("/setores", async (req, res) => {
   }
 });
 
-router.get("/setores/:id/editar", async (req, res) => {
+router.get("/setores/:id/editar", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const setor = await Department.findById(req.params.id);
     if (!setor) {
@@ -300,9 +298,8 @@ router.get("/setores/:id/editar", async (req, res) => {
   }
 });
 
-router.post(
-  "/setores/:id/editar",
-  [body("nome").notEmpty().withMessage("O nome do setor é obrigatório.")],
+router.post("/setores/:id/editar", isAuthenticated, requireStaff, [
+  body("nome").notEmpty().withMessage("O nome do setor é obrigatório.")],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -321,7 +318,7 @@ router.post(
   }
 );
 
-router.post("/setores/:id/apagar", async (req, res) => {
+router.post("/setores/:id/apagar", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const setor = await Department.findById(req.params.id);
     if (setor.colaborador_count > 0) {
@@ -341,19 +338,18 @@ router.post("/setores/:id/apagar", async (req, res) => {
   }
 });
 
-router.get("/setores/novo", (req, res) => {
+router.get("/setores/novo", isAuthenticated, requireStaff, (req, res) => {
   res.render("admin/novo-setor", {
     title: "Adicionar Novo Setor",
     layout: "layouts/main",
     activePage: "setores",
     user: req.user,
-    userProfile: req.userProfile, // CORRIGIDO: userProfile é passado
+    userProfile: req.userProfile,
   });
 });
 
-router.post(
-  "/setores",
-  [body("nome").notEmpty().withMessage("O nome do setor é obrigatório.")],
+router.post("/setores", isAuthenticated, requireStaff, [
+  body("nome").notEmpty().withMessage("O nome do setor é obrigatório.")],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -372,7 +368,7 @@ router.post(
   }
 );
 
-router.get("/aprovacoes", async (req, res) => {
+router.get("/aprovacoes", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const solicitacoesPendentes = await Movement.getPendingMovements();
     res.render("admin/aprovacoes", {
@@ -392,7 +388,7 @@ router.get("/aprovacoes", async (req, res) => {
   }
 });
 
-router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
+router.patch("/movimentacoes/:id/aprovar", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const movementId = req.params.id;
     const statusAprovado = await Status.findByName("Aprovado");
@@ -430,7 +426,7 @@ router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
   }
 });
 
-router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
+router.patch("/movimentacoes/:id/rejeitar", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const movementId = req.params.id;
 
@@ -474,14 +470,14 @@ router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
   }
 });
 
-router.get("/movimentacoes/pendentes", async (req, res) => {
+router.get("/movimentacoes/pendentes", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const pendingMovements = await Movement.getPendingMovements();
     res.render("admin/pendentes", {
       title: "Analisar Solicitações Pendentes",
       pendingMovements,
       user: req.user,
-      userProfile: req.userProfile, // CORRIGIDO: userProfile é passado
+      userProfile: req.userProfile,
       layout: "layouts/main",
       activePage: "pendentes",
     });
@@ -497,7 +493,7 @@ router.get("/movimentacoes/pendentes", async (req, res) => {
   }
 });
 
-router.get("/movimentacoes/pendentes/api", async (req, res) => {
+router.get("/movimentacoes/pendentes/api", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const pendingMovements = await Movement.getPendingMovements();
     res.json({ success: true, pendingMovements });
@@ -507,7 +503,7 @@ router.get("/movimentacoes/pendentes/api", async (req, res) => {
   }
 });
 
-router.get("/api/dashboard-stats", async (req, res) => {
+router.get("/api/dashboard-stats", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const pendingMovements = await Movement.getPendingMovements();
     const stats = await Movement.getMovementStats();
@@ -518,7 +514,7 @@ router.get("/api/dashboard-stats", async (req, res) => {
   }
 });
 
-router.get("/relatorios", async (req, res) => {
+router.get("/relatorios", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const todosColaboradores = await Profile.findAll();
     const todosStatus = await Status.findAll();
@@ -542,7 +538,7 @@ router.get("/relatorios", async (req, res) => {
   }
 });
 
-router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
+router.patch("/movimentacoes/aprovar-todas", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const pendingStatus = await Status.findByName("Pendente");
     const approvedStatus = await Status.findByName("Aprovado"); // Nome do status corrigido
@@ -594,43 +590,57 @@ router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
 });
 
 //Rota para Cancelar uma movimentação
-router.patch('/movimentacoes/:id/cancelar', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { motivo } = req.body;
+router.patch('/api/movimentacoes/:id/cancelar', isApiAuthenticated, requireStaff, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { motivo } = req.body;
 
-    if (!motivo) {
-      return res.status(400).json({ success: false, message: 'O motivo do cancelamento é obrigatório.' });
+        if (!motivo) {
+            return res.status(400).json({ success: false, message: 'O motivo do cancelamento é obrigatório.' });
+        }
+
+        const statusCancelado = await Status.findByName('Cancelado');
+        if (!statusCancelado) {
+            return res.status(500).json({ success: false, message: 'Status "Cancelado" não encontrado no sistema.' });
+        }
+
+        await Movement.update(id, { status_id: statusCancelado.id });
+
+        if (req.userProfile) {
+            await MovementLog.create({
+                movimentacao_id: id,
+                usuario_id: req.userProfile.id,
+                acao: 'CANCELADO',
+                detalhes: `Movimentação cancelada pelo administrador. Motivo: ${motivo}`
+            });
+        }
+
+        res.json({ success: true, message: 'Movimentação cancelada com sucesso.' });
+
+    } catch (error) { // <-- A CORREÇÃO ESTÁ AQUI (definindo 'error')
+        console.error("Erro ao cancelar movimentação:", error); // Agora 'error' está definido
+        res.status(500).json({ success: false, message: 'Erro interno ao cancelar a movimentação.' });
     }
-
-    const statusCancelado = await Status.findById(441);
-    if (!statusCancelado) {
-      return res.status(500).json({ success: false, message: 'Status "Cancelado" não encontrado no sistema.'});
-    }
-
-    //Atualiza a movimentação para status "cancelado"
-    await Movement.update(id, { status_id: statusCancelado.id });
-
-    //Registra o log da ação de cancelamento
-    if (req.userProfile) {
-      await MovementLog.create({
-        movimentacao_id: id,
-        usuario_id: req.userProfile.id,
-        acao: 'CANCELADO',
-        detalhes: `Movimentação cancelada pelo administrador. Motivo: ${motivo}`
-      });
-    }
-
-      res.json({ sucess: true, message: 'Movimentação cancelada com sucesso.'});
-  } catch (erro) {
-      console.error("Erro ao cancelar movimentação:", error);
-      res.status(500).json({ sucess: false, message: 'Erro interno ao cancelar a movimentação'});
-  }
 });
 
-router.get("/api/relatorios", async (req, res) => {
+//ROTA DE API para relatórios
+router.get("/api/relatorios", isApiAuthenticated, requireStaff, async (req, res) => {
     try {
-        const movimentacoesFiltradas = await Movement.findAll(req.query);
+        const filters = { ...req.query }; // Copia todos os query params (data, colaborador, etc.)
+        const incluirCancelados = filters.incluir_cancelados === 'true';
+
+        // Se o utilizador NÃO selecionou um status específico (ou seja, quer "Todos")
+        // E ele NÃO marcou a caixa "Incluir Cancelados"
+        if (!filters.status_id && !incluirCancelados) {
+            // Então nós vamos manualmente excluir os cancelados do relatório "Todos".
+            const canceladoStatus = await Status.findByName('Cancelado');
+            if (canceladoStatus) {
+                filters.exclude_status_id = canceladoStatus.id;
+            }
+        }
+
+        // Passamos o objeto de filtros (possivelmente com a nova chave "exclude_status_id") para o Model
+        const movimentacoesFiltradas = await Movement.findAll(filters);
 
         // Lógica para calcular os totais
         let totalHorasPositivas = 0;
@@ -671,7 +681,7 @@ router.get("/api/relatorios", async (req, res) => {
     }
 });
 
-router.get("/relatorios/exportar", async (req, res) => {
+router.get("/relatorios/exportar", isAuthenticated, requireStaff, async (req, res) => {
   try {
     const movimentacoes = await Movement.findAll(req.query);
     const filename = `relatorio_movimentacoes_${
@@ -704,7 +714,7 @@ router.get("/relatorios/exportar", async (req, res) => {
   }
 });
 
-router.get("/relatorios/exportar-pdf", async (req, res) => {
+router.get("/relatorios/exportar-pdf", isAuthenticated, requireStaff, async (req, res) => {
     try {
         const movimentacoes = await Movement.findAll(req.query);
         const filename = `relatorio_${new Date().toISOString().split("T")[0]}.pdf`;
@@ -804,7 +814,7 @@ router.get("/relatorios/exportar-pdf", async (req, res) => {
     }
 });
 
-router.delete("/colaboradores/:id", async (req, res) => {
+router.delete("/colaboradores/:id", isApiAuthenticated, requireStaff, async (req, res) => {
   try {
     const profileId = req.params.id;
     const profile = await Profile.findById(profileId);

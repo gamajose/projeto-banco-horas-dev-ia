@@ -50,6 +50,15 @@
             </div>
         </form>
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 items-end mt-4">
+            <div class="flex items-center justify-start h-full pb-2">
+                <div class="flex items-center">
+                    <input id="incluir_cancelados" name="incluir_cancelados" type="checkbox" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                    <label for="incluir_cancelados" class="ml-2 block text-sm font-medium text-gray-700">Incluir Cancelados?</label>
+                </div>
+            </div>
+
+            <div></div>
+
              <div class="col-start-1 lg:col-start-3">
                 <button type="submit" form="form-filtros" class="btn-primary w-full">Filtrar</button>
             </div>
@@ -81,7 +90,7 @@
     </div>
 </div>
 
-<script>
+<<script>
 document.addEventListener('DOMContentLoaded', () => {
     // Referências aos elementos do DOM
     const formFiltros = document.getElementById('form-filtros');
@@ -100,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const motivoTextarea = document.getElementById('motivo-cancelamento');
     const cancelFeedbackDiv = document.getElementById('cancel-feedback');
 
-    // Função para criar o HTML de cada linha da tabela
+    // Função para criar o HTML de cada linha da tabela (Esta função está correta)
     const createRowHTML = (mov) => {
         const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
         const tipoHTML = mov.entrada 
@@ -109,10 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const motivo = mov.motivo || '';
 
         let status_color = 'text-yellow-600';
-        if (mov.status_nome === 'Aprovado') status_color = 'text-green-600';
-        if (mov.status_nome === 'Rejeitado' || mov.status_nome === 'Cancelado') status_color = 'text-red-600';
+        if (!mov.status_nome) status_color = 'text-gray-400'; 
+        else if (mov.status_nome === 'Aprovado') status_color = 'text-green-600';
+        else if (mov.status_nome === 'Rejeitado' || mov.status_nome === 'Cancelado') status_color = 'text-red-600';
         
-        const status_name = `<span id="status-mov-${mov.id}" class="${status_color} font-medium">${mov.status_nome}</span>`;
+        const status_name = `<span id="status-mov-${mov.id}" class="${status_color} font-medium">${mov.status_nome || 'Inválido'}</span>`;
 
         const cancelarButtonHTML = mov.status_nome === 'Aprovado'
             ? `<button data-id="${mov.id}" class="btn-danger btn-xs btn-cancelar" title="Cancelar Lançamento"><i class="fas fa-ban"></i></button>`
@@ -131,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     };
     
-    // Função para renderizar a tabela e os cartões de resumo
+    // Função para renderizar a tabela (Esta função está correta)
     const renderTable = (data, summary) => {
         tbodyResultados.innerHTML = '';
         if (data.length === 0) {
@@ -148,10 +158,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // Função para buscar e aplicar os filtros
     const applyFilters = async () => {
-        const formData = new FormData(formFiltros);
-        const params = new URLSearchParams(formData);
+        
+        // LEITURA MANUAL DOS FILTROS (EM VEZ DE new FormData)
+        const data_inicio = document.getElementById('data_inicio').value;
+        const data_fim = document.getElementById('data_fim').value;
+        const colaborador_id = document.getElementById('colaborador_id').value;
+        const status_id = document.getElementById('status_id').value;
+        const incluir_cancelados = document.getElementById('incluir_cancelados').checked; // Lê o estado da checkbox
+
+        // Constrói os parâmetros manualmente para enviar "true"
+        const params = new URLSearchParams();
+        if (data_inicio) params.append('data_inicio', data_inicio);
+        if (data_fim) params.append('data_fim', data_fim);
+        if (colaborador_id) params.append('colaborador_id', colaborador_id);
+        if (status_id) params.append('status_id', status_id);
+        
+        // ENVIA 'true' QUANDO MARCADO (o backend espera 'true' e não 'on')
+        if (incluir_cancelados) {
+            params.append('incluir_cancelados', 'true');
+        }
+
         try {
             const response = await fetch(`/admin/api/relatorios?${params.toString()}`);
             const result = await response.json();
@@ -166,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Lógica do Modal de Cancelamento ---
+    // --- Lógica do Modal de Cancelamento (Esta função está correta) ---
     const openCancelModal = (movementId) => {
         movementIdToCancel = movementId;
         motivoTextarea.value = '';
@@ -187,13 +214,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         showLoading();
         try {
-            const response = await fetch(`/admin/movimentacoes/${movementIdToCancel}/cancelar`, {
+            const response = await fetch(`/admin/api/movimentacoes/${movementIdToCancel}/cancelar`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ motivo: motivo })
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'Falha ao cancelar.');
+
+            const result = await response.json(); 
+            if (!response.ok) {
+                throw new Error(result.message || 'Falha ao cancelar.');
+            }
 
             const statusElement = document.getElementById(`status-mov-${movementIdToCancel}`);
             if (statusElement) {
@@ -203,35 +233,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.getElementById(`row-mov-${movementIdToCancel}`);
             if(row) {
                 const buttonCell = row.querySelector('td:last-child');
-                if(buttonCell) buttonCell.innerHTML = '';
+                if(buttonCell) buttonCell.innerHTML = ''; 
             }
-            
             showNotification(result.message, 'success');
             closeCancelModal();
+
         } catch (error) {
             cancelFeedbackDiv.textContent = `Erro: ${error.message}`;
         } finally {
             hideLoading();
         }
     };
-
-    // --- Adicionar "escutadores" de eventos ---
+    
+    // --- Adicionar "escutadores" de eventos (Esta parte também está ATUALIZADA) ---
     formFiltros.addEventListener('submit', (e) => {
         e.preventDefault();
         applyFilters();
     });
 
+    // Função auxiliar para obter os parâmetros de filtro corretos para exportação
+    const getFilterParams = () => {
+        const params = new URLSearchParams();
+        if (document.getElementById('data_inicio').value) params.append('data_inicio', document.getElementById('data_inicio').value);
+        if (document.getElementById('data_fim').value) params.append('data_fim', document.getElementById('data_fim').value);
+        if (document.getElementById('colaborador_id').value) params.append('colaborador_id', document.getElementById('colaborador_id').value);
+        if (document.getElementById('status_id').value) params.append('status_id', document.getElementById('status_id').value);
+        if (document.getElementById('incluir_cancelados').checked) params.append('incluir_cancelados', 'true'); // Garante que a checkbox é lida
+        return params.toString();
+    };
+
     btnExportarCsv.addEventListener('click', () => {
-        const params = new URLSearchParams(new FormData(formFiltros));
-        window.location.href = `/admin/relatorios/exportar?${params.toString()}`;
+        window.location.href = `/admin/relatorios/exportar?${getFilterParams()}`;
     });
 
     btnExportarPdf.addEventListener('click', () => {
-        const params = new URLSearchParams(new FormData(formFiltros));
-        window.open(`/admin/relatorios/exportar-pdf?${params.toString()}`, '_blank');
+        window.open(`/admin/relatorios/exportar-pdf?${getFilterParams()}`, '_blank');
     });
 
-    // Event Delegation para os botões de cancelar na tabela
+    // O resto do seu script está correto
     tbodyResultados.addEventListener('click', (event) => {
         const target = event.target.closest('.btn-cancelar');
         if (target) {
