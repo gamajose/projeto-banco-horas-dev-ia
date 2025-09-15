@@ -433,6 +433,8 @@ router.patch("/movimentacoes/:id/aprovar", async (req, res) => {
 router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
   try {
     const movementId = req.params.id;
+
+    // 1. Busca o status 'Rejeitado'. Usamos 'Rejeitado' para que ele saia do saldo.
     const statusRejeitado = await Status.findByName("Rejeitado");
     if (!statusRejeitado) {
       return res.status(500).json({
@@ -440,8 +442,10 @@ router.patch("/movimentacoes/:id/rejeitar", async (req, res) => {
         message: 'Status "Rejeitado" não encontrado no sistema.',
       });
     }
+    // 2. Atualiza a movimentação para o status 'Rejeitado'
     await Movement.update(movementId, { status_id: statusRejeitado.id });
 
+    // 3. (MUITO IMPORTANTE) Registra esta ação no log de auditoria
     if (req.userProfile) {
       await MovementLog.create({
         movimentacao_id: movementId,
@@ -586,6 +590,41 @@ router.patch("/movimentacoes/aprovar-todas", async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Erro ao processar as aprovações." });
+  }
+});
+
+//Rota para Cancelar uma movimentação
+router.patch('/movimentacoes/:id/cancelar', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { motivo } = req.body;
+
+    if (!motivo) {
+      return res.status(400).json({ success: false, message: 'O motivo do cancelamento é obrigatório.' });
+    }
+
+    const statusCancelado = await Status.findById(441);
+    if (!statusCancelado) {
+      return res.status(500).json({ success: false, message: 'Status "Cancelado" não encontrado no sistema.'});
+    }
+
+    //Atualiza a movimentação para status "cancelado"
+    await Movement.update(id, { status_id: statusCancelado.id });
+
+    //Registra o log da ação de cancelamento
+    if (req.userProfile) {
+      await MovementLog.create({
+        movimentacao_id: id,
+        usuario_id: req.userProfile.id,
+        acao: 'CANCELADO',
+        detalhes: `Movimentação cancelada pelo administrador. Motivo: ${motivo}`
+      });
+    }
+
+      res.json({ sucess: true, message: 'Movimentação cancelada com sucesso.'});
+  } catch (erro) {
+      console.error("Erro ao cancelar movimentação:", error);
+      res.status(500).json({ sucess: false, message: 'Erro interno ao cancelar a movimentação'});
   }
 });
 

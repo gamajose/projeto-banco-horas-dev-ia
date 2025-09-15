@@ -103,7 +103,10 @@ class Database {
         id SERIAL PRIMARY KEY,
         nome VARCHAR(100) NOT NULL UNIQUE,
         cor VARCHAR(7) DEFAULT '#6B7280',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        analise BOOLEAN DEFAULT FALSE,
+        autorizado BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )`,
       `CREATE TABLE IF NOT EXISTS formas_pagamento (
         id SERIAL PRIMARY KEY,
@@ -145,51 +148,76 @@ class Database {
   // ------------------------------
   // Dados iniciais
   // ------------------------------
-  async insertDefaultData() {
-    const bcrypt = require('bcryptjs');
+   async insertDefaultData() {
+    try {
+      // Dados padrão que queremos garantir que existam
+      const defaultStatus = [
+        { nome: 'Pendente', cor: '#F59E0B', analise: true, autorizado: false },
+        { nome: 'Aprovado', cor: '#10B981', analise: false, autorizado: true },
+        { nome: 'Rejeitado', cor: '#EF4444', analise: false, autorizado: false },
+        { nome: 'Cancelado', cor: '#6B7280', analise: false, autorizado: false }
+      ];
 
-    // Status
-    const statusExists = await this.get("SELECT COUNT(*) as count FROM status_movimentacao");
-    if (statusExists && statusExists.count === 0) {
-      await this.run("INSERT INTO status_movimentacao (nome, cor) VALUES ($1, $2)", ['Pendente', '#F59E0B']);
-      await this.run("INSERT INTO status_movimentacao (nome, cor) VALUES ($1, $2)", ['Aprovado', '#10B981']);
-      await this.run("INSERT INTO status_movimentacao (nome, cor) VALUES ($1, $2)", ['Rejeitado', '#EF4444']);
-    }
+      // Insere cada status se ele não existir
+       for (const status of defaultStatus) {
+        const exists = await this.get("SELECT 1 FROM status_movimentacao WHERE nome = $1", [status.nome]);
+        if (!exists) {
+          // Usa a tabela correta que TEM a coluna "cor"
+          await this.run("INSERT INTO status_movimentacao (nome, cor, analise, autorizado) VALUES ($1, $2, $3, $4)", [status.nome, status.cor, status.analise, status.autorizado]);
+          console.log(`Status "${status.nome}" inserido com sucesso em status_movimentacao.`);
+        }
+      }
 
-    // Formas de pagamento
-    const paymentExists = await this.get("SELECT COUNT(*) as count FROM formas_pagamento");
-    if (paymentExists && paymentExists.count === 0) {
-      await this.run("INSERT INTO formas_pagamento (nome, descricao) VALUES ($1, $2)", ['Horas Extras', 'Pagamento em dinheiro das horas extras']);
-      await this.run("INSERT INTO formas_pagamento (nome, descricao) VALUES ($1, $2)", ['Banco de Horas', 'Acúmulo no banco de horas']);
-      await this.run("INSERT INTO formas_pagamento (nome, descricao) VALUES ($1, $2)", ['Folga Compensatória', 'Folga para compensar horas extras']);
-    }
+      const defaultPayments = [
+        { nome: 'Horas Extras', descricao: 'Pagamento em dinheiro das horas extras' },
+        { nome: 'Banco de Horas', descricao: 'Acúmulo no banco de horas' },
+        { nome: 'Folga Compensatória', descricao: 'Folga para compensar horas extras' }
+      ];
 
-    // Setores
-    const sectorExists = await this.get("SELECT COUNT(*) as count FROM setores");
-    if (sectorExists && sectorExists.count === 0) {
-      await this.run("INSERT INTO setores (nome, descricao) VALUES ($1, $2)", ['Administração', 'Setor administrativo da empresa']);
-      await this.run("INSERT INTO setores (nome, descricao) VALUES ($1, $2)", ['Tecnologia', 'Setor de desenvolvimento e tecnologia']);
-      await this.run("INSERT INTO setores (nome, descricao) VALUES ($1, $2)", ['Recursos Humanos', 'Setor de gestão de pessoas']);
-    }
+      // Insere cada forma de pagamento se ela não existir
+      for (const payment of defaultPayments) {
+        const exists = await this.get("SELECT 1 FROM formas_pagamento WHERE nome = $1", [payment.nome]);
+        if (!exists) {
+          await this.run("INSERT INTO formas_pagamento (nome, descricao) VALUES ($1, $2)", [payment.nome, payment.descricao]);
+        }
+      }
 
-    // Usuário administrador
-    const userExists = await this.get("SELECT COUNT(*) as count FROM usuarios");
-    if (userExists && userExists.count === 0) {
-      const hashedPassword = await bcrypt.hash('admin123', 12);
-      const result = await this.run(
-        "INSERT INTO usuarios (first_name, last_name, email, password, is_active, is_staff, is_manager) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id", 
-        ['admin', 'Sistema', 'admin@bancohoras.com', hashedPassword, true, true, true]
-      );
+      const defaultSectors = [
+        { nome: 'Administração', descricao: 'Setor administrativo da empresa' },
+        { nome: 'Tecnologia', descricao: 'Setor de desenvolvimento e tecnologia' },
+        { nome: 'Recursos Humanos', descricao: 'Setor de gestão de pessoas' }
+      ];
 
-      const adminId = result.rows ? result.rows[0].id : result.lastID;
+      // Insere cada setor se ele não existir
+      for (const sector of defaultSectors) {
+        const exists = await this.get("SELECT 1 FROM setores WHERE nome = $1", [sector.nome]);
+        if (!exists) {
+          await this.run("INSERT INTO setores (nome, descricao) VALUES ($1, $2)", [sector.nome, sector.descricao]);
+        }
+      }
 
-      const sector = await this.get("SELECT id FROM setores WHERE nome = 'Administração'");
-      await this.run(
-        "INSERT INTO perfis (usuario_id, setor_id, nome, gerente, funcao) VALUES ($1, $2, $3, $4, $5)",
-        [adminId, sector.id, 'Administrador do Sistema', true, 'Administrador']
-      );
+      // Cria usuário administrador apenas se não houver nenhum usuário
+      const userCount = await this.get("SELECT COUNT(*) as count FROM usuarios");
 
-      console.log('Usuário administrador criado: admin@bancohoras.com / admin123');
+      if (userCount && userCount.count === 0) {
+        const hashedPassword = await bcrypt.hash('admin123', 12);
+        const result = await this.run(
+          "INSERT INTO usuarios (first_name, last_name, email, password_hash, is_active, is_staff) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", 
+          ['admin', 'Sistema', 'admin@bancohoras.com', hashedPassword, true, true]
+        );
+        const adminId = result.rows[0].id;
+        const sector = await this.get("SELECT id FROM setores WHERE nome = 'Administração'");
+        if (sector) {
+            await this.run(
+              "INSERT INTO perfis (usuario_id, setor_id, nome, gerente, funcao) VALUES ($1, $2, $3, $4, $5)",
+              [adminId, sector.id, 'Administrador do Sistema', true, 'Administrador']
+            );
+        }
+        console.log('Usuário administrador criado: admin@bancohoras.com / admin123');
+      }
+
+    } catch (error) {
+        console.error("Erro ao inserir dados padrão:", error);
     }
   }
 
