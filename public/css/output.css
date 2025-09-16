@@ -2892,6 +2892,10 @@ h1, h2, h3, h4, h5, h6 {
   padding-bottom: 2rem;
 }
 
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .pb-3 {
   padding-bottom: 0.75rem;
 }
@@ -2942,10 +2946,6 @@ h1, h2, h3, h4, h5, h6 {
 
 .pt-6 {
   padding-top: 1.5rem;
-}
-
-.pb-2 {
-  padding-bottom: 0.5rem;
 }
 
 .text-left {

@@ -185,8 +185,44 @@
 
     const btnEntrada = document.getElementById("acao-registrar-entrada");
     const btnSaida = document.getElementById("acao-registrar-saida");
+    const btnAjuste = document.getElementById("acao-solicitar-ajuste"); // Adicionado para a lógica de ajuste
     const btnClose = document.getElementById("modal-acao-rapida-close");
     const form = document.getElementById("form-acao-rapida");
+    const selectColaborador = document.getElementById("acao-rapida-colaborador");
+    const feedbackDiv = document.getElementById("acao-rapida-feedback");
+    const containerTipoAjuste = document.getElementById("container-tipo-ajuste");
+
+     async function loadCollaboratorsForModal() {
+      if (!selectColaborador) return; // Sai se o select não existir
+
+      // Mostra "A carregar..." enquanto busca os dados
+      selectColaborador.disabled = true;
+      selectColaborador.innerHTML = '<option value="">A carregar colaboradores...</option>';
+
+      try {
+        const response = await fetch('/api/v1/profiles'); // A nossa rota de API que já lista perfis
+        if (!response.ok) throw new Error('Falha ao buscar lista de perfis');
+
+        const result = await response.json();
+
+        if (result.success && result.profiles.length > 0) {
+          selectColaborador.innerHTML = ''; // Limpa o "A carregar..."
+          result.profiles.forEach(profile => {
+            const option = document.createElement('option');
+            option.value = profile.id;
+            option.textContent = `${profile.first_name} ${profile.last_name}`;
+            selectColaborador.appendChild(option);
+          });
+        } else {
+          selectColaborador.innerHTML = '<option value="">Nenhum colaborador encontrado</option>';
+        }
+      } catch (error) {
+        console.error('Erro ao carregar colaboradores no modal:', error);
+        selectColaborador.innerHTML = '<option value="">Erro ao carregar lista</option>';
+      } finally {
+        selectColaborador.disabled = false; // Re-ativa o dropdown
+      }
+    }
 
     const openModal = (config) => {
       modal.querySelector("#modal-acao-rapida-title").textContent =
