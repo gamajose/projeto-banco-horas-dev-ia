@@ -1,4 +1,3 @@
-<!-- Page Header -->
 <div class="page-header">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -21,66 +20,70 @@
     </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="stat-card">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600">
-                    <i class="fas fa-users"></i>
-                </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="stat-card md:col-span-2 lg:col-span-1">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-2 p-2" aria-label="Tabs">
+                <button data-target="#total-panel" class="tab-btn active-tab">Total</button>
+                <button data-target="#ativos-panel" class="tab-btn inactive-tab">Ativos</button>
+                <button data-target="#inativos-panel" class="tab-btn inactive-tab">Inativos</button>
+                <button data-target="#gerentes-panel" class="tab-btn inactive-tab">Gerentes</button>
+            </nav>
+        </div>
+        <div class="pt-4 px-2">
+            <div id="total-panel" class="tab-panel">
                 <div class="stat-card-value">
                     <%= colaboradores.length %>
                 </div>
-                <div class="stat-card-label">Total</div>
+                <div class="stat-card-label">Colaboradores Totais</div>
             </div>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600">
-                    <i class="fas fa-user-check"></i>
-                </div>
+            <div id="ativos-panel" class="tab-panel hidden">
                 <div class="stat-card-value">
                     <%= colaboradores.filter(c=> c.is_active).length %>
                 </div>
-                <div class="stat-card-label">Ativos</div>
+                <div class="stat-card-label">Colaboradores Ativos</div>
             </div>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600">
-                    <i class="fas fa-user-times"></i>
-                </div>
+            <div id="inativos-panel" class="tab-panel hidden">
                 <div class="stat-card-value">
                     <%= colaboradores.filter(c=> !c.is_active).length %>
                 </div>
-                <div class="stat-card-label">Inativos</div>
+                <div class="stat-card-label">Colaboradores Inativos</div>
             </div>
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="flex items-center justify-between">
-            <div>
-                <div class="stat-card-icon bg-gradient-to-r from-purple-500 to-purple-600">
-                    <i class="fas fa-user-tie"></i>
-                </div>
+            <div id="gerentes-panel" class="tab-panel hidden">
                 <div class="stat-card-value">
                     <%= colaboradores.filter(c=> c.is_manager).length %>
                 </div>
-                <div class="stat-card-label">Gerentes</div>
+                <div class="stat-card-label">Total de Gerentes</div>
             </div>
         </div>
     </div>
+
+    <div class="stat-card bg-emerald-50">
+        <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i>
+        </div>
+        <div class="stat-card-value text-emerald-600">
+            <%= totalHorasPositivas %>
+        </div>
+        <div class="stat-card-label">Total de Horas Positivas</div>
+    </div>
+    <div class="stat-card bg-red-50">
+        <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600"><i class="fas fa-minus-circle"></i></div>
+        <div class="stat-card-value text-red-600">
+            <%= totalHorasNegativas %>
+        </div>
+        <div class="stat-card-label">Total de Horas Negativas</div>
+    </div>
+    <div class="stat-card bg-blue-50">
+        <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600"><i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="stat-card-value text-blue-800">
+            <%= saldoTotalHoras %>
+        </div>
+        <div class="stat-card-label">Saldo Geral de Horas</div>
+    </div>
 </div>
 
-<!-- Filters and Search -->
+
 <div class="card mb-6">
     <div class="card-body">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -93,12 +96,12 @@
 
             <select id="department-filter" class="form-input">
                 <option value="">Todos os setores</option>
-                <% const uniqueDepartments=[...new Set(colaboradores.map(c=> c.setor_nome).filter(Boolean))];
-                    uniqueDepartments.forEach(dept => { %>
-                    <option value="<%= dept %>">
-                        <%= dept %>
-                    </option>
-                    <% }); %>
+                <% const uniqueDepartments=[...new Set(colaboradores.map(c=> c.setor_nome).filter(Boolean))]; %>
+                    <% uniqueDepartments.forEach(dept=> { %>
+                        <option value="<%= dept %>">
+                            <%= dept %>
+                        </option>
+                        <% }); %>
             </select>
 
             <select id="status-filter" class="form-input">
@@ -107,7 +110,7 @@
                 <option value="inactive">Apenas inativos</option>
             </select>
 
-            <button onclick="clearFilters()" class="btn-secondary">
+            <button onclick="clearFilters()" class="btn-primary">
                 <i class="fas fa-filter-circle-xmark mr-2"></i>
                 Limpar Filtros
             </button>
@@ -115,7 +118,6 @@
     </div>
 </div>
 
-<!-- Collaborators Table -->
 <div class="card">
     <div class="card-header">
         <div class="flex items-center justify-between">
@@ -154,17 +156,21 @@
                             Setor
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
-                        <th class="table-header cursor-pointer hover:bg-gray-100" onclick="sortTable('status')">
+                        <th class="table-header text-center hidden lg:table-cell">Horas Positivas</th>
+                        <th class="table-header text-center hidden lg:table-cell">Horas Negativas</th>
+                        <th class="table-header text-center hidden lg:table-cell">Saldo</th>
+                        <th class="table-header text-center hidden md:table-cell">Último Acesso</th>
+                        <th class="table-header text-center cursor-pointer hover:bg-gray-100"
+                            onclick="sortTable('status')">
                             Status
                             <i class="fas fa-sort ml-2 text-gray-400"></i>
                         </th>
-                        <th class="table-header hidden lg:table-cell">Último Acesso</th>
                         <th class="table-header text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="collaborators-tbody">
                     <% colaboradores.forEach(colab=> { %>
-                        <tr class="table-row collaborator-row"
+                        <tr id="collaborator-row-<%= colab.id %>" class="table-row collaborator-row"
                             data-name="<%= colab.first_name %> <%= colab.last_name %>" data-email="<%= colab.email %>"
                             data-department="<%= colab.setor_nome || '' %>"
                             data-status="<%= colab.is_active ? 'active' : 'inactive' %>">
@@ -182,7 +188,7 @@
                                             src="<%= colab.foto_url || '/images/default-avatar.png' %>"
                                             alt="<%= colab.first_name %>">
                                         <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm
-                                                    <%= colab.is_active ? 'bg-emerald-400' : 'bg-gray-400' %>"></div>
+                                            <%= colab.is_active ? 'bg-emerald-400' : 'bg-gray-400' %>"></div>
                                     </div>
                                     <div>
                                         <div class="font-semibold text-gray-900">
@@ -219,7 +225,36 @@
                                         <% } %>
                             </td>
 
-                            <td class="table-cell">
+                            <td
+                                class="table-cell text-center hidden lg:table-cell font-mono font-semibold text-emerald-600">
+                                <%= colab.saldoPositivo %>
+                            </td>
+                            <td
+                                class="table-cell text-center hidden lg:table-cell font-mono font-semibold text-red-600">
+                                <%= colab.saldoNegativo %>
+                            </td>
+                            <td
+                                class="table-cell text-center hidden lg:table-cell font-mono font-bold <%= colab.saldoTotal.startsWith('-') ? 'text-red-700' : 'text-gray-800' %>">
+                                <%= colab.saldoTotal %>
+                            </td>
+
+                            <td class="table-cell text-center hidden md:table-cell">
+                                <% if (colab.last_login) { %>
+                                    <div class="text-sm">
+                                        <div>
+                                            <%= new Date(colab.last_login).toLocaleDateString('pt-BR') %>
+                                        </div>
+                                        <div class="text-gray-500">
+                                            <%= new Date(colab.last_login).toLocaleTimeString('pt-BR', {hour: '2-digit'
+                                                , minute:'2-digit'}) %>
+                                        </div>
+                                    </div>
+                                    <% } else { %>
+                                        <span class="text-gray-400 text-sm">Nunca</span>
+                                        <% } %>
+                            </td>
+
+                            <td class="table-cell text-center">
                                 <button type="button"
                                     class="toggle-status-btn badge <%= colab.is_active ? 'badge-success' : 'badge-danger' %> cursor-pointer transition-colors hover:opacity-80"
                                     data-id="<%= colab.id %>" data-active="<%= colab.is_active %>">
@@ -227,23 +262,6 @@
                                     <%= colab.is_active ? 'Ativo' : 'Inativo' %>
                                 </button>
                             </td>
-
-                            <td class="table-cell hidden lg:table-cell">
-                                <div class="text-sm">
-                                    <% if (colab.last_login) { %>
-                                        <div class="text-gray-900">
-                                            <%= new Date(colab.last_login).toLocaleDateString('pt-BR') %>
-                                        </div>
-                                        <div class="text-gray-500">
-                                            <%= new Date(colab.last_login).toLocaleTimeString('pt-BR', { hour: '2-digit'
-                                                , minute: '2-digit' }) %>
-                                        </div>
-                                        <% } else { %>
-                                            <span class="text-gray-400">Nunca acessou</span>
-                                            <% } %>
-                                </div>
-                            </td>
-
                             <td class="table-cell text-right">
                                 <div class="flex items-center justify-end space-x-2">
                                     <button class="btn-secondary btn-xs view-collaborator-btn"
@@ -255,7 +273,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button
-                                        onclick="deleteCollaborator('<%= colab.id %>', '<%= colab.first_name %> <%= colab.last_name %>')"
+                                        onclick="openDeleteModal('<%= colab.id %>', '<%= colab.first_name %> <%= colab.last_name %>')"
                                         class="btn-danger btn-xs" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -266,7 +284,6 @@
                 </tbody>
             </table>
 
-            <!-- Empty State -->
             <div id="empty-state" class="hidden p-12 text-center">
                 <div class="text-gray-400">
                     <i class="fas fa-users text-6xl mb-4 opacity-50"></i>
@@ -281,7 +298,6 @@
     </div>
 </div>
 
-<!-- Bulk Actions Bar -->
 <div id="bulk-actions-bar"
     class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-40">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
@@ -311,6 +327,35 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initializeCollaboratorsPage();
+        // Lógica das Abas
+        const tabs = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+
+        const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+        const btnCancelDelete = document.getElementById('btn-cancel-delete');
+
+        if (btnConfirmDelete) btnConfirmDelete.addEventListener('click', executeDelete);
+        if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+
+
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (event) => {
+                tabs.forEach(t => {
+                    t.classList.remove('active-tab');
+                    t.classList.add('inactive-tab');
+                });
+                event.target.classList.add('active-tab');
+                event.target.classList.remove('inactive-tab');
+
+                panels.forEach(panel => panel.classList.add('hidden'));
+                const targetPanelId = event.target.dataset.target;
+                const targetPanel = document.querySelector(targetPanelId);
+                if (targetPanel) {
+                    targetPanel.classList.remove('hidden');
+                }
+            });
+        });
     });
 
     function initializeCollaboratorsPage() {
@@ -688,32 +733,65 @@
         }
     }
 
-    async function deleteCollaborator(id, name) {
-        if (!confirm(`Excluir o colaborador "${name}"? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
+    let collaboratorIdToDelete = null;
+
+    function openDeleteModal(id, name) {
+        collaboratorIdToDelete = id;
+        const modal = document.getElementById('modal-confirm-delete');
+        const message = modal.querySelector('#confirm-delete-message');
+        message.innerHTML = `Tem certeza que deseja excluir <strong>${name}</strong>? Esta ação é irreversível.`;
+        modal.classList.remove('hidden');
+    }
+
+    async function executeDelete() {
+        if (!collaboratorIdToDelete) return;
 
         showLoading();
 
         try {
-            const response = await fetch(`/admin/colaboradores/${id}`, {
+            const response = await fetch(`/admin/colaboradores/${collaboratorIdToDelete}`, {
                 method: 'DELETE'
             });
-
             const result = await response.json();
 
             if (result.success) {
                 showNotification('Colaborador excluído com sucesso!', 'success');
-                location.reload();
+                const rowToRemove = document.getElementById(`collaborator-row-${collaboratorIdToDelete}`);
+                if (rowToRemove) {
+                    rowToRemove.style.transition = 'opacity 0.3s ease';
+                    rowToRemove.style.opacity = '0';
+                    setTimeout(() => {
+                        rowToRemove.remove();
+                        updateCounts(); // Atualiza a contagem de colaboradores
+                    }, 300);
+                } else {
+                    location.reload();
+                }
             } else {
                 throw new Error(result.message);
             }
         } catch (error) {
             showNotification('Erro ao excluir colaborador: ' + error.message, 'error');
         } finally {
+            closeDeleteModal();
             hideLoading();
+            collaboratorIdToDelete = null;
         }
     }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('modal-confirm-delete');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
+    function updateCounts() {
+        const totalCount = document.querySelectorAll('.collaborator-row').length;
+        document.getElementById('total-count').textContent = totalCount;
+        applyFilters(); // Re-aplica filtros para atualizar a contagem "mostrando"
+    }
+
 
     function exportCollaborators() {
         showLoading();

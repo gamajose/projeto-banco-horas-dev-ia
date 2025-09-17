@@ -813,18 +813,18 @@
         if (!trigger) return;
         event.preventDefault();
 
-        currentSectorId = trigger.dataset.sectorId; // Guarda o ID do setor
+        currentSectorId = trigger.dataset.sectorId; 
         const sectorName = trigger.dataset.sectorName;
-
         const modal = document.getElementById('sector-modal');
         const modalTitle = document.getElementById('sector-modal-title');
         const modalList = document.getElementById('sector-modal-list');
 
-        modalTitle.innerHTML = `Colaboradores - ${sectorName}`; // Usamos innerHTML para poder adicionar o botão de voltar
+        modalTitle.innerHTML = `Colaboradores - ${sectorName}`;
         modalList.innerHTML = `<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-2xl text-gray-400"></i></div>`;
         modal.classList.remove('hidden');
 
         try {
+            // A chamada agora usa o ID do setor correto
             const response = await fetch(`/api/v1/profiles?setor_id=${currentSectorId}`);
             const result = await response.json();
 
@@ -850,7 +850,7 @@
             modalList.innerHTML = `<p class="text-red-600">Erro ao carregar colaboradores.</p>`;
         }
     }
-
+    
     async function handleSectorClick(event) {
         const trigger = event.target.closest('.sector-details-trigger');
         if (!trigger) return;

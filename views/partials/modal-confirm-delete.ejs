@@ -1,0 +1,21 @@
+<div id="modal-confirm-delete" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-11/12 max-w-sm text-center">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+            <i class="fas fa-trash-alt text-3xl text-red-500"></i>
+        </div>
+        <div class="mt-4">
+            <h3 id="confirm-delete-title" class="text-lg font-bold text-gray-900">Excluir Colaborador?</h3>
+            <p id="confirm-delete-message" class="mt-2 text-sm text-gray-500">
+                Tem a certeza de que deseja excluir este colaborador? Esta ação é irreversível.
+            </p>
+        </div>
+        <div class="mt-6 flex justify-center space-x-4">
+            <button id="btn-cancel-delete" class="btn-secondary">
+                Cancelar
+            </button>
+            <button id="btn-confirm-delete" class="btn-danger">
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>

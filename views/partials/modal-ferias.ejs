@@ -1,0 +1,34 @@
+<div id="ferias-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md transform transition-all opacity-0 -translate-y-4">
+        <div class="p-6">
+            <div class="flex justify-between items-start">
+                <h3 class="text-xl font-bold text-gray-900">Lançar Período de Férias</h3>
+                <button id="ferias-modal-close" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+            </div>
+        </div>
+        <form id="ferias-form" class="p-6 pt-0 space-y-4">
+            <div>
+                <label for="ferias-perfil-id" class="form-label">Colaborador</label>
+                <select id="ferias-perfil-id" class="form-input">
+                    <% colaboradores.forEach(colab => { %>
+                        <option value="<%= colab.id %>"><%= colab.first_name %> <%= colab.last_name %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="ferias-data-inicio" class="form-label">Data de Início</label>
+                    <input type="date" id="ferias-data-inicio" class="form-input" required>
+                </div>
+                <div>
+                    <label for="ferias-data-fim" class="form-label">Data de Fim</label>
+                    <input type="date" id="ferias-data-fim" class="form-input" required>
+                </div>
+            </div>
+        </form>
+        <div class="px-6 py-4 bg-gray-50/50 rounded-b-2xl flex justify-end items-center space-x-3">
+            <button id="ferias-cancel-btn" type="button" class="btn-secondary !py-2">Cancelar</button>
+            <button id="ferias-save-btn" type="button" class="btn-primary !py-2">Lançar Férias</button>
+        </div>
+    </div>
+</div>

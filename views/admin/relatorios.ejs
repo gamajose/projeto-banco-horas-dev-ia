@@ -1,6 +1,25 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Relatórios de Movimentações</h1>
 
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="stat-card bg-emerald-50">
+            <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i></div>
+            <div id="total-positivas" class="stat-card-value text-emerald-600">+00:00</div>
+            <div class="stat-card-label">Total de Créditos (Aprovados)</div>
+        </div>
+        
+        <div class="stat-card bg-red-50">
+            <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600"><i class="fas fa-minus-circle"></i></div>
+            <div id="total-negativas" class="stat-card-value text-red-600">-00:00</div>
+            <div class="stat-card-label">Total de Débitos (Aprovados)</div>
+        </div>
+        <div class="stat-card bg-blue-50">
+            <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600"><i class="fas fa-balance-scale"></i></div>
+            <div id="saldo-total" class="stat-card-value text-blue-800">00:00</div>
+            <div class="stat-card-label">Saldo do Período (Aprovado)</div>
+        </div>
+    </div>
+
     <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-8">
         <form id="form-filtros" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div>
@@ -31,6 +50,15 @@
             </div>
         </form>
         <div class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 items-end mt-4">
+            <div class="flex items-center justify-start h-full pb-2">
+                <div class="flex items-center">
+                    <input id="incluir_cancelados" name="incluir_cancelados" type="checkbox" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                    <label for="incluir_cancelados" class="ml-2 block text-sm font-medium text-gray-700">Incluir Cancelados?</label>
+                </div>
+            </div>
+
+            <div></div>
+
              <div class="col-start-1 lg:col-start-3">
                 <button type="submit" form="form-filtros" class="btn-primary w-full">Filtrar</button>
             </div>
@@ -52,26 +80,36 @@
                         <th class="table-header">Horas</th>
                         <th class="table-header">Status</th>
                         <th class="table-header">Motivo</th>
+                        <th class="table-header text-right">Ações</th>
                     </tr>
                 </thead>
                 <tbody id="tabela-resultados" class="bg-white divide-y divide-gray-200">
-                    </tbody>
+                </tbody>
             </table>
         </div>
     </div>
 </div>
 
-
-<script>
+<<script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Referências aos elementos do DOM
     const formFiltros = document.getElementById('form-filtros');
     const tbodyResultados = document.getElementById('tabela-resultados');
-    const movimentacoesIniciais = <%- JSON.stringify(movimentacoes || []) %>;
-    
-    // Referências para os botões de exportação
     const btnExportarCsv = document.getElementById('btn-exportar-csv');
     const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+    const totalPositivasEl = document.getElementById('total-positivas');
+    const totalNegativasEl = document.getElementById('total-negativas');
+    const saldoTotalEl = document.getElementById('saldo-total');
 
+    // Referências aos elementos do Modal de Cancelamento
+    let movementIdToCancel = null;
+    const modalCancelar = document.getElementById('modal-cancelar-movimentacao');
+    const btnConfirmarCancelamento = document.getElementById('btn-confirmar-cancelamento');
+    const btnVoltarCancelamento = document.getElementById('btn-voltar-cancelamento');
+    const motivoTextarea = document.getElementById('motivo-cancelamento');
+    const cancelFeedbackDiv = document.getElementById('cancel-feedback');
+
+    // Função para criar o HTML de cada linha da tabela (Esta função está correta)
     const createRowHTML = (mov) => {
         const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', {timeZone: 'UTC'});
         const tipoHTML = mov.entrada 
@@ -79,52 +117,73 @@ document.addEventListener('DOMContentLoaded', () => {
             : `<span class="text-red-600 font-medium">Débito</span>`;
         const motivo = mov.motivo || '';
 
+        let status_color = 'text-yellow-600';
+        if (!mov.status_nome) status_color = 'text-gray-400'; 
+        else if (mov.status_nome === 'Aprovado') status_color = 'text-green-600';
+        else if (mov.status_nome === 'Rejeitado' || mov.status_nome === 'Cancelado') status_color = 'text-red-600';
+        
+        const status_name = `<span id="status-mov-${mov.id}" class="${status_color} font-medium">${mov.status_nome || 'Inválido'}</span>`;
 
-        let status_color = '';
-        if (mov.status_nome === 'Aprovado'){
-            status_color = 'text-green-600';
-        }else if (mov.status_nome === 'Rejeitado'){
-            status_color = 'text-red-600';
-        }else{
-            status_color = 'text-yellow-600';
-        }
-        const status_name = `<span class="${status_color} font-medium">${mov.status_nome}</span>`;
+        const cancelarButtonHTML = mov.status_nome === 'Aprovado'
+            ? `<button data-id="${mov.id}" class="btn-danger btn-xs btn-cancelar" title="Cancelar Lançamento"><i class="fas fa-ban"></i></button>`
+            : '';
 
-        // e noix
         return `
-            <tr>
+            <tr id="row-mov-${mov.id}">
                 <td class="table-cell font-medium">${mov.colaborador_nome}</td>
                 <td class="table-cell">${dataFormatada}</td>
                 <td class="table-cell">${tipoHTML}</td>
                 <td class="table-cell font-mono">${mov.hora_total}</td>
                 <td class="table-cell">${status_name}</td>
                 <td class="table-cell text-sm text-gray-500">${motivo}</td>
+                <td class="table-cell text-right">${cancelarButtonHTML}</td>
             </tr>
         `;
     };
     
-    const renderTable = (data) => {
+    // Função para renderizar a tabela (Esta função está correta)
+    const renderTable = (data, summary) => {
         tbodyResultados.innerHTML = '';
         if (data.length === 0) {
-            tbodyResultados.innerHTML = '<tr><td colspan="6" class="table-cell text-center text-gray-500 py-6">Nenhum resultado encontrado.</td></tr>';
+            tbodyResultados.innerHTML = '<tr><td colspan="7" class="table-cell text-center text-gray-500 py-6">Nenhum resultado encontrado.</td></tr>';
         } else {
             data.forEach(mov => {
                 tbodyResultados.innerHTML += createRowHTML(mov);
             });
         }
+        if(summary) {
+            totalPositivasEl.textContent = summary.totalHorasPositivas;
+            totalNegativasEl.textContent = summary.totalHorasNegativas;
+            saldoTotalEl.textContent = summary.saldoTotalHoras;
+        }
     };
+    
+    const applyFilters = async () => {
+        
+        // LEITURA MANUAL DOS FILTROS (EM VEZ DE new FormData)
+        const data_inicio = document.getElementById('data_inicio').value;
+        const data_fim = document.getElementById('data_fim').value;
+        const colaborador_id = document.getElementById('colaborador_id').value;
+        const status_id = document.getElementById('status_id').value;
+        const incluir_cancelados = document.getElementById('incluir_cancelados').checked; // Lê o estado da checkbox
 
-    renderTable(movimentacoesIniciais);
+        // Constrói os parâmetros manualmente para enviar "true"
+        const params = new URLSearchParams();
+        if (data_inicio) params.append('data_inicio', data_inicio);
+        if (data_fim) params.append('data_fim', data_fim);
+        if (colaborador_id) params.append('colaborador_id', colaborador_id);
+        if (status_id) params.append('status_id', status_id);
+        
+        // ENVIA 'true' QUANDO MARCADO (o backend espera 'true' e não 'on')
+        if (incluir_cancelados) {
+            params.append('incluir_cancelados', 'true');
+        }
 
-    formFiltros.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(formFiltros);
-        const params = new URLSearchParams(formData);
         try {
             const response = await fetch(`/admin/api/relatorios?${params.toString()}`);
             const result = await response.json();
             if (result.success) {
-                renderTable(result.movimentacoes);
+                renderTable(result.movimentacoes, result.summary);
             } else {
                 alert('Erro ao buscar os dados filtrados.');
             }
@@ -132,19 +191,98 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro no fetch dos filtros:', error);
             alert('Não foi possível aplicar os filtros.');
         }
+    };
+
+    // --- Lógica do Modal de Cancelamento (Esta função está correta) ---
+    const openCancelModal = (movementId) => {
+        movementIdToCancel = movementId;
+        motivoTextarea.value = '';
+        cancelFeedbackDiv.textContent = '';
+        modalCancelar.classList.remove('hidden');
+    };
+
+    const closeCancelModal = () => {
+        modalCancelar.classList.add('hidden');
+        movementIdToCancel = null;
+    };
+
+    const executeCancel = async () => {
+        const motivo = motivoTextarea.value.trim();
+        if (!motivo) {
+            cancelFeedbackDiv.textContent = 'Por favor, preencha o motivo.';
+            return;
+        }
+        showLoading();
+        try {
+            const response = await fetch(`/admin/api/movimentacoes/${movementIdToCancel}/cancelar`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ motivo: motivo })
+            });
+
+            const result = await response.json(); 
+            if (!response.ok) {
+                throw new Error(result.message || 'Falha ao cancelar.');
+            }
+
+            const statusElement = document.getElementById(`status-mov-${movementIdToCancel}`);
+            if (statusElement) {
+                statusElement.textContent = 'Cancelado';
+                statusElement.className = 'text-red-600 font-medium';
+            }
+            const row = document.getElementById(`row-mov-${movementIdToCancel}`);
+            if(row) {
+                const buttonCell = row.querySelector('td:last-child');
+                if(buttonCell) buttonCell.innerHTML = ''; 
+            }
+            showNotification(result.message, 'success');
+            closeCancelModal();
+
+        } catch (error) {
+            cancelFeedbackDiv.textContent = `Erro: ${error.message}`;
+        } finally {
+            hideLoading();
+        }
+    };
+    
+    // --- Adicionar "escutadores" de eventos (Esta parte também está ATUALIZADA) ---
+    formFiltros.addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyFilters();
     });
 
-    // Eventos para os botões de exportação
+    // Função auxiliar para obter os parâmetros de filtro corretos para exportação
+    const getFilterParams = () => {
+        const params = new URLSearchParams();
+        if (document.getElementById('data_inicio').value) params.append('data_inicio', document.getElementById('data_inicio').value);
+        if (document.getElementById('data_fim').value) params.append('data_fim', document.getElementById('data_fim').value);
+        if (document.getElementById('colaborador_id').value) params.append('colaborador_id', document.getElementById('colaborador_id').value);
+        if (document.getElementById('status_id').value) params.append('status_id', document.getElementById('status_id').value);
+        if (document.getElementById('incluir_cancelados').checked) params.append('incluir_cancelados', 'true'); // Garante que a checkbox é lida
+        return params.toString();
+    };
+
     btnExportarCsv.addEventListener('click', () => {
-        const formData = new FormData(formFiltros);
-        const params = new URLSearchParams(formData);
-        window.location.href = `/admin/relatorios/exportar?${params.toString()}`;
+        window.location.href = `/admin/relatorios/exportar?${getFilterParams()}`;
     });
 
     btnExportarPdf.addEventListener('click', () => {
-        const formData = new FormData(formFiltros);
-        const params = new URLSearchParams(formData);
-        window.location.href = `/admin/relatorios/exportar-pdf?${params.toString()}`;
+        window.open(`/admin/relatorios/exportar-pdf?${getFilterParams()}`, '_blank');
     });
+
+    // O resto do seu script está correto
+    tbodyResultados.addEventListener('click', (event) => {
+        const target = event.target.closest('.btn-cancelar');
+        if (target) {
+            const movementId = target.dataset.id;
+            openCancelModal(movementId);
+        }
+    });
+
+    btnConfirmarCancelamento.addEventListener('click', executeCancel);
+    btnVoltarCancelamento.addEventListener('click', closeCancelModal);
+
+    // Carregar os dados iniciais
+    applyFilters();
 });
 </script>

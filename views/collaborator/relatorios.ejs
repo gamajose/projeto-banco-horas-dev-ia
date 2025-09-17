@@ -1,5 +1,24 @@
 <h1 class="text-2xl font-bold text-gray-800 mb-6">Meus Relatórios de Movimentações</h1>
 
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="stat-card bg-emerald-50">
+        <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600"><i class="fas fa-plus-circle"></i></div>
+        <div id="total-positivas" class="stat-card-value text-emerald-600">+00:00</div>
+        <div class="stat-card-label">Total de Créditos (Aprovados)</div>
+    </div>
+    
+    <div class="stat-card bg-red-50">
+        <div class="stat-card-icon bg-gradient-to-r from-red-500 to-red-600"><i class="fas fa-minus-circle"></i></div>
+        <div id="total-negativas" class="stat-card-value text-red-600">-00:00</div>
+        <div class="stat-card-label">Total de Débitos (Aprovados)</div>
+    </div>
+    <div class="stat-card bg-blue-50">
+        <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600"><i class="fas fa-balance-scale"></i></div>
+        <div id="saldo-total" class="stat-card-value text-blue-800">00:00</div>
+        <div class="stat-card-label">Saldo do Período (Aprovado)</div>
+    </div>
+</div>
+
 <div class="card mb-6">
     <div class="card-body">
         <form id="form-filtros" class="flex flex-col sm:flex-row flex-wrap items-end gap-4">
@@ -22,9 +41,10 @@
                     <% }) %>
                 </select>
             </div>
-            <div class="flex-shrink-0 flex space-x-2">
-                <button type="submit" class="btn-primary flex-1">Filtrar</button>
-                <button type="button" id="btn-exportar-pdf" class="btn-secondary flex-1">PDF</button>
+            
+            <div class="flex-shrink-0 flex space-x-2 w-full sm:w-auto">
+                <button type="submit" class="btn-primary w-full sm:w-auto">Filtrar</button>
+                <button type="button" id="btn-exportar-pdf" class="btn-secondary w-full sm:w-auto">PDF</button>
             </div>
         </form>
     </div>
@@ -50,26 +70,27 @@
     </div>
 </div>
 
-
-<!------------------------------------------------- Função ---------------------------------------------------------------------->
-
-
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // --- Referências aos elementos do DOM ---
         const formFiltros = document.getElementById('form-filtros');
         const tbodyResultados = document.getElementById('tabela-resultados');
-        const movimentacoesIniciais = <%- JSON.stringify(movimentacoes) %>;
         const btnExportarPdf = document.getElementById('btn-exportar-pdf');
+        const totalPositivasEl = document.getElementById('total-positivas');
+        const totalNegativasEl = document.getElementById('total-negativas');
+        const saldoTotalEl = document.getElementById('saldo-total');
 
+        // --- Dados Iniciais (vindos do servidor) ---
+        const movimentacoesIniciais = <%- JSON.stringify(movimentacoes) %>;
+        const summaryIniciais = <%- JSON.stringify(hourBalance) %>;
+
+        // --- Funções de Renderização ---
         const createRowHTML = (mov) => {
             const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-            const tipoHTML = mov.entrada
-                ? `<span class="badge badge-success">Crédito</span>`
-                : `<span class="badge badge-danger">Débito</span>`;
+            const tipoHTML = mov.entrada ? `<span class="badge badge-success">Crédito</span>` : `<span class="badge badge-danger">Débito</span>`;
             const motivo = mov.motivo || '';
             const statusClass = mov.status_nome === 'Aprovado' ? 'bg-green-100 text-green-800' : (mov.status_nome === 'Pendente' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800');
             const statusBadge = `<p class="text-xs font-semibold px-2 py-1 rounded-full ${statusClass}">${mov.status_nome}</p>`;
-            
             return `
                 <tr>
                     <td class="table-cell">${dataFormatada}</td>
@@ -81,41 +102,31 @@
             `;
         };
 
-        const renderTable = (data) => {
+        // Função ÚNICA para renderizar a tabela e os cards de resumo
+        const renderData = (data, summary) => {
             tbodyResultados.innerHTML = '';
             if (data.length === 0) {
                 tbodyResultados.innerHTML = '<tr><td colspan="5" class="table-cell text-center text-gray-500 py-6">Nenhum resultado encontrado.</td></tr>';
             } else {
                 data.forEach(mov => tbodyResultados.innerHTML += createRowHTML(mov));
             }
-        };
 
-        const loadInitialData = async () => {
-            try {
-                const response = await fetch('/profile/api/relatorio');
-                const result = await response.json();
-                if (result.success) {
-                    renderTable(result.movimentacoes);
-                } else {
-                    alert('Não foi possível carregar os dados iniciais.');
-                }
-            } catch (error) {
-                console.error('Erro no fetch dos dados iniciais:', error);
-                alert('Não foi possível carregar os dados iniciais.');
+            if (summary) {
+                totalPositivasEl.textContent = summary.totalHorasPositivas || summary.positive;
+                totalNegativasEl.textContent = summary.totalHorasNegativas || summary.negative;
+                saldoTotalEl.textContent = summary.saldoTotalHoras || summary.formatted;
             }
         };
-        
-        loadInitialData();
 
-        formFiltros.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // --- Lógica de Filtros e Eventos ---
+        const applyFilters = async () => {
             const formData = new FormData(formFiltros);
             const params = new URLSearchParams(formData);
             try {
                 const response = await fetch(`/profile/api/relatorio?${params.toString()}`);
                 const result = await response.json();
                 if (result.success) {
-                    renderTable(result.movimentacoes);
+                    renderData(result.movimentacoes, result.summary);
                 } else {
                     alert('Não foi possível aplicar os filtros.');
                 }
@@ -123,6 +134,16 @@
                 console.error('Erro no fetch dos filtros:', error);
                 alert('Não foi possível aplicar os filtros.');
             }
+        };
+        
+        // --- Inicialização da Página ---
+        // Renderiza os dados que já vieram do servidor na primeira carga
+        renderData(movimentacoesIniciais, summaryIniciais);
+
+        // Adiciona os "escutadores" de eventos
+        formFiltros.addEventListener('submit', (e) => {
+            e.preventDefault();
+            applyFilters();
         });
 
         btnExportarPdf.addEventListener('click', () => {

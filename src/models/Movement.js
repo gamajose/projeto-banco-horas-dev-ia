@@ -117,7 +117,7 @@ class Movement {
     let sql = `
       SELECT
         m.*, 
-        p.nome as colaborador_nome, -- CORREÇÃO APLICADA AQUI
+        p.nome as colaborador_nome,
         s.nome as setor_nome,
         st.nome as status_nome, 
         st.analise, 
@@ -125,8 +125,8 @@ class Movement {
         fp.nome as forma_pagamento_nome
       FROM movimentacoes m
       JOIN perfis p ON m.colaborador_id = p.id
-      JOIN setores s ON p.setor_id = s.id
-      JOIN status st ON m.status_id = st.id
+      LEFT JOIN setores s ON p.setor_id = s.id
+      LEFT JOIN status_movimentacao st ON m.status_id = st.id
       LEFT JOIN formas_pagamento fp ON m.forma_pagamento_id = fp.id
     `;
     const conditions = [];
@@ -141,6 +141,10 @@ class Movement {
     if (filters.status_id) {
       conditions.push(`m.status_id = $${paramIndex++}`);
       params.push(filters.status_id);
+      } else if (filters.exclude_status_id) {
+      // SE NENHUM status é pedido, MAS queremos excluir um (o Cancelado)
+      conditions.push(`m.status_id != $${paramIndex++}`);
+      params.push(filters.exclude_status_id);
     }
 
     if (filters.data_inicio) {

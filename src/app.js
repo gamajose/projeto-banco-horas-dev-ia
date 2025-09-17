@@ -1,7 +1,13 @@
 const express = require("express");
 const path = require("path");
 const ejsLayouts = require("express-ejs-layouts");
-require("dotenv").config();
+
+const dotenv = require("dotenv");
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
+dotenv.config({ path: envFile });
 
 const session = require("express-session");
 const flash = require("connect-flash");
@@ -19,8 +25,10 @@ const dashboardRoutes = require("./routes/dashboard");
 const adminRoutes = require("./routes/admin");
 const sugestaoRoutes = require("./routes/sugestao");
 const cookieParser = require("cookie-parser");
-const Movement = require('./models/Movement'); 
+const Movement = require("./models/Movement");
 const searchRoutes = require("./routes/search");
+
+const escalaRoutes = require('./routes/escala'); 
 
 const app = express();
 const PORT = process.env.PORT || 8001;
@@ -89,6 +97,7 @@ app.use("/api/v1/profiles", profilesApiRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/sugestao", sugestaoRoutes);
 app.use("/admin", adminRoutes);
+app.use('/admin/escala', escalaRoutes);
 app.use("/profile", profileRoutes);
 app.use("/", dashboardRoutes);
 
