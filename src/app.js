@@ -28,6 +28,8 @@ const cookieParser = require("cookie-parser");
 const Movement = require("./models/Movement");
 const searchRoutes = require("./routes/search");
 
+const escalaRoutes = require('./routes/escala'); 
+
 const app = express();
 const PORT = process.env.PORT || 8001;
 
@@ -95,6 +97,7 @@ app.use("/api/v1/profiles", profilesApiRoutes);
 app.use("/api/v1/search", searchRoutes);
 app.use("/api/v1/sugestao", sugestaoRoutes);
 app.use("/admin", adminRoutes);
+app.use('/admin/escala', escalaRoutes);
 app.use("/profile", profileRoutes);
 app.use("/", dashboardRoutes);
 

@@ -135,7 +135,20 @@ class Database {
         acao VARCHAR(100) NOT NULL,
         detalhes TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS escalas (
+        id SERIAL PRIMARY KEY,
+        perfil_id INT NOT NULL REFERENCES perfis(id) ON DELETE CASCADE,
+        data DATE NOT NULL,
+        tipo_escala VARCHAR(50) NOT NULL, -- Ex: 'Trabalho', 'Folga', 'Feriado', 'Férias'
+        hora_inicio TIME,
+        hora_fim TIME,
+        observacoes TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(perfil_id, data) -- Garante que só há uma entrada por colaborador por dia
       )`
+      
     ];
 
     for (const sql of tables) {
@@ -234,82 +247,6 @@ class Database {
     }
   }
 
-  // ------------------------------
-  // Métodos genéricos
-  // ------------------------------
-  // async query(sql, params = []) {
-  //   if (this.type === 'sqlite') {
-  //     return new Promise((resolve, reject) => {
-  //       this.db.all(sql, params, (err, rows) => {
-  //         if (err) reject(err);
-  //         else resolve({ rows });
-  //       });
-  //     });
-  //   } else {
-  //     const client = await this.pool.connect();
-  //     try {
-  //       return await client.query(sql, params);
-  //     } finally {
-  //       client.release();
-  //     }
-  //   }
-  // }
-
-  // async run(sql, params = []) {
-  //   if (this.type === 'sqlite') {
-  //     return new Promise((resolve, reject) => {
-  //       this.db.run(sql, params, function (err) {
-  //         if (err) reject(err);
-  //         else resolve({ lastID: this.lastID, changes: this.changes });
-  //       });
-  //     });
-  //   } else {
-  //     const client = await this.pool.connect();
-  //     try {
-  //       return await client.query(sql, params);
-  //     } finally {
-  //       client.release();
-  //     }
-  //   }
-  // }
-
-  // async get(sql, params = []) {
-  //   if (this.type === 'sqlite') {
-  //     return new Promise((resolve, reject) => {
-  //       this.db.get(sql, params, (err, row) => {
-  //         if (err) reject(err);
-  //         else resolve(row);
-  //       });
-  //     });
-  //   } else {
-  //     const client = await this.pool.connect();
-  //     try {
-  //       const result = await client.query(sql, params);
-  //       return result.rows[0];
-  //     } finally {
-  //       client.release();
-  //     }
-  //   }
-  // }
-
-  // async all(sql, params = []) {
-  //   if (this.type === 'sqlite') {
-  //     return new Promise((resolve, reject) => {
-  //       this.db.all(sql, params, (err, rows) => {
-  //         if (err) reject(err);
-  //         else resolve(rows);
-  //       });
-  //     });
-  //   } else {
-  //     const client = await this.pool.connect();
-  //     try {
-  //       const result = await client.query(sql, params);
-  //       return result.rows;
-  //     } finally {
-  //       client.release();
-  //     }
-  //   }
-  // }
    // ------------------------------
   // Métodos genéricos
   // ------------------------------

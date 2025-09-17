@@ -183,44 +183,80 @@
     const modal = document.getElementById("modal-acao-rapida");
     if (!modal) return;
 
+    const btnEntradaSidebar = document.getElementById("sidebar-acao-entrada");
+    const btnSaidaSidebar = document.getElementById("sidebar-acao-saida");
+    const btnAjusteSidebar = document.getElementById("sidebar-acao-sugestao");
+
     const btnEntrada = document.getElementById("acao-registrar-entrada");
     const btnSaida = document.getElementById("acao-registrar-saida");
     const btnAjuste = document.getElementById("acao-solicitar-ajuste"); // Adicionado para a lógica de ajuste
     const btnClose = document.getElementById("modal-acao-rapida-close");
     const form = document.getElementById("form-acao-rapida");
-    const selectColaborador = document.getElementById("acao-rapida-colaborador");
+    const selectColaborador = document.getElementById(
+      "acao-rapida-colaborador"
+    );
     const feedbackDiv = document.getElementById("acao-rapida-feedback");
-    const containerTipoAjuste = document.getElementById("container-tipo-ajuste");
+    const containerTipoAjuste = document.getElementById(
+      "container-tipo-ajuste"
+    );
 
-     async function loadCollaboratorsForModal() {
+    async function loadCollaboratorsForModal() {
       if (!selectColaborador) return; // Sai se o select não existir
 
       // Mostra "A carregar..." enquanto busca os dados
       selectColaborador.disabled = true;
-      selectColaborador.innerHTML = '<option value="">A carregar colaboradores...</option>';
+      selectColaborador.innerHTML =
+        '<option value="">A carregar colaboradores...</option>';
 
       try {
-        const response = await fetch('/api/v1/profiles'); // A nossa rota de API que já lista perfis
-        if (!response.ok) throw new Error('Falha ao buscar lista de perfis');
+        const response = await fetch("/api/v1/profiles"); // A nossa rota de API que já lista perfis
+        if (!response.ok) throw new Error("Falha ao buscar lista de perfis");
 
         const result = await response.json();
 
         if (result.success && result.profiles.length > 0) {
-          selectColaborador.innerHTML = ''; // Limpa o "A carregar..."
-          result.profiles.forEach(profile => {
-            const option = document.createElement('option');
+          selectColaborador.innerHTML = ""; // Limpa o "A carregar..."
+          result.profiles.forEach((profile) => {
+            const option = document.createElement("option");
             option.value = profile.id;
             option.textContent = `${profile.first_name} ${profile.last_name}`;
             selectColaborador.appendChild(option);
           });
         } else {
-          selectColaborador.innerHTML = '<option value="">Nenhum colaborador encontrado</option>';
+          selectColaborador.innerHTML =
+            '<option value="">Nenhum colaborador encontrado</option>';
         }
       } catch (error) {
-        console.error('Erro ao carregar colaboradores no modal:', error);
-        selectColaborador.innerHTML = '<option value="">Erro ao carregar lista</option>';
+        console.error("Erro ao carregar colaboradores no modal:", error);
+        selectColaborador.innerHTML =
+          '<option value="">Erro ao carregar lista</option>';
       } finally {
         selectColaborador.disabled = false; // Re-ativa o dropdown
+      }
+
+      if (form) {
+        form.addEventListener("submit", handleFormSubmit);
+      }
+
+      // --- CÓDIGO NOVO A SER ADICIONADO AQUI ---
+      if (btnEntradaSidebar) {
+        btnEntradaSidebar.addEventListener("click", () =>
+          openModal({ title: "Registrar Entrada de Horas", entrada: "true" })
+        );
+      }
+      if (btnSaidaSidebar) {
+        btnSaidaSidebar.addEventListener("click", () =>
+          openModal({ title: "Registrar Saída de Horas", entrada: "false" })
+        );
+      }
+      if (btnAjusteSidebar) {
+        // Esta ação abre o modal de sugestão
+        const modalSugestao = document.getElementById("modal-sugestao");
+        if (modalSugestao) {
+          btnAjusteSidebar.addEventListener("click", () =>
+            modalSugestao.classList.remove("hidden")
+          );
+        }
       }
     }
 
@@ -850,7 +886,6 @@
         }
       }, 300);
     });
-
 
     // Usamos 'mousedown' para capturar o clique antes que o campo de pesquisa perca o foco.
     searchResultsContainer.addEventListener("mousedown", (event) => {
