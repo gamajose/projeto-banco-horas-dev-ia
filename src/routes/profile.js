@@ -211,10 +211,13 @@ router.get('/relatorio', isAuthenticated, async (req, res) => {
         const todosStatus = await Status.findAll();
         const movimentacoes = await Movement.findAll({ colaborador_id: req.userProfile.id });
 
+        const hourBalance = await Profile.calculateHourBalance(req.userProfile.id);
+
         res.render('collaborator/relatorios', {
             title: 'Relatório de Horas',
             movimentacoes,
             status: todosStatus,
+            hourBalance: hourBalance,
             user: req.user,
             userProfile: req.userProfile,
             layout: 'layouts/collaborator',
@@ -249,19 +252,51 @@ router.get('/folgas', isAuthenticated, async (req, res) => {
 
 // Rota de API para filtrar os relatórios do colaborador
 router.get('/api/relatorio', isAuthenticated, async (req, res) => {
-    try {
-        // O filtro de segurança garante que o colaborador só veja as suas próprias movimentações
-        const filtroSeguro = { 
-            ...req.query,
-            colaborador_id: req.userProfile.id
-        };
+    try {
+        const filtroSeguro = {
+            ...req.query,
+            colaborador_id: req.userProfile.id
+        };
 
-        const movimentacoesFiltradas = await Movement.findAll(filtroSeguro);
-        res.json({ success: true, movimentacoes: movimentacoesFiltradas });
-    } catch (error) {
-        console.error("Erro ao filtrar relatórios do colaborador via API:", error);
-        res.status(500).json({ success: false, message: 'Erro ao buscar dados.' });
-    }
+        const movimentacoesFiltradas = await Movement.findAll(filtroSeguro);
+
+        // Lógica para calcular os totais do período filtrado
+        let totalHorasPositivas = 0;
+        let totalHorasNegativas = 0;
+
+        movimentacoesFiltradas.forEach(mov => {
+            if (mov.status_nome === 'Aprovado') { // Apenas horas aprovadas contam para o saldo
+                const [hours, minutes] = mov.hora_total.split(':').map(Number);
+                const timeInMinutes = (hours * 60) + minutes;
+                if (mov.entrada) {
+                    totalHorasPositivas += timeInMinutes;
+                } else {
+                    totalHorasNegativas += timeInMinutes;
+                }
+            }
+        });
+
+        const formatTotalMinutes = (mins) => {
+            const hours = Math.floor(mins / 60).toString().padStart(2, '0');
+            const minutes = Math.round(mins % 60).toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        };
+
+        const saldoGeral = totalHorasPositivas - totalHorasNegativas;
+        const sign = saldoGeral < 0 ? "-" : "";
+        const absSaldoGeral = Math.abs(saldoGeral);
+
+        const summary = {
+            totalHorasPositivas: `+${formatTotalMinutes(totalHorasPositivas)}`,
+            totalHorasNegativas: `-${formatTotalMinutes(totalHorasNegativas)}`,
+            saldoTotalHoras: `${sign}${formatTotalMinutes(absSaldoGeral)}`
+        };
+
+        res.json({ success: true, movimentacoes: movimentacoesFiltradas, summary: summary });
+    } catch (error) {
+        console.error("Erro ao filtrar relatórios do colaborador via API:", error);
+        res.status(500).json({ success: false, message: 'Erro ao buscar dados.' });
+    }
 });
 
 // Rota para exportar o relatório do colaborador em PDF
@@ -284,7 +319,34 @@ router.get('/relatorio/exportar-pdf', isAuthenticated, async (req, res) => {
         doc.fontSize(12).text(`Colaborador: ${req.userProfile.nome}`, { align: "center" });
         doc.moveDown();
 
-        const tableTop = 100;
+        let totalHorasPositivas = 0;
+        let totalHorasNegativas = 0;
+        movimentacoes.forEach(mov => {
+            if (mov.status_nome === 'Aprovado') {
+                const [hours, minutes] = mov.hora_total.split(':').map(Number);
+                const timeInMinutes = (hours * 60) + minutes;
+                if (mov.entrada) {
+                    totalHorasPositivas += timeInMinutes;
+                } else {
+                    totalHorasNegativas += timeInMinutes;
+                }
+            }
+        });
+        const formatTotalMinutes = (mins) => {
+            const hours = Math.floor(mins / 60).toString().padStart(2, '0');
+            const minutes = Math.round(mins % 60).toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        };
+        const saldoGeral = totalHorasPositivas - totalHorasNegativas;
+        const sign = saldoGeral < 0 ? "-" : "";
+        const absSaldoGeral = Math.abs(saldoGeral);
+
+        doc.fontSize(12).font("Helvetica-Bold").text('Resumo de Horas Aprovadas (Período Filtrado)');
+        doc.fontSize(10).font("Helvetica").text(`Total de Créditos: +${formatTotalMinutes(totalHorasPositivas)} | Total de Débitos: -${formatTotalMinutes(totalHorasNegativas)}`);
+        doc.fontSize(10).font("Helvetica-Bold").text(`Saldo do Período: ${sign}${formatTotalMinutes(absSaldoGeral)}`);
+        doc.moveDown(2);
+
+        const tableTop = doc.y;
         const rowData = ["Data", "Tipo", "Horas", "Status", "Motivo"];
         const colWidths = [70, 50, 50, 80, 200];
         
