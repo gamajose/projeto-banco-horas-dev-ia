@@ -10,7 +10,7 @@ module.exports = {
     {
       name: 'banco-de-horas',
       script: 'src/app.js',
-      cwd: '/home/user/webapp',
+      cwd: __dirname,
       instances: 1,
       autorestart: true,
       watch: process.env.NODE_ENV !== 'production', // watch apenas em dev
