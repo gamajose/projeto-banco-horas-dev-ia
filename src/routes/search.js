@@ -4,6 +4,7 @@ const express = require('express');
 const { isApiAuthenticated, requireStaff } = require('../middleware/auth');
 const Profile = require('../models/Profile');
 const Movement = require('../models/Movement');
+const Escala = require('../models/Escala');
 
 const router = express.Router();
 
@@ -30,14 +31,19 @@ router.get('/profiles', isApiAuthenticated, requireStaff, async (req, res) => {
 // GET /api/v1/search/profiles/1/details
 router.get('/profiles/:id/details', isApiAuthenticated, requireStaff, async (req, res) => {
     try {
-        const profile = await Profile.findById(req.params.id);
+        const profileId = req.params.id;
+        const profile = await Profile.findById(profileId);
         if (!profile) {
             return res.status(404).json({ success: false, message: 'Perfil não encontrado.' });
         }
 
-        const movements = await Movement.findAll({ colaborador_id: req.params.id });
+        const movements = await Movement.findAll({ colaborador_id: profileId, limit: 5 }); // Limitar a 5 para o modal
 
-        res.json({ success: true, profile, movements });
+        // NOVO: Buscar a escala para o dia de hoje
+        const hoje = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        const todaySchedule = await Escala.findForDate(profileId, hoje);
+
+        res.json({ success: true, profile, movements, todaySchedule });
     } catch (error) {
         console.error("Erro ao buscar detalhes do perfil via API:", error);
         res.status(500).json({ success: false, message: 'Erro interno do servidor.' });

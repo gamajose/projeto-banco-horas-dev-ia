@@ -34,6 +34,26 @@ class Escala {
      * @param {object} data - Os dados da escala.
      * @returns {Promise<object>}
      */
+
+    /**
+     * Encontra uma única entrada de escala para um perfil e data específicos.
+     * @param {number} perfil_id - O ID do perfil do colaborador.
+     * @param {string} data - A data no formato 'YYYY-MM-DD'.
+     * @returns {Promise<object|null>}
+     */
+    static async findForDate(perfil_id, data) {
+        const sql = `
+            SELECT 
+                tipo_escala, 
+                TO_CHAR(hora_inicio, 'HH24:MI') as hora_inicio, 
+                TO_CHAR(hora_fim, 'HH24:MI') as hora_fim
+            FROM escalas 
+            WHERE perfil_id = $1 AND data = $2
+            LIMIT 1;
+        `;
+        const result = await db.get(sql, [perfil_id, data]);
+        return result;
+    }
     static async upsert(data) {
         const { perfil_id, data: dia, tipo_escala, hora_inicio, hora_fim, observacoes } = data;
         const sql = `
