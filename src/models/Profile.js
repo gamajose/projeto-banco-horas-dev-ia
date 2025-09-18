@@ -81,7 +81,7 @@ class Profile {
       sql += " WHERE " + conditions.join(" AND ");
     }
 
-    sql += " ORDER BY u.first_name";
+    sql += " ORDER BY p.ordem_escala, u.first_name";
 
     return await db.all(sql, params);
   }

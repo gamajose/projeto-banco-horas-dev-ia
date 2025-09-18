@@ -73,6 +73,7 @@ class Database {
         setor_id INT REFERENCES setores(id) ON DELETE SET NULL,
         nome VARCHAR(255),
         gerente BOOLEAN DEFAULT FALSE,
+        ordem_escala INTEGER DEFAULT 0,
         ch_primeira TIME,
         ch_segunda TIME,
         foto_url TEXT,

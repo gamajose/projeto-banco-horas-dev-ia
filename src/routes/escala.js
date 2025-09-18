@@ -3,6 +3,7 @@ const { isAuthenticated, requireStaff } = require('../middleware/auth');
 const Profile = require('../models/Profile');
 const Escala = require('../models/Escala');
 const PDFDocument = require('pdfkit')
+const db = require('../config/database');
 
 const router = express.Router();
 
@@ -254,6 +255,39 @@ router.get('/exportar-pdf', isAuthenticated, requireStaff, async (req, res) => {
     } catch (error) {
         console.error("Erro ao gerar PDF da escala:", error);
         res.status(500).send("Erro ao gerar o PDF. Verifique os logs do servidor para mais detalhes.");
+    }
+});
+
+// ROTA DA API PARA ATUALIZAR A ORDEM DOS COLABORADORES NA ESCALA
+router.patch('/api/ordenar', isAuthenticated, requireStaff, async (req, res) => {
+    try {
+        const { ordem } = req.body; // Espera um array de IDs na nova ordem. Ex: [3, 1, 2]
+
+        if (!Array.isArray(ordem)) {
+            return res.status(400).json({ success: false, message: 'O corpo da requisição deve conter um array de IDs.' });
+        }
+
+        // Usa uma transação para garantir que todas as atualizações sejam feitas com sucesso
+        const client = await db.getClient();
+        try {
+            await client.query('BEGIN');
+            for (let i = 0; i < ordem.length; i++) {
+                const perfilId = ordem[i];
+                const novaOrdem = i; // O índice do array será a nova ordem
+                await client.query('UPDATE perfis SET ordem_escala = $1 WHERE id = $2', [novaOrdem, perfilId]);
+            }
+            await client.query('COMMIT');
+            res.json({ success: true, message: 'Ordem da escala atualizada com sucesso!' });
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        console.error("Erro ao salvar a ordem da escala:", error);
+        res.status(500).json({ success: false, message: 'Erro ao salvar a nova ordem.' });
     }
 });
 
