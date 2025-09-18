@@ -85,6 +85,32 @@ class Escala {
         const result = await db.run(sql, [perfil_id, data]);
         return result.rowCount > 0;
     }
+
+    /**
+     * Busca todas as entradas de escala para um colaborador específico em um determinado mês e ano.
+     * @param {number} perfil_id - O ID do perfil do colaborador.
+     * @param {number} ano - O ano.
+     * @param {number} mes - O mês (1-12).
+     * @returns {Promise<Array>}
+     */
+    static async findByProfileAndMonth(perfil_id, ano, mes) {
+        const mesFormatado = mes.toString().padStart(2, '0');
+        const sql = `
+            SELECT 
+                id, 
+                perfil_id, 
+                data, 
+                tipo_escala, 
+                TO_CHAR(hora_inicio, 'HH24:MI') as hora_inicio, 
+                TO_CHAR(hora_fim, 'HH24:MI') as hora_fim, 
+                observacoes 
+            FROM escalas 
+            WHERE perfil_id = $1
+              AND EXTRACT(YEAR FROM data) = $2 
+              AND EXTRACT(MONTH FROM data) = $3
+        `;
+        return await db.all(sql, [perfil_id, ano, mes]);
+    }
 }
 
 module.exports = Escala;

@@ -1,11 +1,12 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, isApiAuthenticated } = require("../middleware/auth");
 const User = require("../models/User");
 const Profile = require("../models/Profile");
 const upload = require("../config/multer");
 const Movement = require('../models/Movement');
 const Status = require('../models/Status');
+const Escala = require('../models/Escala');
 const csv = require('fast-csv');
 const PDFDocument = require('pdfkit');
 
@@ -393,4 +394,52 @@ router.get('/relatorio/exportar-pdf', isAuthenticated, async (req, res) => {
         res.status(500).send("Não foi possível gerar o relatório em PDF.");
     }
 });
+
+// ROTA PARA RENDERIZAR A PÁGINA "MINHA ESCALA"
+router.get('/escala', isAuthenticated, async (req, res) => {
+    try {
+        res.render('collaborator/escala', {
+            title: 'Minha Escala',
+            layout: 'layouts/collaborator', // Usando o layout do colaborador
+            user: req.user,
+            userProfile: req.userProfile,
+            activePage: 'escala' // Para o botão de navegação ficar ativo
+        });
+    } catch (error) {
+        console.error("Erro ao carregar a página da minha escala:", error);
+        res.status(500).render('error', { title: 'Erro', message: 'Não foi possível carregar a sua escala.' });
+    }
+});
+
+// ROTA DE API PARA BUSCAR OS DADOS DA ESCALA DO COLABORADOR LOGADO
+router.get('/api/escala', isApiAuthenticated, async (req, res) => {
+    try {
+        const { ano, mes } = req.query;
+        if (!ano || !mes) {
+            return res.status(400).json({ success: false, message: 'Ano e mês são obrigatórios.' });
+        }
+
+        const profileId = req.userProfile.id; // Pega o ID do utilizador logado de forma segura
+
+        // Usaremos um novo método que busca a escala por perfil e por mês
+        const escalas = await Escala.findByProfileAndMonth(profileId, ano, mes);
+
+        // Lógica de aniversário (opcional, mas um detalhe simpático)
+        const aniversariantes = [];
+        if (req.userProfile.data_nascimento && new Date(req.userProfile.data_nascimento).getUTCMonth() + 1 === parseInt(mes)) {
+            aniversariantes.push({
+                perfil_id: profileId,
+                dia: new Date(req.userProfile.data_nascimento).getUTCDate()
+            });
+        }
+
+        res.json({ success: true, escalas, aniversariantes });
+
+    } catch (error) {
+        console.error("Erro ao buscar dados da escala do colaborador via API:", error);
+        res.status(500).json({ success: false, message: 'Erro interno do servidor.' });
+    }
+});
+
+
 module.exports = router;

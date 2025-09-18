@@ -29,17 +29,24 @@
             </div>
             <button id="open-menu-btn" class="text-gray-700">
                 <i class="fas fa-bars text-2xl"></i>
+
             </button>
         </header>
 
         <nav class="my-6">
-            <ul class="grid grid-cols-4 gap-2 bg-white rounded-full shadow-md p-2">
+            <ul class="grid grid-cols-5 gap-2 bg-white rounded-full shadow-md p-2">
                 <li><a href="/meu-perfil"
                         class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'home' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Home</a>
                 </li>
                 <li><a href="/profile/gerenciar"
                         class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'gerenciar' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Gerenciar
                         Horas</a></li>
+
+                <li><a href="/profile/escala"
+                        class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'escala' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Minha
+                        Escala</a>
+                </li>
+
                 <li><a href="/profile/relatorio"
                         class="nav-item flex justify-center text-center py-3 px-4 rounded-full font-semibold text-sm transition-colors duration-200 <%= activePage === 'relatorio' ? 'active' : 'text-gray-800 hover:bg-gray-200' %>">Relatório</a>
                 </li>
@@ -55,17 +62,19 @@
 
     <div id="options-modal"
         class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden z-50 transition-opacity ease-in-out duration-300">
-        <div id="modal-content-wrapper"
-            class="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white transition-transform ease-in-out duration-300 transform scale-95">
+        <div id="modal-content-wrapper" class="relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-6 border w-full max-w-sm shadow-lg rounded-2xl bg-white transition-transform ease-in-out 
+duration-300 transform scale-95">
             <div class="flex justify-between items-center pb-3 border-b border-gray-200">
                 <h3 class="text-2xl font-bold text-gray-800">Opções</h3>
                 <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600 text-3xl">&times;</button>
             </div>
             <div class="mt-4">
+
                 <nav class="space-y-2">
                     <a href="/profile/editar"
                         class="block p-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
                         <i class="fas fa-user-edit mr-3 text-gray-500"></i>
+
                         Editar Perfil
                     </a>
                     <a href="/auth/logout"
@@ -97,6 +106,7 @@
 
 
         function openModal(modalEl, contentEl) {
+
             modalEl.classList.remove('hidden');
             setTimeout(() => {
                 modalEl.classList.add('opacity-100');
@@ -105,6 +115,7 @@
         }
 
         function closeModal(modalEl, contentEl) {
+
             modalEl.classList.remove('opacity-100');
             if (contentEl) contentEl.classList.add('scale-95');
             setTimeout(() => {
