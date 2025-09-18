@@ -170,9 +170,9 @@
                 </thead>
                 <tbody id="collaborators-tbody">
                     <% colaboradores.forEach(colab=> { %>
-                        <tr id="collaborator-row-<%= colab.id %>" class="table-row collaborator-row"
-                            data-name="<%= colab.first_name %> <%= colab.last_name %>" data-email="<%= colab.email %>"
-                            data-department="<%= colab.setor_nome || '' %>"
+                        <tr id="collaborator-row-<%= colab.id %>" class="table-row collaborator-row cursor-pointer"
+                            data-profile-id="<%= colab.id %>" data-name="<%= colab.first_name %> <%= colab.last_name %>"
+                            data-email="<%= colab.email %>" data-department="<%= colab.setor_nome || '' %>"
                             data-status="<%= colab.is_active ? 'active' : 'inactive' %>">
 
                             <td class="table-cell">
@@ -193,22 +193,22 @@
                                     <div>
                                         <div class="font-semibold text-gray-900">
                                             <%= colab.first_name %>
-                                            <%= colab.last_name %>
+                                                <%= colab.last_name %>
 
-                                            <%# NOVO: Adiciona o ícone de bolo apenas se for aniversário %>
-                                            <% if (colab.isBirthday) { %>
-                                                <i class="fas fa-birthday-cake text-pink-500 ml-2"
-                                                title="Aniversariante!"></i>
-                                            <% } %>
-                                            
-                                            <% if (colab.is_manager) { %>
-                                                <i class="fas fa-crown text-yellow-500 ml-1"
-                                                title="Gerente"></i>
-                                            <% } %>
-                                            <% if (colab.is_staff) { %>
-                                                <i class="fas fa-shield-alt text-red-500 ml-1"
-                                                title="Administrador"></i>
-                                            <% } %>
+                                                    <%# NOVO: Adiciona o ícone de bolo apenas se for aniversário %>
+                                                        <% if (colab.isBirthday) { %>
+                                                            <i class="fas fa-birthday-cake text-pink-500 ml-2"
+                                                                title="Aniversariante!"></i>
+                                                            <% } %>
+
+                                                                <% if (colab.is_manager) { %>
+                                                                    <i class="fas fa-crown text-yellow-500 ml-1"
+                                                                        title="Gerente"></i>
+                                                                    <% } %>
+                                                                        <% if (colab.is_staff) { %>
+                                                                            <i class="fas fa-shield-alt text-red-500 ml-1"
+                                                                                title="Administrador"></i>
+                                                                            <% } %>
                                         </div>
                                         <div class="text-sm text-gray-600">
                                             <i class="fas fa-envelope mr-1"></i>
@@ -392,6 +392,32 @@
 
         if (statusFilter) {
             statusFilter.addEventListener('change', applyFilters);
+        }
+
+        const tbody = document.getElementById('collaborators-tbody');
+        if (tbody) {
+            tbody.addEventListener('click', function (event) {
+                // 1. Encontra a linha (tr) em que se clicou
+                const row = event.target.closest('tr.collaborator-row');
+                if (!row) return; // Se o clique foi fora de uma linha, não faz nada
+
+                // 2. Pega o ID do colaborador a partir da linha
+                const profileId = row.dataset.profileId;
+                if (!profileId) return;
+
+                // 3. Verifica se o clique foi num botão de ação, link ou checkbox
+                if (event.target.closest('a, button, input')) {
+                    // Exceção: se o clique foi no botão "olho", abre o modal
+                    if (event.target.closest('.view-collaborator-btn')) {
+                        showProfileModal(profileId);
+                    }
+                    // Se foi noutro botão (editar, apagar), não faz mais nada.
+                    return;
+                }
+
+                // 4. Se chegou aqui, o clique foi na linha. Abre o modal.
+                showProfileModal(profileId);
+            });
         }
     }
 
@@ -840,87 +866,6 @@
         };
     }
 
-    /**
-     * Função para buscar os dados de um perfil e exibir o modal.
-     */
-    async function showProfileModal(profileId) {
-        // Encontra os elementos do modal que já existem no seu layout (views/partials/modal-profile-view.ejs)
-        const modal = document.getElementById("modal-profile-view");
-        const modalContent = document.getElementById("modal-profile-content");
-
-        if (!modal || !modalContent) {
-            alert("Erro: O HTML do modal de perfil não foi encontrado.");
-            return;
-        }
-
-        // Mostra o modal e um feedback de "carregando"
-        modal.classList.remove("hidden");
-        modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-spinner fa-spin text-2xl text-red-500"></i><p class="mt-2">A carregar perfil...</p></div>`;
-
-        setTimeout(() => {
-            modalContent.classList.remove("opacity-0", "-translate-y-4");
-        }, 10);
-
-        try {
-            // Vai buscar os dados do colaborador à API
-            const response = await fetch(`/api/v1/search/profiles/${profileId}/details`);
-            const result = await response.json();
-
-            if (!result.success) throw new Error(result.message);
-
-            const { profile, movements } = result;
-
-            // Cria o HTML para a lista de movimentações
-            const movementsHTML = movements.length > 0 ? movements.map(mov => `
-                <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                    <div>
-                        <p class="font-medium text-gray-800">${mov.motivo}</p>
-                        <p class="text-xs text-gray-500">${new Date(mov.data_movimentacao).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
-                    </div>
-                    <div class="text-right flex-shrink-0 ml-4">
-                        <p class="font-mono font-semibold ${mov.entrada ? "text-green-600" : "text-red-600"}">
-                            ${mov.entrada ? "+" : "-"}${mov.hora_total}
-                        </p>
-                        <p class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block ${mov.autorizado ? "bg-green-100 text-green-800" : mov.analise ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}">
-                            ${mov.status_nome}
-                        </p>
-                    </div>
-                </div>`).join("") : '<p class="text-sm text-gray-500 text-center py-4">Nenhuma movimentação encontrada.</p>';
-
-            // Cria o HTML final do modal com todos os dados
-            modalContent.innerHTML = `
-                <div class="p-6">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center space-x-4">
-                            <img src="${profile.foto_url || '/images/default-avatar.png'}" alt="${profile.nome}" class="w-20 h-20 rounded-full object-cover border-4 border-gray-100 shadow-md">
-                            <div>
-                                <h3 class="text-2xl font-bold text-gray-900">${profile.nome}</h3>
-                                <p class="text-sm text-gray-600">${profile.funcao || "Cargo não definido"}</p>
-                                <p class="text-sm text-gray-500">${profile.email}</p>
-                            </div>
-                        </div>
-                        <button id="modal-profile-close" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
-                    </div>
-                </div>
-                <div class="px-6 py-4 bg-gray-50/50 border-y border-gray-200/60">
-                    <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos</h4>
-                    <div class="max-h-64 overflow-y-auto pr-2">${movementsHTML}</div>
-                </div>
-                <div class="p-4 bg-gray-50/50 text-right">
-                     <a href="/admin/colaboradores/editar/${profileId}" class="btn-primary btn-sm">Editar Perfil Completo</a>
-                </div>`;
-
-            // Adiciona a funcionalidade de fechar o modal
-            document.getElementById("modal-profile-close").addEventListener("click", () => {
-                modalContent.classList.add("opacity-0", "-translate-y-4");
-                setTimeout(() => modal.classList.add("hidden"), 300);
-            });
-        } catch (error) {
-            modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-exclamation-triangle text-2xl text-red-500"></i><p class="mt-2">Erro ao carregar o perfil.</p><button id="modal-profile-close" class="mt-4 btn-secondary btn-sm">Fechar</button></div>`;
-            document.getElementById("modal-profile-close").addEventListener("click", () => modal.classList.add("hidden"));
-        }
-    }
-
     // --- Adiciona o "escutador de eventos" na tabela ---
     const tbody = document.getElementById('collaborators-tbody');
     if (tbody) {
@@ -932,5 +877,4 @@
             }
         });
     }
-
 </script>
