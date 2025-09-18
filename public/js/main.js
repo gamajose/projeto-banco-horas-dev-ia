@@ -691,7 +691,6 @@
     showModal,
     closeModal,
     showNotification,
-    hideNotification,
     calculateTotalTime,
     validateForm,
   };
@@ -918,118 +917,129 @@
   }
 
   /**
-   * Busca os dados de um perfil e exibe o modal de visualização.
-   * @param {string} profileId - O ID do perfil a ser exibido.
-   */
-  async function showProfileModal(profileId) {
+ * Busca os dados de um perfil e exibe o modal de visualização.
+ * @param {string} profileId - O ID do perfil a ser exibido.
+ */
+async function showProfileModal(profileId) {
     const modal = document.getElementById("modal-profile-view");
     const modalContent = document.getElementById("modal-profile-content");
     if (!modal || !modalContent) return;
 
     modal.classList.remove("hidden");
     modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-spinner fa-spin text-2xl text-red-500"></i><p class="mt-2">A carregar perfil...</p></div>`;
+    modalContent.classList.remove('is-birthday'); // Limpa a classe de aniversário
 
     setTimeout(() => {
-      modalContent.classList.remove("opacity-0", "-translate-y-4");
+        modalContent.classList.remove("opacity-0", "-translate-y-4");
     }, 10);
 
     try {
-      const response = await fetch(
-        `/api/v1/search/profiles/${profileId}/details`
-      );
-      const result = await response.json();
+        const response = await fetch(`/api/v1/search/profiles/${profileId}/details`);
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message);
 
-      if (!result.success) throw new Error(result.message);
+        // ✅ AQUI CAPTURAMOS A INFORMAÇÃO DA ESCALA (todaySchedule)
+        const { profile, movements, todaySchedule } = result;
+        
+        // (Lógica de aniversário que já existe)
+        const hoje = new Date();
+        let eAniversario = false;
+        if (profile.data_nascimento) {
+            const aniversario = new Date(profile.data_nascimento);
+            if (aniversario.getUTCDate() === hoje.getDate() && aniversario.getUTCMonth() === hoje.getMonth()) {
+                eAniversario = true;
+            }
+        }
+        if (eAniversario) {
+            modalContent.classList.add('is-birthday');
+        }
 
-      const { profile, movements } = result;
-      const birthDate = profile.data_nascimento
-        ? new Date(profile.data_nascimento).toLocaleDateString("pt-BR", {
-            timeZone: "UTC",
-          })
-        : "Não informado";
+        // ✅ AQUI CONSTRUÍMOS O HTML DA ESCALA
+        let scheduleHTML = `<h4 class="text-xs uppercase font-bold text-gray-500 mb-2 mt-6">Escala de Hoje</h4>`;
+        if (todaySchedule) {
+            let scheduleText = '';
+            switch (todaySchedule.tipo_escala) {
+                case 'Trabalho':
+                    scheduleText = `Trabalho das <strong>${todaySchedule.hora_inicio}</strong> às <strong>${todaySchedule.hora_fim}</strong>`;
+                    break;
+                case 'Folga':
+                    scheduleText = '<strong>Folga</strong>';
+                    break;
+                case 'Férias':
+                    scheduleText = '<strong>Férias</strong>';
+                    break;
+                case 'Standby':
+                    scheduleText = '<strong>Standby</strong>';
+                    break;
+            }
+            scheduleHTML += `<div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">${scheduleText}</div>`;
+        } else {
+            scheduleHTML += `<p class="text-sm text-gray-500">Sem escala definida para hoje.</p>`;
+        }
+        
+        // (Código do histórico de movimentos que já existe)
+        const movementsHTML = movements.length > 0 ? movements.map(mov => {
+            const dataFormatada = new Date(mov.data_movimentacao).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+            const isEntrada = mov.entrada;
+            const statusNome = mov.status_nome;
+            let statusClass = 'bg-gray-100 text-gray-800';
+            if (statusNome === 'Aprovado') statusClass = 'bg-green-100 text-green-800';
+            if (statusNome === 'Rejeitado' || statusNome === 'Cancelado') statusClass = 'bg-red-100 text-red-800';
+            if (statusNome === 'Pendente') statusClass = 'bg-yellow-100 text-yellow-800';
 
-      const movementsHTML =
-        movements.length > 0
-          ? movements
-              .map(
-                (mov) => `
-            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
-                <div>
-                    <p class="font-medium text-gray-800">${mov.motivo}</p>
-                    <p class="text-xs text-gray-500">${new Date(
-                      mov.data_movimentacao
-                    ).toLocaleDateString("pt-BR", { timeZone: "UTC" })}</p>
+            return `
+                <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                    <div>
+                        <p class="font-medium text-gray-800">${mov.motivo}</p>
+                        <p class="text-xs text-gray-500">${dataFormatada}</p>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-4">
+                        <p class="font-mono font-semibold ${isEntrada ? 'text-green-600' : 'text-red-600'}">
+                            ${isEntrada ? '+' : '-'}${mov.hora_total}
+                        </p>
+                        <p class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block ${statusClass}">
+                            ${statusNome}
+                        </p>
+                    </div>
                 </div>
-                <div class="text-right flex-shrink-0 ml-4">
-                    <p class="font-mono font-semibold ${
-                      mov.entrada ? "text-green-600" : "text-red-600"
-                    }">
-                        ${mov.entrada ? "+" : "-"}${mov.hora_total}
-                    </p>
-                    <p class="text-xs font-semibold px-2 py-0.5 rounded-full inline-block ${
-                      mov.autorizado
-                        ? "bg-green-100 text-green-800"
-                        : mov.analise
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }">
-                        ${mov.status_nome}
-                    </p>
-                </div>
-            </div>
-        `
-              )
-              .join("")
-          : '<p class="text-sm text-gray-500 text-center py-4">Nenhuma movimentação encontrada.</p>';
+            `;
+        }).join('') : '<p class="text-sm text-gray-500 text-center py-4">Nenhum lançamento recente encontrado.</p>';
 
-      modalContent.innerHTML = `
+        // ✅ AQUI MONTAMOS O HTML FINAL, INCLUINDO A VARIÁVEL "scheduleHTML"
+        modalContent.innerHTML = `
             <div class="p-6">
                 <div class="flex justify-between items-start">
                     <div class="flex items-center space-x-4">
-                        <img src="${
-                          profile.foto_url || "/images/default-avatar.png"
-                        }" alt="${
-        profile.nome
-      }" class="w-20 h-20 rounded-full object-cover border-4 border-gray-100 shadow-md">
+                        <img src="${profile.foto_url || '/images/default-avatar.png'}" alt="${profile.nome}" class="w-20 h-20 rounded-full object-cover border-4 border-gray-100 shadow-md">
                         <div>
-                            <h3 class="text-2xl font-bold text-gray-900">${
-                              profile.nome
-                            }</h3>
-                            <p class="text-sm text-gray-600">${
-                              profile.funcao || "Cargo não definido"
-                            }</p>
-                            <p class="text-sm text-gray-500">${
-                              profile.email
-                            }</p>
+                            <h3 class="text-2xl font-bold text-gray-900">${profile.nome} ${eAniversario ? '🎂' : ''}</h3>
+                            <p class="text-sm text-gray-600">${profile.funcao || "Cargo não definido"}</p>
+                            <p class="text-sm text-gray-500">${profile.email}</p>
                         </div>
                     </div>
                     <button id="modal-profile-close" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                 </div>
+                ${scheduleHTML}
             </div>
             <div class="px-6 py-4 bg-gray-50/50 border-y border-gray-200/60">
-                <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos</h4>
-                <div class="max-h-64 overflow-y-auto pr-2">
-                    ${movementsHTML}
-                </div>
+                <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos Recentes</h4>
+                <div class="max-h-64 overflow-y-auto pr-2">${movementsHTML}</div>
             </div>
             <div class="p-4 bg-gray-50/50 text-right">
-                 <a href="/admin/colaboradores/editar/${profileId}" class="btn-primary btn-sm">Editar Perfil Completo</a>
+                 <a href="/admin/colaboradores/editar/${profile.id}" class="btn-primary btn-sm">Editar Perfil Completo</a>
             </div>
         `;
 
-      document
-        .getElementById("modal-profile-close")
-        .addEventListener("click", () => {
-          modalContent.classList.add("opacity-0", "-translate-y-4");
-          setTimeout(() => modal.classList.add("hidden"), 300);
+        document.getElementById("modal-profile-close").addEventListener("click", () => {
+            modalContent.classList.add("opacity-0", "-translate-y-4");
+            setTimeout(() => modal.classList.add("hidden"), 300);
         });
+
     } catch (error) {
-      modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-exclamation-triangle text-2xl text-red-500"></i><p class="mt-2">Erro ao carregar o perfil.</p><button id="modal-profile-close" class="mt-4 btn-secondary btn-sm">Fechar</button></div>`;
-      document
-        .getElementById("modal-profile-close")
-        .addEventListener("click", () => modal.classList.add("hidden"));
+        modalContent.innerHTML = `<div class="p-8 text-center"><i class="fas fa-exclamation-triangle text-2xl text-red-500"></i><p class="mt-2">Erro ao carregar o perfil.</p><button id="modal-profile-close" class="mt-4 btn-secondary btn-sm">Fechar</button></div>`;
+        document.getElementById("modal-profile-close").addEventListener("click", () => modal.classList.add("hidden"));
     }
-  }
+}
 
   // Anexa a função à `window` para torná-la global
 /**
@@ -1175,4 +1185,6 @@ async function showProfileModal(profileId) {
       setTimeout(() => profileModal.classList.add("hidden"), 300);
     }
   });
+
+  window.showProfileModal = showProfileModal; 
 })();

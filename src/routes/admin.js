@@ -21,12 +21,35 @@ router.get("/colaboradores", isAuthenticated, requireStaff, async (req, res) => 
     let totalHorasPositivas = 0;
     let totalHorasNegativas = 0;
 
-    // Itera sobre cada colaborador para calcular seu saldo
+    const hoje = new Date();
+    const diaAtual = hoje.getDate();
+    const mesAtual = hoje.getMonth() + 1;
+    
+    const timeStringToMinutes = (timeStr) => {
+      if (!timeStr || typeof timeStr !== 'string') return 0;
+      const cleanTime = timeStr.replace(/[+-]/g, '');
+      const [hours, minutes] = cleanTime.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) return 0;
+      return (hours * 60) + minutes;
+    };
+
+    // Itera sobre cada colaborador para calcular seu saldo e verificar aniversário
     for (const colab of colaboradores) {
       const balance = await Profile.calculateHourBalance(colab.id);
       colab.saldoPositivo = balance.positive;
       colab.saldoNegativo = balance.negative;
       colab.saldoTotal = balance.formatted;
+
+      // Adiciona a verificação de aniversário
+      colab.isBirthday = false;
+      if (colab.data_nascimento) {
+        const aniversario = new Date(colab.data_nascimento);
+        const diaAniversario = aniversario.getUTCDate();
+        const mesAniversario = aniversario.getUTCMonth() + 1;
+        if (diaAniversario === diaAtual && mesAniversario === mesAtual) {
+          colab.isBirthday = true;
+        }
+      }
 
       // Soma os minutos para o total geral
       totalHorasPositivas += parseFloat(balance.positive.replace('+', '').replace(':', '.')) * 60;

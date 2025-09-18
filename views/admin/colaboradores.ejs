@@ -184,7 +184,7 @@
                             <td class="table-cell">
                                 <div class="flex items-center space-x-4">
                                     <div class="relative">
-                                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 shadow-sm"
+                                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200 shadow-sm <%= colab.isBirthday ? 'birthday-photo-border' : '' %>"
                                             src="<%= colab.foto_url || '/images/default-avatar.png' %>"
                                             alt="<%= colab.first_name %>">
                                         <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white shadow-sm
@@ -193,15 +193,22 @@
                                     <div>
                                         <div class="font-semibold text-gray-900">
                                             <%= colab.first_name %>
-                                                <%= colab.last_name %>
-                                                    <% if (colab.is_manager) { %>
-                                                        <i class="fas fa-crown text-yellow-500 ml-1"
-                                                            title="Gerente"></i>
-                                                        <% } %>
-                                                            <% if (colab.is_staff) { %>
-                                                                <i class="fas fa-shield-alt text-red-500 ml-1"
-                                                                    title="Administrador"></i>
-                                                                <% } %>
+                                            <%= colab.last_name %>
+
+                                            <%# NOVO: Adiciona o ícone de bolo apenas se for aniversário %>
+                                            <% if (colab.isBirthday) { %>
+                                                <i class="fas fa-birthday-cake text-pink-500 ml-2"
+                                                title="Aniversariante!"></i>
+                                            <% } %>
+                                            
+                                            <% if (colab.is_manager) { %>
+                                                <i class="fas fa-crown text-yellow-500 ml-1"
+                                                title="Gerente"></i>
+                                            <% } %>
+                                            <% if (colab.is_staff) { %>
+                                                <i class="fas fa-shield-alt text-red-500 ml-1"
+                                                title="Administrador"></i>
+                                            <% } %>
                                         </div>
                                         <div class="text-sm text-gray-600">
                                             <i class="fas fa-envelope mr-1"></i>
