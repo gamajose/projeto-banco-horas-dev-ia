@@ -192,9 +192,7 @@
     const btnAjuste = document.getElementById("acao-solicitar-ajuste"); // Adicionado para a lógica de ajuste
     const btnClose = document.getElementById("modal-acao-rapida-close");
     const form = document.getElementById("form-acao-rapida");
-    const selectColaborador = document.getElementById(
-      "acao-rapida-colaborador"
-    );
+    const selectColaborador = document.getElementById("acao-rapida-colaborador");
     const feedbackDiv = document.getElementById("acao-rapida-feedback");
     const containerTipoAjuste = document.getElementById(
       "container-tipo-ajuste"
@@ -272,6 +270,10 @@
       modal.classList.remove("hidden");
     };
 
+    if (selectColaborador) {
+            loadCollaboratorsForModal();
+        }
+        
     const closeModal = () => modal.classList.add("hidden");
 
     if (btnEntrada)

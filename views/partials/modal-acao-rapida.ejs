@@ -14,7 +14,7 @@
                     <select name="colaborador_id" id="acao-rapida-colaborador" required class="form-input">
                         <% if (locals.todosColaboradores && todosColaboradores.length > 0) { %>
                             <% todosColaboradores.forEach(colab => { %>
-                                <option value="<%= colab.id %>"><%= colab.first_name %> <%= colab.last_name %></option>
+                                <option value="<%= colab.id %>"> <%= colab.first_name %> <%= colab.last_name %></option>
                             <% }) %>
                         <% } else { %>
                             <option value="">Nenhum colaborador encontrado</option>
