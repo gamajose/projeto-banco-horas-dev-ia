@@ -2,43 +2,6 @@
 (function () {
   "use strict";
 
-  // Lógica para alternar e persistir o tema
-  const alteraTema = document.getElementById('alternar-tema');
-  const htmlElement = document.documentElement;
-  const userTema = localStorage.getItem('theme');
-
-  // Define o tema inicial baseado na preferência do usuário ou do sistema
-  if (userTema === 'dark' || (!userTema && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    htmlElement.classList.add('dark');
-  }
-
-  // Troca o ícone do botão com base no tema atual
-  const updateThemeIcon = () => {
-    if (htmlElement.classList.contains('dark')) {
-      alteraTema.querySelector('i').classList.replace('fa-sun', 'fa-moon');
-    } else {
-      alteraTema.querySelector('i').classList.replace('fa-moon', 'fa-sun');
-    }
-  };
-  
-  // Executa a troca do ícone ao carregar a página
-  if (alteraTema) {
-    updateThemeIcon();
-  }
-
-  // Adiciona o listener para o botão de alternância
-  if (alteraTema) {
-    alteraTema.addEventListener('click', () => {
-      htmlElement.classList.toggle('dark');
-      if (htmlElement.classList.contains('dark')) {
-        localStorage.setItem('theme', 'dark');
-      } else {
-        localStorage.setItem('theme', 'light');
-      }
-      updateThemeIcon();
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", function () {
     initializeNavigation();
     initializeGeneralModals();
