@@ -21,14 +21,14 @@
 </div>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="stat-card card-hover">
+    <div class="dark stat-card card-hover">
         <a href="/admin/colaboradores">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="stat-card-icon bg-gradient-to-r from-blue-500 to-blue-600">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="stat-card-value" id="total-users-count">
+                    <div class="dark stat-card-value" id="total-users-count">
                         <%= totalUsers %>
                     </div>
                     <div class="stat-card-label">Total de Colaboradores</div>
@@ -46,14 +46,14 @@
         </a>
     </div>
 
-    <div class="stat-card card-hover">
+    <div class="dark stat-card card-hover">
         <a href="/admin/relatorios">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="stat-card-icon bg-gradient-to-r from-green-500 to-green-600">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <div class="stat-card-value" id="total-movements-count">
+                    <div class="dark stat-card-value" id="total-movements-count">
                         <%= stats.total %>
                     </div>
                     <div class="stat-card-label">Registros Totais</div>
@@ -71,14 +71,14 @@
         </a>
     </div>
 
-    <div class="stat-card card-hover">
+    <div class="dark stat-card card-hover">
         <a href="/admin/relatorios">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="stat-card-icon bg-gradient-to-r from-emerald-500 to-emerald-600">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <div class="stat-card-value" id="approved-hours-count">
+                    <div class="dark stat-card-value" id="approved-hours-count">
                         <%= stats.aprovadas %>
                     </div>
                     <div class="stat-card-label">Horas Aprovadas</div>
@@ -97,14 +97,14 @@
         </a>
     </div>
 
-    <div class="stat-card card-hover">
+    <div class="dark stat-card card-hover">
         <a href="/admin/aprovacoes">
             <div class="flex items-center justify-between">
                 <div>
                     <div class="stat-card-icon bg-gradient-to-r from-amber-500 to-amber-600">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                    <div class="stat-card-value" id="pending-requests-count">
+                    <div class="dark stat-card-value" id="pending-requests-count">
                         <%= stats.pendentes %>
                     </div>
                     <div class="stat-card-label">Pendentes</div>
@@ -152,11 +152,11 @@
                     <table class="min-w-full">
                         <thead>
                             <tr>
-                                <th class="table-header">Colaborador</th>
-                                <th class="table-header hidden sm:table-cell">Setor</th>
-                                <th class="table-header">Data/Hora</th>
-                                <th class="table-header">Tipo</th>
-                                <th class="table-header text-right">Ações</th>
+                                <th class="dark table-header">Colaborador</th>
+                                <th class="dark table-header hidden sm:table-cell">Setor</th>
+                                <th class="dark table-header">Data/Hora</th>
+                                <th class="dark table-header">Tipo</th>
+                                <th class="dark table-header text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="pending-requests-tbody">

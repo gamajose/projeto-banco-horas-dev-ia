@@ -348,7 +348,15 @@
 
 @layer components {
   .dark .card {
-    @apply bg-gray-800 text-gray-200 border-gray-700/60;
+    @apply bg-gray-800 text-gray-200 border-gray-700;
+  }
+
+  .dark .stat-card {
+    @apply  bg-gray-800 border-gray-700/60 hover:shadow-xl hover:-translate-y-1 cursor-pointer
+  }
+
+  .dark .stat-card-value, .stat-card-label{
+    @apply text-white;
   }
   
   .dark .sidebar {
@@ -374,11 +382,11 @@
   .dark .table-container {
     @apply bg-gray-800 border-gray-700/60;
   }
-  
+
   .dark .table-header {
-    @apply bg-gray-800 text-gray-400 border-gray-700/60;
+    @apply bg-gray-700 text-gray-300 border-gray-600;
   }
-  
+
   .dark .form-input {
     @apply bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:ring-red-500 focus:border-red-500;
   }
