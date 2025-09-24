@@ -240,8 +240,8 @@
     <div>
         <div class="card">
             <div class="card-header border-b border-gray-200">
-                <nav class="-mb-px flex space-x-4" aria-label="Tabs">
-                    <button data-target="#quick-stats-panel" class="tab-btn active-tab">
+                <nav class="mb-px flex space-x-4" aria-label="Tabs">
+                    <button data-target="#quick-stats-panel" class="dark tab-btn active-tab">
                         Estatísticas Rápidas
                     </button>
                     <button data-target="#recent-activity-panel" class="tab-btn inactive-tab">
@@ -296,7 +296,7 @@
             <div id="resumo-setor-list" class="space-y-3">
                 <% if (departmentStats && departmentStats.length> 0) { %>
                     <% departmentStats.forEach(dept=> { %>
-                        <div class="sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
+                        <div class="dark sector-details-trigger p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors border border-gray-100"
                             data-sector-id="<%= dept.id %>" data-sector-name="<%= dept.nome %>">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-3">
@@ -305,7 +305,7 @@
                                         <i class="fas fa-users text-white text-sm"></i>
                                     </div>
                                     <div>
-                                        <div class="font-semibold text-gray-900">
+                                        <div class="dark font-semibold text-gray-900">
                                             <%= dept.nome %>
                                         </div>
                                         <div class="text-sm text-gray-500">

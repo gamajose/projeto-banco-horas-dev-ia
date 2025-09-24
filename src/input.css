@@ -394,4 +394,12 @@
   .dark .search-input {
     @apply bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:ring-red-500 focus:border-red-500;
   }
+
+  .dark .sector-details-trigger{
+    @apply text-white hover:bg-gray-700 border-gray-700;
+  }
+
+  .dark .font-semibold{
+    @apply text-white;
+  }
 }
