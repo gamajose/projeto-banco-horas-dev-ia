@@ -3,7 +3,7 @@ const { readdirSync, statSync } = require("node:fs");
 const { join } = require("node:path");
 
 const roots = ["src"];
-const standaloneFiles = ["migrations.js", "create-admin-profile.js", "ecosystem.config.js"];
+const standaloneFiles = ["migrations.js", "create-admin-profile.js"];
 
 function javascriptFiles(directory) {
   return readdirSync(directory).flatMap((entry) => {

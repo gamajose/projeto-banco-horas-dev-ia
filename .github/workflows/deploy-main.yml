@@ -19,7 +19,7 @@ jobs:
     runs-on:
       - self-hosted
       - linux
-      - banco-horas
+      - x64
     timeout-minutes: 15
 
     steps:
@@ -45,34 +45,35 @@ jobs:
             exit 1
           }
 
-          DIRTY_FILES="$(git status --porcelain --untracked-files=all | grep -Ev '^.. (\.env|\.env\.production|logs/)' || true)"
+          DIRTY_FILES="$(git status --porcelain --untracked-files=all | grep -Ev '^.. (\.env|\.env\.production|logs/|public/uploads/)' || true)"
           if [ -n "$DIRTY_FILES" ]; then
             echo "A cópia de produção possui alterações locais. O deploy foi interrompido."
             echo "$DIRTY_FILES"
             exit 1
           fi
 
-          ENV_BACKUP="$(mktemp)"
-          trap 'rm -f "$ENV_BACKUP"' EXIT
-          cp .env.production "$ENV_BACKUP"
+          BACKUP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$BACKUP_DIR"' EXIT
+          cp .env.production "$BACKUP_DIR/.env.production"
+          mkdir -p "$BACKUP_DIR/uploads"
+          cp -a public/uploads/. "$BACKUP_DIR/uploads/" 2>/dev/null || true
 
           git fetch --prune origin main
           git checkout main
           git reset --hard origin/main
-          install -m 600 "$ENV_BACKUP" .env.production
+          install -m 600 "$BACKUP_DIR/.env.production" .env.production
+          mkdir -p public/uploads
+          cp -a "$BACKUP_DIR/uploads/." public/uploads/ 2>/dev/null || true
 
-          npm ci
-          npm test
-          npm run build
-          mkdir -p logs
-          npx pm2 startOrReload ecosystem.config.js --env production --update-env
-          npx pm2 save
+          docker compose build --pull
+          docker compose run --rm --no-deps banco-horas npm test
+          docker compose up -d --remove-orphans
 
           for attempt in 1 2 3 4 5; do
             if curl --fail --silent --show-error "$HEALTH_URL"; then
               echo
               echo "Deploy concluído no commit $(git rev-parse --short HEAD)."
-              npx pm2 status banco-de-horas
+              docker compose ps
               exit 0
             fi
             echo "Aplicação ainda não respondeu; nova tentativa em 2 segundos ($attempt/5)."
@@ -80,5 +81,5 @@ jobs:
           done
 
           echo "A aplicação não respondeu ao health check."
-          npx pm2 logs banco-de-horas --lines 100 --nostream || true
+          docker compose logs --tail 100 banco-horas || true
           exit 1
