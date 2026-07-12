@@ -12,7 +12,8 @@
     "build-css": "tailwindcss -i ./src/input.css -o ./public/css/output.css",
     "build-css:watch": "tailwindcss -i ./src/input.css -o ./public/css/output.css --watch",
     "build": "npm run build-css",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "node scripts/check-syntax.js",
+    "test": "npm run check"
   },
   "keywords": [],
   "author": "",

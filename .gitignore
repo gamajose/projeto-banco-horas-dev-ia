@@ -1,5 +1,5 @@
 .env*
+!.env.example
 *.db
 logs/
 node_modules/
-ecosystem.config.js

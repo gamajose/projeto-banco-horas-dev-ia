@@ -56,6 +56,11 @@ app.use(
 );
 app.use(flash());
 
+// Endpoint leve usado pelo deploy para confirmar que o processo respondeu.
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use(async (req, res, next) => {
   res.locals.success_msg = req.flash("success_msg");
   res.locals.error_msg = req.flash("error_msg");
