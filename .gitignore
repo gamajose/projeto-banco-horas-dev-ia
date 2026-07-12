@@ -1,5 +1,7 @@
 .env*
+!.env.example
 *.db
 logs/
 node_modules/
-ecosystem.config.js
+public/uploads/*
+!public/uploads/.gitkeep

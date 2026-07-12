@@ -1,0 +1,85 @@
+name: Deploy Banco de Horas
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: banco-horas-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    name: Atualizar servidor local
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+    timeout-minutes: 15
+
+    steps:
+      - name: Atualizar, validar e publicar
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          PROJECT_DIR="/mnt/Projetos/banco-horas-red-prod"
+          HEALTH_URL="http://localhost:8000/health"
+
+          exec 9>/tmp/banco-horas-deploy.lock
+          flock -n 9 || {
+            echo "Outro deploy do Banco de Horas já está em execução."
+            exit 1
+          }
+
+          git config --global --add safe.directory "$PROJECT_DIR"
+          cd "$PROJECT_DIR"
+
+          test -f .env.production || {
+            echo "Crie $PROJECT_DIR/.env.production antes do primeiro deploy."
+            exit 1
+          }
+
+          DIRTY_FILES="$(git status --porcelain --untracked-files=all | grep -Ev '^.. (\.env|\.env\.production|logs/|public/uploads/)' || true)"
+          if [ -n "$DIRTY_FILES" ]; then
+            echo "A cópia de produção possui alterações locais. O deploy foi interrompido."
+            echo "$DIRTY_FILES"
+            exit 1
+          fi
+
+          BACKUP_DIR="$(mktemp -d)"
+          trap 'rm -rf "$BACKUP_DIR"' EXIT
+          cp .env.production "$BACKUP_DIR/.env.production"
+          mkdir -p "$BACKUP_DIR/uploads"
+          cp -a public/uploads/. "$BACKUP_DIR/uploads/" 2>/dev/null || true
+
+          git fetch --prune origin main
+          git checkout main
+          git reset --hard origin/main
+          install -m 600 "$BACKUP_DIR/.env.production" .env.production
+          mkdir -p public/uploads
+          cp -a "$BACKUP_DIR/uploads/." public/uploads/ 2>/dev/null || true
+
+          docker compose build --pull
+          docker compose run --rm --no-deps banco-horas npm test
+          docker compose up -d --remove-orphans
+
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --show-error "$HEALTH_URL"; then
+              echo
+              echo "Deploy concluído no commit $(git rev-parse --short HEAD)."
+              docker compose ps
+              exit 0
+            fi
+            echo "Aplicação ainda não respondeu; nova tentativa em 2 segundos ($attempt/5)."
+            sleep 2
+          done
+
+          echo "A aplicação não respondeu ao health check."
+          docker compose logs --tail 100 banco-horas || true
+          exit 1

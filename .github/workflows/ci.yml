@@ -1,0 +1,38 @@
+name: Validar projeto
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - 'agent/**'
+      - 'codex/**'
+
+concurrency:
+  group: validar-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Validar JavaScript
+        run: npm test
+      - name: Compilar CSS
+        run: npm run build
+      - name: Construir imagem Docker
+        run: docker build --tag banco-horas-ci .
+      - name: Testar imagem Docker
+        run: docker run --rm banco-horas-ci npm test
