@@ -61,7 +61,9 @@ jobs:
           git fetch --prune origin main
           git checkout main
           git reset --hard origin/main
-          install -m 600 "$BACKUP_DIR/.env.production" .env.production
+          # /mnt/Projetos pode estar em filesystem compartilhado com Windows,
+          # onde chmod/install -m não é suportado.
+          cp "$BACKUP_DIR/.env.production" .env.production
           mkdir -p public/uploads
           cp -a "$BACKUP_DIR/uploads/." public/uploads/ 2>/dev/null || true
 
