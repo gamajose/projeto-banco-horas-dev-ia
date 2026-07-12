@@ -32,3 +32,7 @@ jobs:
         run: npm test
       - name: Compilar CSS
         run: npm run build
+      - name: Construir imagem Docker
+        run: docker build --tag banco-horas-ci .
+      - name: Testar imagem Docker
+        run: docker run --rm banco-horas-ci npm test
