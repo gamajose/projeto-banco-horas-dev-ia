@@ -409,51 +409,59 @@
 
   /* Compatibilidade global para telas legadas que usam utilitários claros. */
   .dark .bg-white {
-    @apply bg-gray-800;
+    background-color: #1f2937;
   }
 
   .dark .bg-gray-50,
   .dark .bg-gray-100 {
-    @apply bg-gray-700;
+    background-color: #374151;
   }
 
   .dark .text-gray-900,
   .dark .text-gray-800 {
-    @apply text-gray-100;
+    color: #f3f4f6;
   }
 
   .dark .text-gray-700,
   .dark .text-gray-600 {
-    @apply text-gray-300;
+    color: #d1d5db;
   }
 
   .dark .text-gray-500,
   .dark .text-gray-400 {
-    @apply text-gray-400;
+    color: #9ca3af;
   }
 
   .dark .border-gray-100,
   .dark .border-gray-200 {
-    @apply border-gray-700;
+    border-color: #374151;
   }
 
   .dark .border-gray-300 {
-    @apply border-gray-600;
+    border-color: #4b5563;
   }
 
   .dark .hover\:bg-gray-50:hover,
   .dark .hover\:bg-gray-100:hover {
-    @apply bg-gray-700;
+    background-color: #374151;
   }
 
   .dark input:not([type='checkbox']):not([type='radio']):not([type='file']),
   .dark select,
   .dark textarea {
-    @apply bg-gray-800 text-gray-100 border-gray-600 placeholder-gray-500;
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #f3f4f6;
+  }
+
+  .dark input:not([type='checkbox']):not([type='radio']):not([type='file'])::placeholder,
+  .dark textarea::placeholder {
+    color: #6b7280;
   }
 
   .dark select option {
-    @apply bg-gray-800 text-gray-100;
+    background-color: #1f2937;
+    color: #f3f4f6;
   }
 
   .dark .form-input {
