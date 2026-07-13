@@ -259,8 +259,8 @@ class Profile {
         COUNT(*) as total_movimentacoes,
         COUNT(CASE WHEN s.analise = TRUE THEN 1 END) as total_analise
       FROM movimentacoes m
-      JOIN status s ON m.status_id = s.id
-      WHERE m.colaborador_id = $1
+      JOIN status_movimentacao s ON m.status_id = s.id
+      WHERE m.perfil_id = $1
     `,
       [id]
     );
@@ -273,8 +273,8 @@ class Profile {
       `
       SELECT m.hora_total, m.entrada
       FROM movimentacoes m
-      JOIN status s ON m.status_id = s.id
-      WHERE m.colaborador_id = $1 AND s.autorizado = TRUE
+      JOIN status_movimentacao s ON m.status_id = s.id
+      WHERE m.perfil_id = $1 AND s.autorizado = TRUE
     `,
       [profileId]
     );

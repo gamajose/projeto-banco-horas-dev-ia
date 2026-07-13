@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 
 class Database {
   constructor() {
@@ -213,7 +214,7 @@ class Database {
       // Cria usuário administrador apenas se não houver nenhum usuário
       const userCount = await this.get("SELECT COUNT(*) as count FROM usuarios");
 
-      if (userCount && userCount.count === 0) {
+      if (userCount && Number(userCount.count) === 0) {
         const hashedPassword = await bcrypt.hash('admin123', 12);
         const result = await this.run(
           "INSERT INTO usuarios (first_name, last_name, email, password_hash, is_active, is_staff) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id", 

@@ -27,10 +27,10 @@ class Movement {
 
       const duplicateCheckSql = `
         SELECT id FROM movimentacoes
-        WHERE colaborador_id = $1
+        WHERE perfil_id = $1
           AND data_movimentacao = $2
           AND hora_total = $3
-          AND motivo = $4
+          AND observacao = $4
           AND entrada = $5
           AND created_at >= $6
       `;
@@ -57,7 +57,7 @@ class Movement {
       // Se não for duplicado, insere o novo registro
       const insertSql = `
         INSERT INTO movimentacoes 
-        (data_movimentacao, hora_inicial, hora_final, hora_total, motivo, entrada, forma_pagamento_id, status_id, colaborador_id)
+        (data_movimentacao, hora_entrada, hora_saida, hora_total, observacao, entrada, forma_pagamento_id, status_id, perfil_id)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id
       `;
       const insertParams = [
@@ -95,6 +95,7 @@ class Movement {
       `
       SELECT
         m.*,
+        m.perfil_id AS colaborador_id,
         p.nome as colaborador_nome,
         p.foto_url,  
         s.nome as setor_nome,
@@ -103,9 +104,9 @@ class Movement {
         st.autorizado,
         fp.nome as forma_pagamento_nome
       FROM movimentacoes m
-      JOIN perfis p ON m.colaborador_id = p.id
+      JOIN perfis p ON m.perfil_id = p.id
       JOIN setores s ON p.setor_id = s.id
-      JOIN status st ON m.status_id = st.id
+      JOIN status_movimentacao st ON m.status_id = st.id
       LEFT JOIN formas_pagamento fp ON m.forma_pagamento_id = fp.id
       WHERE m.id = $1
     `,
@@ -117,6 +118,7 @@ class Movement {
     let sql = `
       SELECT
         m.*, 
+        m.perfil_id AS colaborador_id,
         p.nome as colaborador_nome,
         s.nome as setor_nome,
         st.nome as status_nome, 
@@ -124,7 +126,7 @@ class Movement {
         st.autorizado,
         fp.nome as forma_pagamento_nome
       FROM movimentacoes m
-      JOIN perfis p ON m.colaborador_id = p.id
+      JOIN perfis p ON m.perfil_id = p.id
       LEFT JOIN setores s ON p.setor_id = s.id
       LEFT JOIN status_movimentacao st ON m.status_id = st.id
       LEFT JOIN formas_pagamento fp ON m.forma_pagamento_id = fp.id
@@ -134,7 +136,7 @@ class Movement {
     let paramIndex = 1;
 
     if (filters.colaborador_id) {
-      conditions.push(`m.colaborador_id = $${paramIndex++}`);
+      conditions.push(`m.perfil_id = $${paramIndex++}`);
       params.push(filters.colaborador_id);
     }
 
@@ -175,14 +177,15 @@ class Movement {
     return await db.all(`
       SELECT
         m.*, 
+        m.perfil_id AS colaborador_id,
         p.nome as colaborador_nome, 
         p.foto_url,  -- Adicionamos a URL da foto aqui
         s.nome as setor_nome, 
         st.nome as status_nome
       FROM movimentacoes m
-      JOIN perfis p ON m.colaborador_id = p.id
+      JOIN perfis p ON m.perfil_id = p.id
       JOIN setores s ON p.setor_id = s.id
-      JOIN status st ON m.status_id = st.id
+      JOIN status_movimentacao st ON m.status_id = st.id
       WHERE st.analise = TRUE
       ORDER BY m.data_movimentacao DESC
     `);
@@ -198,7 +201,7 @@ class Movement {
         COUNT(CASE WHEN s.analise = TRUE THEN 1 END) AS pendentes,
         COUNT(CASE WHEN s.autorizado = FALSE AND s.analise = FALSE THEN 1 END) AS rejeitadas
       FROM movimentacoes m
-      JOIN status s ON m.status_id = s.id
+      JOIN status_movimentacao s ON m.status_id = s.id
     `);
     return (
       stats || {
@@ -217,10 +220,11 @@ class Movement {
     const sql = `
       SELECT
         m.*,
+        m.perfil_id AS colaborador_id,
         st.nome as status_nome, st.analise, st.autorizado
       FROM movimentacoes m
-      JOIN status st ON m.status_id = st.id
-      WHERE m.colaborador_id = $1
+      JOIN status_movimentacao st ON m.status_id = st.id
+      WHERE m.perfil_id = $1
       ORDER BY m.data_movimentacao DESC, m.created_at DESC
       LIMIT $2
     `;
