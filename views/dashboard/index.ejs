@@ -135,8 +135,8 @@
                             <i class="fas fa-clipboard-check text-red-600"></i>
                         </div>
                         <div>
-                            <h2 class="text-xl font-bold text-gray-900">Solicitações Pendentes</h2>
-                            <p class="text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Solicitações Pendentes</h2>
+                            <p class="dashboard-muted text-sm text-gray-600">Aprovações que necessitam de sua análise</p>
                         </div>
                     </div>
                     <% if (stats.pendentes> 0) { %>
@@ -152,11 +152,11 @@
                     <table class="min-w-full">
                         <thead>
                             <tr>
-                                <th class="dark table-header">Colaborador</th>
-                                <th class="dark table-header hidden sm:table-cell">Setor</th>
-                                <th class="dark table-header">Data/Hora</th>
-                                <th class="dark table-header">Tipo</th>
-                                <th class="dark table-header text-right">Ações</th>
+                                <th class="table-header">Colaborador</th>
+                                <th class="table-header hidden sm:table-cell">Setor</th>
+                                <th class="table-header">Data/Hora</th>
+                                <th class="table-header">Tipo</th>
+                                <th class="table-header text-right">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="pending-requests-tbody">
@@ -222,7 +222,7 @@
                                         <% } else { %>
                                             <tr>
                                                 <td colspan="5" class="table-cell text-center py-12">
-                                                    <div class="text-gray-400">
+                                                    <div class="dashboard-empty-state text-gray-400">
                                                         <i class="fas fa-check-circle text-4xl mb-4"></i>
                                                         <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
                                                         <p class="text-sm">Todas as aprovações estão em dia!</p>
@@ -283,11 +283,11 @@
                         <i class="fas fa-building text-blue-600"></i>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Setores</h3>
-                        <p class="text-sm text-gray-600">Distribuição por departamento</p>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Setores</h3>
+                        <p class="dashboard-muted text-sm text-gray-600">Distribuição por departamento</p>
                     </div>
                 </div>
-                <button id="btn-add-setor-dashboard" class="btn-secondary btn-xs">
+                <button id="btn-add-setor-dashboard" class="dashboard-add-button btn-secondary btn-xs">
                     <i class="fas fa-plus"></i>
                 </button>
             </div>
@@ -308,7 +308,7 @@
                                         <div class="dark font-semibold text-gray-900">
                                             <%= dept.nome %>
                                         </div>
-                                        <div class="text-sm text-gray-500">
+                                        <div class="dashboard-muted text-sm text-gray-500">
                                             <%= dept.total_colaboradores %> colaborador<%= dept.total_colaboradores !==1
                                                     ? 'es' : '' %>
                                         </div>
@@ -464,8 +464,8 @@
                                     <i class="fas fa-users text-white text-sm"></i>
                                 </div>
                                 <div>
-                                    <div class="font-semibold text-gray-900">${result.department.nome}</div>
-                                    <div class="text-sm text-gray-500">0 colaboradores</div>
+                                    <div class="font-semibold text-gray-900 dark:text-white">${result.department.nome}</div>
+                                    <div class="dashboard-muted text-sm text-gray-500">0 colaboradores</div>
                                 </div>
                             </div>
                             <i class="fas fa-chevron-right text-gray-400"></i>
@@ -607,7 +607,7 @@
                         tbody.innerHTML = `
                         <tr>
                             <td colspan="5" class="table-cell text-center py-12">
-                                <div class="text-gray-400">
+                            <div class="dashboard-empty-state text-gray-400">
                                     <i class="fas fa-check-circle text-4xl mb-4"></i>
                                     <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
                                     <p class="text-sm">Todas as aprovações estão em dia!</p>
@@ -1206,7 +1206,7 @@
             tbody.innerHTML = `
             <tr>
                 <td colspan="5" class="table-cell text-center py-12">
-                    <div class="text-gray-400">
+                    <div class="dashboard-empty-state text-gray-400">
                         <i class="fas fa-check-circle text-4xl mb-4"></i>
                         <p class="text-lg font-medium">Nenhuma solicitação pendente</p>
                         <p class="text-sm">Todas as aprovações estão em dia!</p>
