@@ -408,41 +408,41 @@
   }
 
   /* Compatibilidade global para telas legadas que usam utilitários claros. */
-  .dark .bg-white {
+  .dark [class~='bg-white'] {
     background-color: #1f2937;
   }
 
-  .dark .bg-gray-50,
-  .dark .bg-gray-100 {
+  .dark [class~='bg-gray-50'],
+  .dark [class~='bg-gray-100'] {
     background-color: #374151;
   }
 
-  .dark .text-gray-900,
-  .dark .text-gray-800 {
+  .dark [class~='text-gray-900'],
+  .dark [class~='text-gray-800'] {
     color: #f3f4f6;
   }
 
-  .dark .text-gray-700,
-  .dark .text-gray-600 {
+  .dark [class~='text-gray-700'],
+  .dark [class~='text-gray-600'] {
     color: #d1d5db;
   }
 
-  .dark .text-gray-500,
-  .dark .text-gray-400 {
+  .dark [class~='text-gray-500'],
+  .dark [class~='text-gray-400'] {
     color: #9ca3af;
   }
 
-  .dark .border-gray-100,
-  .dark .border-gray-200 {
+  .dark [class~='border-gray-100'],
+  .dark [class~='border-gray-200'] {
     border-color: #374151;
   }
 
-  .dark .border-gray-300 {
+  .dark [class~='border-gray-300'] {
     border-color: #4b5563;
   }
 
-  .dark .hover\:bg-gray-50:hover,
-  .dark .hover\:bg-gray-100:hover {
+  .dark [class~='hover:bg-gray-50']:hover,
+  .dark [class~='hover:bg-gray-100']:hover {
     background-color: #374151;
   }
 
