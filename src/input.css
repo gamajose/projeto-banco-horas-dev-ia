@@ -355,7 +355,7 @@
     @apply  bg-gray-800 border-gray-700/60 hover:shadow-xl hover:-translate-y-1 cursor-pointer
   }
 
-  .dark .stat-card-value, .stat-card-label{
+  .dark .stat-card-value, .dark .stat-card-label{
     @apply text-white;
   }
   
@@ -384,7 +384,27 @@
   }
 
   .dark .table-header {
-    @apply bg-gray-700 text-gray-300 border-gray-600;
+    @apply bg-none bg-gray-700 text-gray-200 border-gray-600;
+  }
+
+  .dark .table-cell {
+    @apply text-gray-200 border-gray-700;
+  }
+
+  .dark .table-row {
+    @apply hover:bg-gray-700/50;
+  }
+
+  .dark .dashboard-muted {
+    @apply text-gray-400;
+  }
+
+  .dark .dashboard-empty-state {
+    @apply text-gray-300;
+  }
+
+  .dark .dashboard-add-button {
+    @apply bg-gray-700 text-gray-100 border-gray-600 hover:bg-gray-600;
   }
 
   .dark .form-input {
