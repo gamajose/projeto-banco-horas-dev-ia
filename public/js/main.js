@@ -1060,11 +1060,11 @@ async function showProfileModal(profileId) {
                 </div>
                 ${scheduleHTML}
             </div>
-            <div class="px-6 py-4 bg-gray-50/50 border-y border-gray-200/60">
+            <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-700/60 border-y border-gray-200/60 dark:border-gray-600">
                 <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos Recentes</h4>
                 <div class="max-h-64 overflow-y-auto pr-2">${movementsHTML}</div>
             </div>
-            <div class="p-4 bg-gray-50/50 text-right">
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-700/60 text-right">
                 <a href="/admin/colaboradores/editar/${profile.id}" class="btn-primary btn-sm">Editar Perfil Completo</a>
             </div>
         `;
@@ -1187,11 +1187,11 @@ async function showProfileModal(profileId) {
                 </div>
                 ${scheduleHTML}
             </div>
-            <div class="px-6 py-4 bg-gray-50/50 border-y border-gray-200/60">
+            <div class="px-6 py-4 bg-gray-50/50 dark:bg-gray-700/60 border-y border-gray-200/60 dark:border-gray-600">
                 <h4 class="text-xs uppercase font-bold text-gray-500 mb-2">Histórico de Lançamentos Recentes</h4>
                 <div class="max-h-64 overflow-y-auto pr-2">${movementsHTML}</div>
             </div>
-            <div class="p-4 bg-gray-50/50 text-right">
+            <div class="p-4 bg-gray-50/50 dark:bg-gray-700/60 text-right">
                  <a href="/admin/colaboradores/editar/${profile.id}" class="btn-primary btn-sm">Editar Perfil Completo</a>
             </div>
         `;
