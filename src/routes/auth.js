@@ -49,7 +49,9 @@ router.post('/login', async (req, res) => {
         // Define o token num cookie seguro
         res.cookie('token', token, {
             httpOnly: true, // O cookie não pode ser acedido por JavaScript no navegador
-            secure: process.env.NODE_ENV === 'production', // Use https em produção
+            // COOKIE_SECURE deve ser true somente quando o acesso usa HTTPS.
+            secure: process.env.COOKIE_SECURE === 'true',
+            sameSite: 'lax',
             maxAge: 24 * 60 * 60 * 1000, // 1 dia em milissegundos
         });
 
